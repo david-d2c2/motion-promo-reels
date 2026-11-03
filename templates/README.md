@@ -1,50 +1,52 @@
-# Plantillas
+# Templates
 
-Tres implementaciones completas del método. Todas renderizan tal cual, con datos de ejemplo **ficticios**. Copia la que más se parezca a tu caso y sustituye los datos.
+**English** · [Español](README.es.md)
 
-| Carpeta | Caso | Formato | Qué cambiar |
+Three complete implementations of the method. All of them render as they are, using **fictional** sample data. Copy the one closest to your case and replace the data.
+
+| Folder | Case | Format | What to change |
 |---|---|---|---|
-| `persona-16x9/` | Persona o marca personal | 1920×1080, 27 s | El objeto `CFG` al principio de `anim.html`: nombre, homónimos reales, cifras, método, stack, frase y CTA. Todo lo demás se adapta solo. |
-| `producto-9x16/` | Pocos productos, un gag escrito a mano por producto | 1080×1920, 15,5 s | `productos.json`: marca y productos. Los gags disponibles son `contador`, `invisible`, `diagonal` y `brillo`; los nuevos van en `hook()` de `motor.html` y en `gag_sfx()` de `audio.py`. La paleta está en el objeto `C` de `motor.html`. |
-| `catalogo-9x16/` | Catálogo WooCommerce, gag por categoría | 1080×1920, 15,5 s | `config.json`: tienda, marcas a quitar, atributos (rango, variantes, colores, material), etiquetas, paleta y categorías con su gag y sus frases (admite condiciones). Después, `node extraer.js`. |
+| `persona-16x9/` | Person or personal brand | 1920×1080, 27 s | The `CFG` object at the top of `anim.html`: name, real namesakes, stats, method, stack, quote and CTA. Everything else adapts on its own. |
+| `producto-9x16/` | A few products, one hand-written gag each | 1080×1920, 15.5 s | `productos.json`: brand and products. Available gags: `contador`, `invisible`, `diagonal`, `brillo`. New ones go in `hook()` in `motor.html` and in `gag_sfx()` in `audio.py`. The palette is the `C` object in `motor.html`. |
+| `catalogo-9x16/` | WooCommerce catalog, one gag per category | 1080×1920, 15.5 s | `config.json`: store, brands to strip, attributes (range, variants, colors, material), labels, palette and categories with their gag and phrases (conditions supported). Then run `node extraer.js`. |
 
-## Uso
+## Usage
 
 ```bash
 npm install                      # puppeteer-core
 pip install numpy scipy          # audio
-# ffmpeg en el PATH · Chrome o Edge instalado (o CHROME_PATH)
+# ffmpeg on your PATH · Chrome or Edge installed (or CHROME_PATH)
 
 # persona-16x9
 node render.js stills 1.9,6.6,9.5,14,17.3,20,25
 node render.js video promo.mp4
 
-# producto-9x16 y catalogo-9x16
-node render.js all --stills 1,3.4,7.4,10.4,12.4,14.4   # revisar fotogramas en out/stills
-node render.js all                                      # vídeos finales en out/
-node render.js <id> ...                                 # un solo producto
+# producto-9x16 and catalogo-9x16
+node render.js all --stills 1,3.4,7.4,10.4,12.4,14.4   # review frames in out/stills
+node render.js all                                      # final videos in out/
+node render.js <id> ...                                 # a single product
 
-# solo catalogo-9x16: datos reales de la tienda
-node extraer.js            # productos.json + fotos en img/ + REVISAR.md
+# catalogo-9x16 only: real data from the store
+node extraer.js            # productos.json + photos in img/ + REVISAR.md
 ```
 
-`catalogo-9x16/ejemplo_api.json` imita la respuesta de la Store API de WooCommerce. Sirve para probar `catalogo.js` sin conexión.
+`catalogo-9x16/ejemplo_api.json` mimics a WooCommerce Store API response, so you can test `catalogo.js` offline.
 
-## Frases condicionales (catálogo)
+## Conditional phrases (catalog)
 
-En `config.json`, una frase puede ser un texto fijo o una condición:
+In `config.json`, a phrase can be fixed text or a condition:
 
 ```json
 { "si": "elástic", "texto": "Elástico y listo.", "sino": "Se calza y listo." }
 { "si_variantes": 2, "texto": "Aquí, del {vmin} al {vmax}.", "sino": "Ancho {vmin}, hasta la talla {rmax}." }
 ```
 
-- `si`: expresión regular que se busca en la descripción del producto.
-- `si_variantes`: número mínimo de variantes.
-- Marcadores disponibles: `{vmin}`, `{vmax}`, `{rmin}`, `{rmax}` y `{modelo}`.
+- `si`: a regular expression matched against the product description.
+- `si_variantes`: a minimum number of variants.
+- Available placeholders: `{vmin}`, `{vmax}`, `{rmin}`, `{rmax}`, `{modelo}`.
 
-## Fuentes e imágenes
+## Fonts and images
 
-En cada `fonts/` están los woff2 que usa la plantilla y su licencia OFL. Para cambiar de fuente: `npm pack @fontsource/<familia>@<versión>` y copia los `.woff2` (y su `LICENSE`).
+Each `fonts/` folder holds the woff2 files the template uses, plus their OFL license. To switch fonts: `npm pack @fontsource/<family>@<version>` and copy the `.woff2` files (and their `LICENSE`).
 
-Las carpetas `img/` están vacías: pon tus fotos y apunta a ellas en `productos.json` (`foto`) o en la configuración (`logo`). Sin foto, el motor muestra una tarjeta de marcador. Sin logo, escribe el nombre de la marca.
+The `img/` folders are empty: drop in your photos and point to them in `productos.json` (`foto`) or in the config (`logo`). With no photo, the engine shows a placeholder card. With no logo, it writes the brand name.

@@ -1,154 +1,162 @@
 ---
 name: motion-promo-reels
-description: Vídeos promocionales con motion graphics y audio generados por código (canvas + ffmpeg) para una persona, web o ecommerce, uno o en lote por producto, con datos reales y gag ingenioso.
+description: Promotional videos with motion graphics and audio generated entirely by code (canvas + ffmpeg) for a person, website or online store — one video or a batch per product, built on real data and a clever, self-referential gag.
 ---
 
-# Reels promocionales con motion graphics por código
+# Promotional reels with code-generated motion graphics
 
-Vídeos de 15 a 30 segundos generados íntegramente con código: canvas 2D → fotogramas → ffmpeg, y audio sintetizado con numpy. No hay plantillas de vídeo, ni After Effects, ni música de terceros. Sirve para tres casos:
-- una persona o marca personal (16:9),
-- unos pocos productos (9:16),
-- un catálogo entero de una tienda (9:16, decenas o cientos de vídeos).
+15–30 second videos generated entirely by code: 2D canvas → frames → ffmpeg, with audio synthesized in numpy. No video templates, no After Effects, no third-party music. It covers three cases:
+- a person or personal brand (16:9);
+- a handful of products (9:16);
+- a store's entire catalog (9:16, dozens or hundreds of videos).
 
-**Principio rector: nada inventado.** Cada cifra, precio, color o característica que aparezca en el vídeo sale de una fuente comprobada (web, API de la tienda, ficha de producto o documentos del proyecto). Si un dato no se puede confirmar, se marca como pendiente y se dice.
+**Guiding principle: nothing made up.** Every figure, price, color or feature shown in the video comes from a verified source: website, store API, product page or project documents. If something can't be confirmed, flag it as pending and say so.
 
-Este paquete incluye tres plantillas completas en `templates/`. **Parte de la más parecida a tu caso** en lugar de reconstruir el motor (ver el punto 4).
+This package ships three complete templates in `templates/`. **Start from the closest one** instead of rebuilding the engine (see section 4).
 
-## 0. Decidir el caso
+Write all on-screen copy in the language of the brand's audience. Reply to the user in their language.
 
-| Caso | Plantilla | Formato | Duración | Unidad de gag |
+## 0. Pick the case
+
+| Case | Template | Format | Length | Gag unit |
 |---|---|---|---|---|
-| Persona o marca personal | `persona-16x9` | 1920×1080 | 27 s | Uno, escrito a mano |
-| Web o servicio | `persona-16x9` adaptada | 16:9 o 9:16 | 20–30 s | Uno, escrito a mano |
-| Pocos productos (≤10) | `producto-9x16` | 1080×1920 | 15,5 s | Uno por producto, escrito a mano |
-| Catálogo (decenas o cientos) | `catalogo-9x16` | 1080×1920 | 15,5 s | **Uno por categoría**, con frases plantilla rellenadas con los datos de cada producto |
+| Person or personal brand | `persona-16x9` | 1920×1080 | 27 s | One, hand-written |
+| Website or service | `persona-16x9`, adapted | 16:9 or 9:16 | 20–30 s | One, hand-written |
+| A few products (≤10) | `producto-9x16` | 1080×1920 | 15.5 s | One per product, hand-written |
+| Catalog (dozens to hundreds) | `catalogo-9x16` | 1080×1920 | 15.5 s | **One per category**, with template phrases filled from each product's data |
 
-Si el usuario no especifica nada, para producto elige 9:16 y dilo en una línea.
+If the user doesn't specify, use 9:16 for products and say so in one line.
 
-## 1. Investigación (antes de escribir una sola línea de guion)
+## 1. Research (before writing a single line of script)
 
-Orden de fuentes:
-1. **Carpeta del proyecto, si existe.** Lee `CLAUDE.md`, `AGENTS.md`, decisiones, informes y planes de redes. Ahí están las reglas de marca y de copy (por ejemplo: «sin nombres de marcas de terceros», «tuteo», «nada de superlativos»), los tokens de diseño, las reglas de moderación y los avisos legales (etiquetado de IA). **Estas reglas mandan sobre cualquier idea creativa.**
-2. **La web oficial.** Hero, servicios, cifras, método, stack, credenciales. En una web con JS, usa un navegador y lee `document.body.innerText` por secciones.
-3. **Ecommerce:**
-   - WooCommerce: `/wp-json/wc/store/v1/products?per_page=100&page=N` y `/products/<id>`. Precios en céntimos; `prices.price_range` con mínimo distinto de máximo → «desde»; `on_sale` + `regular_price` → precio tachado; `attributes` (colores, tallas, medidas); `description` (a menudo con viñetas estructuradas); `permalink`.
-   - Shopify: `/products.json` y `/products/<handle>.json`.
-   - **Nunca adivines slugs ni URLs:** léelos del `permalink`.
-4. **Buscador.** Útil para personas, pero con nombres comunes devuelve homónimos. Si pasa, conviértelo en material para el guion (ver el punto 2) en vez de esconderlo.
-5. **Fotos:** primero las del proyecto local. Los entornos en la nube suelen tener bloqueadas las descargas de la tienda: no insistas. O usas las fotos locales o dibujas el producto con código (franjas, ondas satinadas y formas simples quedan mejor de lo que parece).
+Sources, in order:
+1. **The project folder, if there is one.** Read `CLAUDE.md`, `AGENTS.md`, decision logs, reports and social-media plans. That's where brand and copy rules live (e.g. "no third-party brand names", "informal tone", "no empty superlatives"), along with design tokens, moderation rules and legal notices (AI labelling). **These rules override any creative idea.**
+2. **The official website.** Hero, services, stats, method, stack, credentials. On a JS-heavy site, use a browser and read `document.body.innerText` section by section.
+3. **Online stores:**
+   - WooCommerce: `/wp-json/wc/store/v1/products?per_page=100&page=N` and `/products/<id>`. Prices are in cents. `prices.price_range` with min ≠ max → "from"; `on_sale` + `regular_price` → struck-through price; `attributes` (colors, sizes, measurements); `description` (often with structured bullet lists); `permalink`.
+   - Shopify: `/products.json` and `/products/<handle>.json`.
+   - **Never guess slugs or URLs:** read them from `permalink`.
+4. **Web search.** Useful for people, but common names return namesakes. If that happens, turn it into script material (see section 2) instead of hiding it.
+5. **Photos:** local project files first. Cloud sandboxes often can't download from the store; don't keep retrying. Either use local photos or draw the product in code (stripes, satin waves and simple shapes look better than you'd expect).
 
-Apunta la fecha de lectura de los datos: los precios caducan.
+Write down the date you read the data: prices go stale.
 
-## 2. Concepto: el gag
+## 2. Concept: the gag
 
-**Un gag es una propiedad real del producto o de la persona convertida en algo que hace el propio vídeo.** No es un chiste puesto encima. Ejemplos de mecánicas (todas implementadas en las plantillas):
+**A gag is a real property of the product or person, turned into something the video itself does.** It is not a joke pasted on top. Example mechanics, all implemented in the templates (gag ids are Spanish in the code):
 
-| Mecánica | Propiedad real | Lo que hace el vídeo |
+| Mechanic | Real property | What the video does |
 |---|---|---|
-| `invisible` | Transparente, oculto, discreto | Marco vacío: «Aquí hay una funda. ¿No la ves? Normal. Es transparente.» La pantalla se abre como una cremallera. |
-| `contador` | Una cantidad grande (metros, horas, unidades) | «Este reel dura 15 s. Este rollo, 50 m. No te va a dar tiempo a gastarlo.» Corre un contador. |
-| `diagonal` | Corte, rayas o diseño en diagonal | El texto gira 45° y cruzan franjas. |
-| `brillo` | Acabado brillante o satinado | «Este texto es mate. / Este brilla.» (con reflejo) |
-| `cortar` | Sin cordones, sin cables, sin ataduras | Dos hilos sujetan el texto, se cortan y el texto se queda. |
-| `elevar` | Plataforma, realce, altura | El texto sube sobre un «cojín». |
-| `secuencia` | Muchas tallas, anchos o variantes | Las variantes reales pasan una a una: «Aquí, del E al H.» |
-| `quitar` | «Sin X» | Dos aros se dibujan y salen disparados: «Fuera.» |
-| `ritmo` | Deporte, movimiento | Las palabras entran al ritmo de la música. |
-| `reordenar` | Multiusos, convertible | Dos líneas cambian de posición: paralelas, cruzadas, en V. |
-| `patron` | Bordado, estampado, encaje | Un patrón decorativo se dibuja. |
-| `calma` | Categorías sensibles (salud, posoperatorio, maternidad…) | Sin gag, sin golpes de sonido ni percusión: tono sereno. |
-| `homonimos` (persona) | Nombre común en Google | `investigar("Nombre")` muestra los homónimos tachados con «NO ES ÉL/ELLA» y después «FUENTE ENCONTRADA». |
+| `invisible` | Transparent, hidden, discreet | An empty frame: "There's a case here. Can't see it? Of course not, it's transparent." The screen then unzips like a zipper. |
+| `contador` (counter) | A big quantity (metres, hours, units) | "This reel lasts 15 s. This roll, 50 m. You won't have time to use it up." A counter runs. |
+| `diagonal` | Bias cut, stripes or a diagonal design | The text tilts 45° and stripes cross the screen. |
+| `brillo` (shine) | Glossy or satin finish | "This text is matte. / This one shines." (with a sheen) |
+| `cortar` (cut) | No laces, no cables, no ties | Two threads hold the text up, get cut, and the text stays put. |
+| `elevar` (lift) | Platform, push-up, height | The text rises on a "cushion". |
+| `secuencia` (sequence) | Many sizes, widths or variants | The real variants flip one by one: "Here, from E to H." |
+| `quitar` (remove) | "Without X" | Two rings get drawn and fly off: "Gone." |
+| `ritmo` (rhythm) | Sport, movement | Words land on the beat. |
+| `reordenar` (rearrange) | Multi-use, convertible | Two lines switch position: parallel, crossed, V-shape. |
+| `patron` (pattern) | Embroidery, print, lace | A decorative pattern draws itself. |
+| `calma` (calm) | Sensitive categories (health, post-surgery, maternity…) | No gag, no sound hits, no percussion: a serene tone. |
+| `homonimos` (namesakes, person) | A common name on Google | `investigar("Name")` shows the namesakes crossed out with "NOT THEM", then "SOURCE FOUND". |
 
-Reglas:
-1. Una propiedad **real y comprobable**.
-2. Tres frases: planteamiento, giro y remate (el remate en cursiva o con color de acento).
-3. **El remate no puede ser falso.** Si la ficha no lo dice, no se afirma. Las frases condicionales (`si`/`sino` en el config) sirven para que el remate solo aparezca cuando la descripción lo respalda.
-4. **Elemento autorreferencial fijo durante todo el vídeo**, ligado al sector: un HUD con timecode y fotogramas (tecnología), una costura con contador de puntadas (oficios, textil), una cinta métrica que «mide» el reel (moda y tallas). Remátalo en el cierre («Este reel mide 15,5 s. Talla única»).
-5. **Nunca bromas sobre cuerpos.** Las categorías sensibles van con `calma`. Repasa también que ningún dibujo abstracto pueda leerse como una silueta corporal.
-6. Nada de superlativos vacíos ni comparaciones con la competencia.
+Rules:
+1. One **real, verifiable** property.
+2. Three lines: setup, twist, punchline (the punchline in italics or the accent color).
+3. **The punchline must not be false.** If the product page doesn't say it, don't claim it. Conditional phrases (`si`/`sino` in the config) let a punchline appear only when the description backs it up.
+4. **A fixed self-referential element across the whole video**, tied to the industry: a HUD with timecode and frame counter (tech), a stitch line with a stitch counter (crafts, textiles), a tape measure that "measures" the reel (fashion, sizing). Pay it off in the outro ("This reel measures 15.5 s. One size fits all.").
+5. **Never joke about bodies.** Sensitive categories use `calma`. Also check that no abstract drawing could read as a body silhouette.
+6. No empty superlatives, no comparisons with competitors.
 
-## 3. Estructura
+## 3. Structure
 
-**9:16 producto (15,5 s a 30 fps = 465 fotogramas)**
+**9:16 product (15.5 s at 30 fps = 465 frames)**
 
-| Escena | Tiempo | Contenido |
+| Scene | Time | Content |
 |---|---|---|
-| Gancho | 0–3,0 | El gag |
-| Producto | 3,0–5,6/5,8 | Nombre + foto con rebote (o dibujo procedural, o tarjeta de marcador) |
-| Surtido | ~2,8 s | Contador real de colores, o rango (tallas), variantes y colores con su nombre |
-| Datos | ~2,6 s | Tres datos de la ficha con check animado |
-| Precio | ~1,8 s | Precio real, «desde» u oferta, nota fiscal si aplica |
-| Cierre | 13,2–15,5 | Logo o marca, web en una píldora, envío o CTA, y el guiño final |
+| Hook | 0–3.0 | The gag |
+| Product | 3.0–5.6/5.8 | Name + photo with a bounce (or a procedural drawing, or a placeholder card) |
+| Range | ~2.8 s | Real color count, or range (sizes), variants and colors with their names |
+| Facts | ~2.6 s | Three facts from the product page, with animated checkmarks |
+| Price | ~1.8 s | Real price, "from" or sale, tax note if it applies |
+| Outro | 13.2–15.5 | Logo or brand, website in a pill, shipping or CTA, and the closing wink |
 
-**16:9 persona o marca (27 s):** terminal → homónimos tachados con glitch → drop (fuente encontrada + titular) → cifras con contador → método por fases → stack en marquesina (se congela en un elemento autorreferencial: «↑ ese soy yo») → «ESTE VÍDEO: 0 plantillas · N líneas de código» (recuento real) → frase de la persona → cierre con monograma, nombre y CTA.
+**16:9 person or brand (27 s):** terminal → namesakes crossed out with a glitch → drop (source found + headline) → stats with counters → method in phases → tool stack marquee (freezes on a self-referential item: "↑ that's me") → "THIS VIDEO: 0 templates · N lines of code" (real count) → the person's quote → outro with monogram, name and CTA.
 
-## 4. Motor
+## 4. Engine
 
 ```
-<proyecto>/<carpeta-reels>/
-├── METODO.md        método, reglas y checklist (para humanos)
-├── CLAUDE.md        estado y pendientes (para la próxima sesión)
-├── config.json      (catálogo) tienda, atributos, etiquetas, paleta y categorías → gag + frases
-├── productos.json   marca + un bloque por producto
-├── motor.html       canvas 1080×1920 o 1920×1080; window.renderFrame(f) DETERMINISTA
-├── render.js        puppeteer-core → JPEG por fotograma → ffmpeg image2pipe; después audio y mux
-├── audio.py         síntesis numpy/scipy con la MISMA tabla de cues que motor.html
-├── catalogo.js      (catálogo) API → ficha: gag, frases, datos, limpieza de marcas
-├── extraer.js       (catálogo) descarga catálogo y fotos con UA de navegador y pausas; REVISAR.md
-├── fonts/           woff2 locales + su licencia (fontsource: `npm pack @fontsource/<familia>@<versión>`)
-├── img/             fotos locales
-└── out/             vídeos finales
+<project>/<reels-folder>/
+├── METODO.md        method, rules and checklist (for humans)
+├── CLAUDE.md        status and to-dos (for the next session)
+├── config.json      (catalog) store, attributes, labels, palette and categories → gag + phrases
+├── productos.json   brand + one block per product
+├── motor.html       1080×1920 or 1920×1080 canvas; window.renderFrame(f) is DETERMINISTIC
+├── render.js        puppeteer-core → one JPEG per frame → ffmpeg image2pipe; then audio and mux
+├── audio.py         numpy/scipy synthesis using the SAME cue table as motor.html
+├── catalogo.js      (catalog) API → product sheet: gag, phrases, facts, brand stripping
+├── extraer.js       (catalog) downloads catalog and photos with a browser UA and pauses; REVISAR.md
+├── fonts/           local woff2 + their license (fontsource: `npm pack @fontsource/<family>@<version>`)
+├── img/             local photos
+└── out/             final videos
 ```
 
-Claves técnicas:
-- **Determinismo:** cada fotograma se calcula desde `t = f/FPS`. Nada de `requestAnimationFrame` ni de aleatoriedad sin semilla (usa `hash(n)`).
-- Helpers: `clamp`, `P(t,a,b)` (progreso), easings (`eOC`, `eIOC`, `eOX`, `eIX`, `eOB` con rebote), `T_()` para texto con letterSpacing y alfa, `fit()` para reducir el tamaño hasta que el texto quepa, `rr()` para rectángulos redondeados.
-- Escenas como funciones que reciben el tiempo local `u = t - T.escena`; transición con un barrido del color de fondo de ±0,16 s en cada corte.
-- `render.js`: `page.evaluateOnNewDocument(spec => window.SPEC = spec)`, esperar a `window.READY` (fuentes e imágenes cargadas), `canvas.toDataURL('image/jpeg', .93)` → stdin de `ffmpeg -f image2pipe -c:v mjpeg -i - -c:v libx264 -preset veryfast -crf 18 -pix_fmt yuv420p`. Lanza Chrome con `--allow-file-access-from-files` (si no, el canvas queda «tainted» con imágenes locales). Busca Chrome o Edge en sus rutas estándar o en `CHROME_PATH`. Ten un modo `--stills t1,t2,…` para revisar.
+Technical keys:
+- **Determinism:** every frame is computed from `t = f/FPS`. No `requestAnimationFrame`, no unseeded randomness (use `hash(n)`).
+- Helpers: `clamp`, `P(t,a,b)` (progress), easings (`eOC`, `eIOC`, `eOX`, `eIX`, `eOB` with bounce), `T_()` for text with letterSpacing and alpha, `fit()` to shrink text until it fits, `rr()` for rounded rectangles.
+- Scenes are functions that receive local time `u = t - T.scene`. Transitions are a ±0.16 s background-color wipe at every cut.
+- `render.js`: `page.evaluateOnNewDocument(spec => window.SPEC = spec)`, wait for `window.READY` (fonts and images loaded), then `canvas.toDataURL('image/jpeg', .93)` → stdin of `ffmpeg -f image2pipe -c:v mjpeg -i - -c:v libx264 -preset veryfast -crf 18 -pix_fmt yuv420p`.
+  - Launch Chrome with `--allow-file-access-from-files`; otherwise local images taint the canvas.
+  - Look for Chrome or Edge in their standard paths, or in `CHROME_PATH`.
+  - Keep a `--stills t1,t2,…` mode for review.
 - Mux: `-af loudnorm=I=-14:TP=-1:LRA=11 -c:a aac -movflags +faststart -shortest`.
-- Audio: progresión de 4 acordes acorde al tono de marca (tecnología: 128 BPM con kick, bajo y pluck; artesanal: 112 BPM pizzicato y marimba; elegante: 96 BPM piano y cuerdas). Efectos por gag (cremallera = ráfaga de clics que acelera; máquina = tren de clics + zumbido; tijera = dos chasquidos; brillo = arpegio agudo) más efectos comunes (whoosh en los cortes, ticks en los contadores, chime en el precio). Sidechain ligero bajo el kick, `tanh` para limitar y normalizar.
-- En Windows el script llama a `python` y en Linux o Mac a `python3`.
+- Audio: a 4-chord progression matching the brand's tone (tech: 128 BPM with kick, bass and pluck; craft: 112 BPM pizzicato and marimba; elegant: 96 BPM piano and strings).
+  - Per-gag effects: zipper = an accelerating burst of clicks; machine = a click train + hum; scissors = two snaps; shine = a high arpeggio.
+  - Shared effects: whoosh on cuts, ticks on counters, chime on the price.
+  - Light sidechain under the kick, `tanh` to limit, then normalize.
+- On Windows the scripts call `python`; on Linux and macOS, `python3`.
 
-## 5. Datos de catálogo sin inventar (catalogo.js + config.json)
+## 5. Catalog data without making anything up (catalogo.js + config.json)
 
-- Nombre visible: el nombre del producto sin las `marcas_a_quitar` (si la regla de copy lo pide) y sin las `palabras_tipo` (Zapatilla, Bota…). Si queda un código, usa el nombre sin marca.
-- Datos: las viñetas bajo `titulo_datos` en la descripción (sin la composición). Si no hay, frases de la descripción corta partidas por «.» y «:». El tercer dato, la composición desde el atributo de material (respetando siglas como EVA).
-- Recortar frases a unos 54 caracteres: primero en una coma; si no hay, antes de la última subordinada («con», «para», «que», «y»); nunca terminar en preposición o artículo.
-- Colores: tabla nombre → hex en `motor.html`. Para los bicolores («Negro/Blanco») se dibuja la muestra partida. Si el color no está en la tabla, gris neutro con su nombre real.
-- `"manual": true` en un producto lo protege de ser sobrescrito al volver a extraer.
-- `REVISAR.md`: tono sensible, fichas sin viñetas, productos sin foto o sin atributos.
-- **Prueba la transformación con el catálogo real** pegando la función en la consola de la tienda (navegador) antes de dar el extractor por bueno. Si la descarga no se ha podido probar, dilo.
+- **Display name:** the product name without `marcas_a_quitar` (brands to strip, if the copy rules require it) and without `palabras_tipo` (generic type words such as "Sneaker" or "Boot"). If only a code remains, use the name without the brand.
+- **Facts:** the bullets under `titulo_datos` in the description, excluding composition. If there are none, take phrases from the short description split on "." and ":". The third fact is the composition from the material attribute, keeping acronyms like EVA.
+- **Trimming:** cut phrases to ~54 characters. Cut at a comma first; otherwise before the last subordinate clause ("with", "for", "that", "and"). Never end on a preposition or article.
+- **Colors:** name → hex table in `motor.html`. Two-tone colors ("Black/White") get a split swatch. Unknown colors render neutral grey with their real name.
+- **Manual edits:** `"manual": true` on a product protects it from being overwritten on the next extraction.
+- **`REVISAR.md`** (review list): sensitive tone, pages without bullets, products without photo or attributes.
+- **Test the transformation against the real catalog** by pasting the function into the store's browser console before trusting the extractor. If the download step couldn't be tested, say so.
 
-## 6. Control de calidad (obligatorio antes de entregar)
+## 6. Quality control (mandatory before delivery)
 
-1. Renderiza fotogramas sueltos de cada escena, haz una hoja de contactos con PIL (no con `xstack` de muchos inputs: ffmpeg puede petar) y **mírala**. Busca:
-   - solapes de texto y frases cortadas;
-   - tildes de titulares grandes que chocan con la línea de encima;
-   - elementos que invaden otra línea;
-   - letras que desaparecen en reflejos demasiado blancos;
-   - bloques vacíos («—») cuando falta un atributo;
-   - huecos en la mitad inferior en formato vertical.
-2. Zonas seguras 9:16: nada importante por encima de unos 250 px (interfaz de Reels) ni en los últimos ~320 px (caption). Ahí abajo solo va el elemento decorativo.
-3. Datos: precios del día, «desde» cuando hay rango, ofertas que pueden caducar, unidades no confirmadas (marcarlas), URLs verificadas.
-4. Legal y moderación:
-   - Fotos con personas generadas o modificadas con IA → etiqueta visible en el vídeo (AI Act, art. 50; `ia.mostrar_si_foto` en el config) y declararlo al publicar.
-   - Productos que se muestran sobre el cuerpo: foto completa, estilo catálogo, sin recortes agresivos y poco tiempo en pantalla.
-   - Nunca prometer devoluciones o garantías que no apliquen.
-5. Audio: `ffmpeg -af ebur128` → alrededor de −14 LUFS. Duración y resolución con `ffprobe`.
+1. Render stills for every scene, build a contact sheet with PIL (not `xstack` with many inputs: ffmpeg can crash) and **look at it**. Check for:
+   - overlapping text or truncated phrases;
+   - accents on large headlines colliding with the line above;
+   - elements intruding on another line;
+   - letters vanishing under an overly white sheen;
+   - empty "—" blocks when an attribute is missing;
+   - empty lower halves in vertical format.
+2. 9:16 safe zones: nothing important above ~250 px (Reels UI) or in the last ~320 px (caption). Only the decorative element goes down there.
+3. Data: today's prices, "from" when there's a range, sales that may expire, unconfirmed units (flag them), verified URLs.
+4. Legal and moderation:
+   - Photos with AI-generated or AI-modified people → a visible label in the video (EU AI Act, art. 50; `ia.mostrar_si_foto` in the config). Disclose it when publishing too.
+   - Products shown on the body: full photo, catalog style, no aggressive crops, little screen time.
+   - Never promise returns or warranties that don't apply.
+5. Audio: `ffmpeg -af ebur128` → about −14 LUFS. Check duration and resolution with `ffprobe`.
 
-## 7. Entrega
+## 7. Delivery
 
-- Si trabajas sobre el ordenador del usuario, escribe todo en una subcarpeta de su proyecto, conservando los finales de línea de los archivos que edites. **No toques los `CLAUDE.md` ni los documentos que ya existan:** crea los tuyos dentro de la subcarpeta.
-- `METODO.md`: qué hay, cómo se ejecuta, de dónde sale cada dato, reglas de marca aplicadas, cómo añadir un producto o un gag, checklist antes de publicar y límites conocidos.
-- `CLAUDE.md` de la subcarpeta: estado, pendientes y reglas no negociables, en pocas líneas.
-- Enseña los vídeos y resume: los gags (uno por línea), dónde está todo, el comando para regenerar y los datos pendientes de confirmar.
+- When working on the user's machine, write everything into a subfolder of their project and keep the line endings of any file you edit. **Don't touch existing `CLAUDE.md` files or documents:** create your own inside the subfolder.
+- `METODO.md`: what's there, how to run it, where each piece of data comes from, brand rules applied, how to add a product or a gag, a pre-publishing checklist and known limits.
+- The subfolder's `CLAUDE.md`: status, to-dos and non-negotiable rules, in a few lines.
+- Show the videos and summarize: the gags (one per line), where everything lives, the command to regenerate, and any data still to confirm.
 
-## Errores frecuentes (evítalos)
+## Common mistakes (avoid them)
 
-- Inventar slugs de producto. Léelos del `permalink`.
-- Gag de texto girado que pisa las frases siguientes: recoloca las líneas cuando el texto rota.
-- Reflejo satinado demasiado blanco: se come letras. Usa un tono claro de la marca, no blanco puro.
-- Sombreados de muestras con stops de gradiente que colapsan: quedan bandas diagonales. Mejor una capa de brillo aparte con recorte.
-- Precio tachado en un producto con rango de precios: usa «desde» + etiqueta de oferta, sin tachado.
-- Unidades ausentes en la ficha (por ejemplo, medidas sin «cm»): o se omiten o se marcan para confirmar.
-- Formas abstractas que, juntas, sugieren una silueta corporal: cámbialas por figuras inequívocas.
+- Guessing product slugs. Read them from `permalink`.
+- A rotated-text gag that runs over the following lines: reposition the lines when the text rotates.
+- A satin sheen that's too white eats letters. Use a light brand tone, not pure white.
+- Swatch gradients whose color stops collapse leave diagonal bands. Use a separate, clipped sheen layer instead.
+- A struck-through price on a product with a price range: use "from" + a sale badge, without the strike-through.
+- Units missing from the product page (e.g. measurements without "cm"): omit them or flag them for confirmation.
+- Abstract shapes that together suggest a body silhouette: replace them with unambiguous figures.
