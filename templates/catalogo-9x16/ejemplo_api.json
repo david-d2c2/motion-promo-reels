@@ -1,0 +1,14 @@
+[
+ {"id":101,"slug":"zapatilla-aurora","name":"Zapatilla Aurora","permalink":"https://tutienda.com/producto/zapatilla-aurora/","prices":{"price":"5990","regular_price":"5990","price_range":null},"on_sale":false,"images":[],
+  "categories":[{"name":"Deportivo"}],"attributes":[{"name":"Talla","terms":[{"name":"36"},{"name":"37"},{"name":"38"},{"name":"39"},{"name":"40"},{"name":"41"},{"name":"42"}]},{"name":"Color","terms":[{"name":"Blanco"},{"name":"Negro"},{"name":"Azul marino"}]},{"name":"Material","terms":[{"name":"Malla"},{"name":"Caucho"}]}],
+  "description":"<p>Zapatilla ligera para el día a día.</p><h3>Lo que te aporta</h3><ul><li><strong>Malla transpirable</strong> que no acumula calor.</li><li>Suela de caucho con buen agarre.</li><li>Composición: malla y caucho.</li></ul>","short_description":"<p>Zapatilla ligera y transpirable.</p>"},
+ {"id":102,"slug":"bota-brisa","name":"Bota Brisa","permalink":"https://tutienda.com/producto/bota-brisa/","prices":{"price":"8900","regular_price":"8900","price_range":{"min_amount":"8900","max_amount":"9500"}},"on_sale":false,"images":[],
+  "categories":[{"name":"Ancho especial"}],"attributes":[{"name":"Talla","terms":[{"name":"37"},{"name":"38"},{"name":"39"},{"name":"40"},{"name":"41"}]},{"name":"Ancho","terms":[{"name":"E"},{"name":"F"},{"name":"G"},{"name":"H"}]},{"name":"Color","terms":[{"name":"Marrón"},{"name":"Negro"}]},{"name":"Material","terms":[{"name":"Piel"}]}],
+  "description":"","short_description":"<p>Bota de piel con horma amplia: sujeción firme y comodidad todo el día. Tallas 37–41</p>"},
+ {"id":103,"slug":"zapato-lumen","name":"Zapato Lumen","permalink":"https://tutienda.com/producto/zapato-lumen/","prices":{"price":"4500","regular_price":"5200","price_range":null},"on_sale":true,"images":[],
+  "categories":[{"name":"Sin cordones"}],"attributes":[{"name":"Talla","terms":[{"name":"38"},{"name":"39"},{"name":"40"},{"name":"41"},{"name":"42"},{"name":"43"}]},{"name":"Color","terms":[{"name":"Gris"},{"name":"Negro"},{"name":"Beige"},{"name":"Negro/Blanco"}]}],
+  "description":"<h3>Lo que te aporta</h3><ul><li>Cierre elástico: se calza en un segundo.</li><li>Plantilla acolchada extraíble.</li></ul>","short_description":""},
+ {"id":104,"slug":"sandalia-nube","name":"Sandalia Nube","permalink":"https://tutienda.com/producto/sandalia-nube/","prices":{"price":"3990","regular_price":"3990","price_range":null},"on_sale":false,"images":[],
+  "categories":[{"name":"Plataforma"}],"attributes":[{"name":"Talla","terms":[{"name":"36"},{"name":"37"},{"name":"38"},{"name":"39"},{"name":"40"}]},{"name":"Color","terms":[{"name":"Arena"},{"name":"Blanco"},{"name":"Coral"}]},{"name":"Material","terms":[{"name":"EVA"}]}],
+  "description":"<p>Sandalia con plataforma de 5 cm, ligera y cómoda.</p>","short_description":"<p>Plataforma de 5 cm: ligera y con buena amortiguación.</p>"}
+]

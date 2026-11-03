@@ -1,0 +1,7 @@
+{
+  "name": "reels-producto",
+  "private": true,
+  "description": "Reels de producto (9:16) con motion graphics generados por código",
+  "scripts": { "render": "node render.js all" },
+  "dependencies": { "puppeteer-core": "^23.11.1" }
+}

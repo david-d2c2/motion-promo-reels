@@ -1,0 +1,195 @@
+{
+  "_comentario": "EJEMPLO FICTICIO generado con catalogo.js a partir de ejemplo_api.json. Para tu tienda: node extraer.js",
+  "marca": {
+    "nombre": "Tienda Ejemplo",
+    "web": "tutienda.com",
+    "envio": "Envío gratis desde 50 €",
+    "logo": "img/logo.png",
+    "nota_cierre": "¿Dudas con la talla? Guía de tallas en la web.",
+    "precio_nota": "IVA incluido",
+    "cinta_remate": "Este reel mide 15,5 s. Talla única.",
+    "colores": {
+      "fondo": "#F8ECE8",
+      "fondo_cierre": "#FBF6F2",
+      "tinta": "#0A0A0A",
+      "texto": "#2B2B2B",
+      "acento": "#8C6A4F",
+      "acento_suave": "#B89878"
+    },
+    "etiquetas": {
+      "rango": "Tu talla",
+      "variantes": "Ancho",
+      "variantes_plural": "Anchos"
+    },
+    "ia": {
+      "mostrar_si_foto": false,
+      "texto": "Imagen generada con IA · producto real"
+    }
+  },
+  "productos": [
+    {
+      "id": "zapatilla-aurora",
+      "woo_id": 101,
+      "url": "https://tutienda.com/producto/zapatilla-aurora/",
+      "modelo": "Aurora",
+      "categoria": "Deportivo",
+      "gag": "ritmo",
+      "hook": [
+        "Este reel va a ritmo.",
+        "Tú también.",
+        "Hecho para moverte."
+      ],
+      "rango": [
+        36,
+        37,
+        38,
+        39,
+        40,
+        41,
+        42
+      ],
+      "variantes": [],
+      "colores": [
+        "Blanco",
+        "Negro",
+        "Azul marino"
+      ],
+      "datos": [
+        "Malla transpirable que no acumula calor",
+        "Suela de caucho con buen agarre",
+        "Composición: malla y caucho"
+      ],
+      "precio": "59,90 €",
+      "desde": false,
+      "precio_antes": null,
+      "foto": null,
+      "foto_url": null,
+      "revisar": [
+        "Sin foto"
+      ]
+    },
+    {
+      "id": "bota-brisa",
+      "woo_id": 102,
+      "url": "https://tutienda.com/producto/bota-brisa/",
+      "modelo": "Brisa",
+      "categoria": "Ancho especial",
+      "gag": "secuencia",
+      "hook": [
+        "No todo es ancho estándar.",
+        "Aquí, del E al H."
+      ],
+      "rango": [
+        37,
+        38,
+        39,
+        40,
+        41
+      ],
+      "variantes": [
+        "E",
+        "F",
+        "G",
+        "H"
+      ],
+      "colores": [
+        "Marrón",
+        "Negro"
+      ],
+      "datos": [
+        "Bota de piel con horma amplia",
+        "Sujeción firme y comodidad todo el día",
+        "Composición: piel"
+      ],
+      "precio": "89,00 €",
+      "desde": true,
+      "precio_antes": null,
+      "foto": null,
+      "foto_url": null,
+      "revisar": [
+        "Sin «Lo que te aporta»: datos de la descripción corta y atributos",
+        "Sin foto"
+      ]
+    },
+    {
+      "id": "zapato-lumen",
+      "woo_id": 103,
+      "url": "https://tutienda.com/producto/zapato-lumen/",
+      "modelo": "Lumen",
+      "categoria": "Sin cordones",
+      "gag": "cortar",
+      "hook": [
+        "Este texto no lleva cordones.",
+        "Y aquí sigue.",
+        "Elástico y listo."
+      ],
+      "rango": [
+        38,
+        39,
+        40,
+        41,
+        42,
+        43
+      ],
+      "variantes": [],
+      "colores": [
+        "Gris",
+        "Negro",
+        "Beige",
+        "Negro/Blanco"
+      ],
+      "datos": [
+        "Cierre elástico: se calza en un segundo",
+        "Plantilla acolchada extraíble"
+      ],
+      "precio": "45,00 €",
+      "desde": false,
+      "precio_antes": "52,00 €",
+      "foto": null,
+      "foto_url": null,
+      "revisar": [
+        "Sin foto"
+      ]
+    },
+    {
+      "id": "sandalia-nube",
+      "woo_id": 104,
+      "url": "https://tutienda.com/producto/sandalia-nube/",
+      "modelo": "Nube",
+      "categoria": "Plataforma",
+      "gag": "elevar",
+      "hook": [
+        "Este texto viene con plataforma.",
+        "Así de sencillo.",
+        "Unos centímetros más."
+      ],
+      "rango": [
+        36,
+        37,
+        38,
+        39,
+        40
+      ],
+      "variantes": [],
+      "colores": [
+        "Arena",
+        "Blanco",
+        "Coral"
+      ],
+      "datos": [
+        "Plataforma de 5 cm",
+        "Ligera y con buena amortiguación",
+        "Composición: EVA"
+      ],
+      "precio": "39,90 €",
+      "desde": false,
+      "precio_antes": null,
+      "foto": null,
+      "foto_url": null,
+      "revisar": [
+        "Sin «Lo que te aporta»: datos de la descripción corta y atributos",
+        "Sin foto"
+      ]
+    }
+  ]
+}

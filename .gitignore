@@ -1,0 +1,6 @@
+node_modules/
+out/
+stills/
+*_silent.mp4
+*.wav
+REVISAR.md

@@ -1,0 +1,31 @@
+{
+  "_comentario": "EJEMPLO FICTICIO (zapatería). Cambia la tienda, los atributos y las categorías por los de tu catálogo.",
+  "tienda": {
+    "base": "https://tutienda.com",
+    "nombre": "Tienda Ejemplo",
+    "web": "tutienda.com",
+    "envio": "Envío gratis desde 50 €",
+    "logo": "img/logo.png",
+    "nota_cierre": "¿Dudas con la talla? Guía de tallas en la web.",
+    "precio_nota": "IVA incluido",
+    "cinta_remate": "Este reel mide 15,5 s. Talla única.",
+    "colores_marca": { "fondo": "#F8ECE8", "fondo_cierre": "#FBF6F2", "tinta": "#0A0A0A", "texto": "#2B2B2B", "acento": "#8C6A4F", "acento_suave": "#B89878" }
+  },
+  "marcas_a_quitar": [],
+  "palabras_tipo": ["Zapatilla", "Zapato", "Bota", "Sandalia"],
+  "titulo_datos": "Lo que te aporta",
+  "atributos": { "rango": "Talla", "variantes": "Ancho", "colores": "Color", "material": "Material" },
+  "etiquetas": { "rango": "Tu talla", "variantes": "Ancho", "variantes_plural": "Anchos" },
+  "ia": { "mostrar_si_foto": false, "texto": "Imagen generada con IA · producto real" },
+  "categorias": [
+    { "nombre": "Ortopédico", "gag": "calma", "sensible": true, "frases": ["Pensado para tu pie.", "Con calma.", "A tu ritmo."] },
+    { "nombre": "Deportivo", "gag": "ritmo", "frases": ["Este reel va a ritmo.", "Tú también.", "Hecho para moverte."] },
+    { "nombre": "Sin cordones", "gag": "cortar", "frases": ["Este texto no lleva cordones.", "Y aquí sigue.", { "si": "elástic", "texto": "Elástico y listo.", "sino": "Se calza y listo." }] },
+    { "nombre": "Multiusos", "gag": "reordenar", "frases": ["Este reel cambia de posición.", "Tus planes, también.", "Para varias ocasiones."] },
+    { "nombre": "Plataforma", "gag": "elevar", "frases": ["Este texto viene con plataforma.", "Así de sencillo.", { "si": "\\d+ ?cm", "texto": "Unos centímetros más.", "sino": "Un poco más arriba." }] },
+    { "nombre": "Ancho especial", "gag": "secuencia", "frases": ["No todo es ancho estándar.", { "si_variantes": 2, "texto": "Aquí, del {vmin} al {vmax}.", "sino": "Ancho {vmin}, hasta la talla {rmax}." }] },
+    { "nombre": "Sin costuras", "gag": "quitar", "frases": ["Este reel tiene dos costuras.", "Fuera.", "Nada que roce."] },
+    { "nombre": "Bordado", "gag": "patron", "frases": ["Este reel lleva bordado.", "Discreto.", "Bonito también de cerca."] },
+    { "nombre": "*", "gag": "texto", "frases": ["Este reel es básico.", "Como lo que más usas.", "Y eso es un elogio."] }
+  ]
+}

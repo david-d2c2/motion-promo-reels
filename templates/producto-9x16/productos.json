@@ -1,0 +1,79 @@
+{
+  "_comentario": "EJEMPLO FICTICIO. Sustituye la marca y los productos por datos reales leídos de la tienda (Store API de WooCommerce, /products.json de Shopify o la ficha). Revisa los precios el día de publicar.",
+  "marca": {
+    "nombre": "Tienda Ejemplo",
+    "lema": "Tu tienda de barrio, ahora online",
+    "web": "tiendaejemplo.com",
+    "envio": "Envío gratis desde 50 €"
+  },
+  "productos": [
+    {
+      "id": "cinta-50m",
+      "url": "https://tiendaejemplo.com/producto/cinta-50m/",
+      "nombre": ["Cinta adhesiva", "de 50 metros"],
+      "foto": null,
+      "gag": "contador",
+      "hook": ["Este reel dura 15 segundos.", "Este rollo, 50 metros.", "No te va a dar tiempo a gastarlo."],
+      "colores": 12,
+      "muestra": "circulo",
+      "linea_colores": "12 colores. Los hemos puesto todos.",
+      "datos": ["50 m por rollo", "Se corta con la mano", "Para embalar y etiquetar"],
+      "precio": "3,90 €",
+      "desde": false,
+      "unidad": "por rollo",
+      "oferta": false,
+      "guino_final": "Cinta gastada en este reel: 0 cm. Seguimos teniendo 50 m."
+    },
+    {
+      "id": "funda-transparente",
+      "url": "https://tiendaejemplo.com/producto/funda-transparente/",
+      "nombre": ["Funda", "transparente"],
+      "foto": null,
+      "gag": "invisible",
+      "hook": ["Aquí hay una funda.", "¿No la ves?", "Normal. Es transparente."],
+      "colores": 6,
+      "muestra": "barra",
+      "linea_colores": "6 tintes. Todos igual de discretos.",
+      "datos": ["Deja ver el diseño original", "Bordes reforzados", "Para 20 modelos"],
+      "precio": "9,90 €",
+      "desde": true,
+      "unidad": "según modelo",
+      "oferta": false,
+      "guino_final": "Hemos escondido una en este reel. No la busques."
+    },
+    {
+      "id": "toalla-rayas",
+      "url": "https://tiendaejemplo.com/producto/toalla-rayas/",
+      "nombre": ["Toalla", "de rayas diagonales"],
+      "foto": null,
+      "gag": "diagonal",
+      "hook": ["Este reel va en diagonal.", "Como sus rayas.", "Ni una línea recta."],
+      "colores": 18,
+      "muestra": "diagonal",
+      "linea_colores": "18 combinaciones. En diagonal, claro.",
+      "datos": ["Algodón de rizo", "Tres tamaños", "Lavable a 60 °C"],
+      "precio": "14,50 €",
+      "desde": true,
+      "unidad": "según tamaño",
+      "oferta": true,
+      "guino_final": "Este reel se ha montado en diagonal. Ninguna recta."
+    },
+    {
+      "id": "pintura-satinada",
+      "url": "https://tiendaejemplo.com/producto/pintura-satinada/",
+      "nombre": ["Pintura", "satinada"],
+      "foto": null,
+      "gag": "brillo",
+      "hook": ["Este texto es mate.", "Este brilla.", "Es satinado."],
+      "colores": 40,
+      "muestra": "satinado",
+      "linea_colores": "40. Sí, los hemos contado.",
+      "datos": ["Acabado satinado lavable", "Bote de 750 ml", "Interior y exterior"],
+      "precio": "12,95 €",
+      "desde": true,
+      "unidad": "el bote",
+      "oferta": false,
+      "guino_final": "Ningún texto mate ha sufrido daños en este reel."
+    }
+  ]
+}
