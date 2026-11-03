@@ -12,9 +12,9 @@ description: Promotional videos with motion graphics and audio generated entirel
 
 **Guiding principle: nothing made up.** Every figure, price, color or feature shown in the video comes from a verified source: website, store API, product page or project documents. If something can't be confirmed, flag it as pending and say so.
 
-This package ships three complete templates in `templates/`. **Start from the closest one** instead of rebuilding the engine (see section 4).
+This package ships three complete templates in `${CLAUDE_SKILL_DIR}/templates/` (in chat on claude.ai: `templates/`, next to this file). **Copy the closest one into the user's project and adapt it** instead of rebuilding the engine (see section 4). `templates/README.md` lists what to change in each one.
 
-Write all on-screen copy in the language of the brand's audience. Reply to the user in their language.
+Write all on-screen copy in the language of the brand's audience, and reply to the user in their language. Fixed interface strings ("from", "colors", "NOT HIM"…) are overridden through the template's `textos` block, never by editing the engine. Match the person's gender in `no_es`.
 
 ## 0. Pick the case
 

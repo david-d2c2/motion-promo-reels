@@ -1,0 +1,37 @@
+name: Package skill
+
+# Builds motion-promo-reels.zip with the layout claude.ai expects
+# (top-level folder named exactly like the skill) and publishes it as the "latest" release.
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  package:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          path: motion-promo-reels
+
+      - name: Build zip
+        run: |
+          rm -rf motion-promo-reels/.git motion-promo-reels/.github
+          zip -qr motion-promo-reels.zip motion-promo-reels
+          unzip -l motion-promo-reels.zip | grep -q "motion-promo-reels/SKILL.md"
+
+      - name: Publish release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        run: |
+          gh release delete latest --cleanup-tag --yes || true
+          gh release create latest motion-promo-reels.zip \
+            --target "${{ github.sha }}" \
+            --title "motion-promo-reels (latest)" \
+            --notes "Ready-to-upload skill package for claude.ai. Built automatically from ${{ github.sha }}." \
+            --latest

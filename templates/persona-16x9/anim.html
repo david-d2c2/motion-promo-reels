@@ -46,7 +46,16 @@ const CFG = {
   claim: 'DISEÑO · CONTENIDOS · AUTOMATIZACIÓN',
   cta2: 'Respuesta en < 48 h',
   credito: 'render: Claude  ·  criterio: humano',
+  // Textos fijos de la interfaz. Cambia los que necesites (por ejemplo, a inglés o a «NO ES ELLA»).
+  textos: {},
 };
+const UI = Object.assign({
+  hud: 'canvas 2D · 1920×1080 · 30 fps · 0 plantillas', rec: 'REC', buscando: 'buscando en internet…',
+  resultados: '> resultados: {n}', no_es: '✕ NO ES ÉL', cero_de: '0 de {n}. Toca ir a la fuente.', fuente: '✓ FUENTE ENCONTRADA',
+  datos_web: '// datos sacados de su web, no de mi imaginación', verificado: '✓ verificado · 0 datos inventados',
+  stack: 'STACK EN SU WEB: {n} HERRAMIENTAS.', contado: 'las he contado. dos veces.', este_video: 'ESTE VÍDEO:',
+  filas: ['PLANTILLAS', 'AFTER EFFECTS', 'LÍNEAS DE CÓDIGO', 'IAS IMPLICADAS'],
+}, CFG.textos);
 // =========================================================================================
 
 
@@ -112,9 +121,9 @@ function hud(t,f){
   const tc=`00:00:${String(s).padStart(2,'0')}:${String(fr).padStart(2,'0')}`;
   T(CFG.archivo,56,62,20,{f:MONO,w:400,a,ls:1});
   T(`${tc}  ·  F ${String(f).padStart(3,'0')}/${Math.round(DUR*FPS)}`,W-56,62,20,{f:MONO,w:400,a,al:'right',ls:1});
-  T('canvas 2D · 1920×1080 · 30 fps · 0 plantillas',56,H-48,18,{f:MONO,w:400,a:a*0.8,ls:1});
+  T(UI.hud,56,H-48,18,{f:MONO,w:400,a:a*0.8,ls:1});
   if(Math.floor(t*2)%2===0){ctx.save();ctx.globalAlpha=a;ctx.fillStyle=RED;ctx.beginPath();ctx.arc(W-150,H-54,7,0,7);ctx.fill();ctx.restore()}
-  T('REC',W-56,H-48,18,{f:MONO,w:700,a,al:'right',ls:2});
+  T(UI.rec,W-56,H-48,18,{f:MONO,w:700,a,al:'right',ls:2});
   // progress hairline
   ctx.save();ctx.globalAlpha=a;ctx.fillStyle=CY;ctx.fillRect(0,H-3,W*t/DUR,3);ctx.restore();
 }
@@ -137,7 +146,7 @@ function s1(t){
   const w=T(CMD.slice(0,n),x,y,46,{f:MONO,w:400});
   if(t<1.7&&Math.floor(t*4)%2===0){ctx.fillStyle=TX;ctx.fillRect(x+w+4,y-38,24,46)}
   if(t>=1.7){
-    T('buscando en internet…',bx+60,by+235,34,{f:MONO,w:400,c:'rgba(255,250,242,0.7)'});
+    T(UI.buscando,bx+60,by+235,34,{f:MONO,w:400,c:'rgba(255,250,242,0.7)'});
     const k=eOC(P(t,1.75,2.15));
     rr(bx+60,by+275,bw-120,14,7);ctx.fillStyle='rgba(255,255,255,0.08)';ctx.fill();
     rr(bx+60,by+275,(bw-120)*k,14,7);ctx.fillStyle=CY;ctx.fill();
@@ -151,7 +160,7 @@ function s2(t){
   const u=t-2.2;
   // RGB glitch amount
   const g=(u>1.9&&u<2.35)?1:(u>2.1&&u<2.9?P(u,2.1,2.9):0);
-  T('> resultados: 3',W/2-640,200,30,{f:MONO,w:400,c:CY,a:P(u,0,.15)});
+  T(UI.resultados.replace('{n}',WRONG.length),W/2-640,200,30,{f:MONO,w:400,c:CY,a:P(u,0,.15)});
   WRONG.forEach((c,i)=>{
     const st=0.15+i*0.4, k=eOX(P(u,st,st+0.45));
     if(u<st)return;
@@ -166,7 +175,7 @@ function s2(t){
       const sp=eOB(P(u,st+0.5,st+0.75));
       ctx.save();ctx.translate(1110,80);ctx.rotate(-0.12);ctx.scale(sp*1.0,sp*1.0);
       rr(-130,-36,260,72,10);ctx.strokeStyle=RED;ctx.lineWidth=5;ctx.stroke();
-      T('✕ NO ES ÉL',0,13,34,{c:RED,al:'center',w:900});
+      T(UI.no_es,0,13,34,{c:RED,al:'center',w:900});
       ctx.restore();
       T(c[2],44+MW(c[1],28,400,MONO)+40,128,26,{f:MONO,w:400,c:CO,a:P(u,st+0.6,st+0.8)});
     }
@@ -174,7 +183,7 @@ function s2(t){
   });
   if(u>1.9){
     const k=eOX(P(u,1.9,2.2));
-    const msg='0 de 3. Toca ir a la fuente.';
+    const msg=UI.cero_de.replace('{n}',WRONG.length);
     const y=900;
     if(g>0){
       T(msg,W/2-8*g,y,64,{c:'rgba(255,0,80,0.8)',al:'center'});
@@ -207,7 +216,7 @@ function s3(t){
     const sk=eOB(P(u,0.1,0.35));
     ctx.save();ctx.translate(280,250);ctx.scale(sk,sk);
     rr(0,-34,330,48,8);ctx.fillStyle=CY;ctx.fill();
-    T('✓ FUENTE ENCONTRADA',16,0,22,{f:MONO,w:700,c:BG,ls:1});ctx.restore();
+    T(UI.fuente,16,0,22,{f:MONO,w:700,c:BG,ls:1});ctx.restore();
     const url=CFG.web+' · '+CFG.ciudad;const n=Math.floor(cl((u-0.2)/0.55)*url.length);
     T(url.slice(0,n)+(u<0.8&&Math.floor(u*6)%2?'▌':''),640,250,34,{f:MONO,w:400});
   }
@@ -237,7 +246,7 @@ function s3(t){
 const STATS=CFG.stats;
 function s4(t){
   const u=t-7.6;
-  T('// datos sacados de su web, no de mi imaginación',150,230,26,{f:MONO,w:400,c:CY,a:P(u,0,0.25)});
+  T(UI.datos_web,150,230,26,{f:MONO,w:400,c:CY,a:P(u,0,0.25)});
   STATS.forEach((s,i)=>{
     const st=0.1+i*0.4,x=140+i*430;
     if(u<st)return;
@@ -255,7 +264,7 @@ function s4(t){
   if(u>2.9){const k=eOB(P(u,2.9,3.15));
     ctx.save();ctx.translate(150,860);ctx.scale(k,k);
     rr(0,-40,620,58,29);ctx.strokeStyle=CY;ctx.lineWidth=2;ctx.stroke();
-    T('✓ verificado · 0 datos inventados',28,-1,26,{f:MONO,w:400,c:CY});ctx.restore()}
+    T(UI.verificado,28,-1,26,{f:MONO,w:400,c:CY});ctx.restore()}
   // coral wipe out
   if(u>3.45){const k=eIOC(P(u,3.45,3.8));ctx.fillStyle=CO;ctx.fillRect(0,0,W*k,H)}
 }
@@ -312,8 +321,8 @@ function s6(t){
   const s=pos(u),v=vel(u);
   const fz=u>=FZ-0.05&&u<FZE;
   const ent=eOX(P(u,0,0.4));
-  T(`STACK EN SU WEB: ${new Set(CFG.stack.flat()).size} HERRAMIENTAS.`,150,180,34,{w:900,ls:2,a:ent});
-  T('las he contado. dos veces.',150,226,26,{f:MONO,w:400,c:CY,a:P(u,0.3,0.5)});
+  T(UI.stack.replace('{n}',new Set(CFG.stack.flat()).size),150,180,34,{w:900,ls:2,a:ent});
+  T(UI.contado,150,226,26,{f:MONO,w:400,c:CY,a:P(u,0.3,0.5)});
   let claudeRect=null;
   ROWS.forEach((row,r)=>{
     const ws=row.map(pillW),gap=28;const per=ws.reduce((a,b)=>a+b+gap,0);
@@ -368,8 +377,8 @@ function s7(t){
   const u=t-18.9;
   const sl=eIOC(P(u,1.55,1.9)); // slide list away
   ctx.save();ctx.translate(-sl*W*0.6,0);ctx.globalAlpha=1-sl;
-  T('ESTE VÍDEO:',150,270,64,{a:eOX(P(u,0,0.2))});
-  const rows=[['PLANTILLAS',0],['AFTER EFFECTS',0],['LÍNEAS DE CÓDIGO',window.LOC],['IAS IMPLICADAS',1]];
+  T(UI.este_video,150,270,64,{a:eOX(P(u,0,0.2))});
+  const rows=[[UI.filas[0],0],[UI.filas[1],0],[UI.filas[2],window.LOC],[UI.filas[3],1]];
   rows.forEach((r,i)=>{
     const st=0.2+i*0.22;if(u<st)return;
     const k=eOX(P(u,st,st+0.25));

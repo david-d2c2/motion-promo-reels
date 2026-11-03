@@ -14,6 +14,13 @@ const DATA = JSON.parse(fs.readFileSync(path.join(ROOT, 'productos.json'), 'utf8
 const OUT = path.join(ROOT, 'out');
 fs.mkdirSync(OUT, { recursive: true });
 
+// Normalización de volumen en dos pasadas (más precisa que una sola en clips cortos): mide y luego corrige a -14 LUFS.
+function loudnormFilter(wav) {
+  const r = require('child_process').spawnSync('ffmpeg', ['-hide_banner', '-i', wav, '-af', 'loudnorm=I=-14:TP=-1:LRA=11:print_format=json', '-f', 'null', '-'], { encoding: 'utf8' });
+  const m = JSON.parse(r.stderr.slice(r.stderr.lastIndexOf('{'), r.stderr.lastIndexOf('}') + 1));
+  return `loudnorm=I=-14:TP=-1:LRA=11:measured_I=${m.input_i}:measured_TP=${m.input_tp}:measured_LRA=${m.input_lra}:measured_thresh=${m.input_thresh}:offset=${m.target_offset}:linear=true`;
+}
+
 function browserPath() {
   const c = [process.env.CHROME_PATH,
     '/usr/bin/google-chrome', '/usr/bin/chromium', '/usr/bin/chromium-browser',
@@ -62,7 +69,7 @@ async function renderProduct(browser, p, stills) {
   execFileSync(py, [path.join(ROOT, 'audio.py'), p.id, wav], { stdio: 'inherit' });
   const final = path.join(OUT, `reel_${p.id}.mp4`);
   execFileSync('ffmpeg', ['-y', '-loglevel', 'error', '-i', silent, '-i', wav,
-    '-af', 'loudnorm=I=-14:TP=-1:LRA=11', '-c:v', 'copy', '-c:a', 'aac', '-b:a', '192k', '-ar', '48000',
+    '-af', loudnormFilter(wav), '-c:v', 'copy', '-c:a', 'aac', '-b:a', '192k', '-ar', '48000',
     '-shortest', '-movflags', '+faststart', final]);
   fs.unlinkSync(silent); fs.unlinkSync(wav);
   console.log('OK', final);

@@ -24,7 +24,9 @@
     "ia": {
       "mostrar_si_foto": false,
       "texto": "Imagen generada con IA · producto real"
-    }
+    },
+    "titulo_datos": "Lo que te aporta",
+    "textos": {}
   },
   "productos": [
     {

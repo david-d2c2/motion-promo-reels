@@ -40,7 +40,9 @@ motion-promo-reels/
     └── catalogo-9x16/          WooCommerce catalog (config.json + extraer.js)
 ```
 
-The skill and the templates are language-agnostic: Claude replies in your language. The sample on-screen copy and code comments are in Spanish; swap the copy in `CFG`, `productos.json` or `config.json` for your own.
+The skill is language-agnostic: Claude replies in your language and writes the on-screen copy in your audience's language. The sample data and code comments are in Spanish. All on-screen text can be changed without touching code:
+- **Product and brand copy** lives in `CFG` (persona), `productos.json` (product) or `config.json` (catalog).
+- **Interface strings** ("from", "colors", "NOT HIM", "measuring this reel…"…) live in a `textos` block. Spanish defaults are built in; override only the keys you need. See [templates/README.md](templates/README.md#interface-strings).
 
 ## Installation
 
@@ -56,11 +58,15 @@ git clone https://github.com/david-d2c2/motion-promo-reels "$env:USERPROFILE\.cl
 
 You can also clone it into `.claude/skills/` inside a specific project.
 
-**claude.ai**: download the repository as a zip (*Code → Download ZIP*) and upload it from the skills section.
+**claude.ai**: download [`motion-promo-reels.zip`](https://github.com/david-d2c2/motion-promo-reels/releases/latest/download/motion-promo-reels.zip) from the latest release and upload it under **Customize → Skills**, then turn it on.
+
+> Don't use GitHub's green *Code → Download ZIP* button for this: it names the folder `motion-promo-reels-main`, and claude.ai requires the folder to match the skill name (`motion-promo-reels`). The release zip is built with the right layout.
 
 Then just ask: *"make a promo reel for this product"*, *"research [name] and create a promotional video with motion graphics"*, *"generate one reel for every product in my store"*.
 
 ## Rendering requirements
+
+Rendering runs real tools, so it works best where they're installed: Claude Code or Cowork on your own machine. In a cloud sandbox, Claude installs what's missing when it can.
 
 - Node 18+ and `npm install` (installs `puppeteer-core`) inside the template you use
 - Chrome or Edge (or `CHROME_PATH`)

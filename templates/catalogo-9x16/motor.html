@@ -41,6 +41,9 @@ const COLORS={'blanco':'#F5F2EC','negro':'#141414','tierra':'#C29A7B','piel':'#D
   'champán':'#E9D7B9','marfil':'#F3EBDD','crudo':'#EFE6D6','visón':'#A89184','topo':'#8E7F74','malva':'#B48BA6','morado':'#6C4A7D','lila':'#C2A9D1','coral':'#E07A65','turquesa':'#3BAFB0','maquillaje':'#D8B096','alabastro':'#EFE7DC','cava':'#E6D3B3','marrón':'#6B4A35','marron':'#6B4A35','arena':'#D6C2A1','fucsia':'#D0317A','flúor':'#D6F23A','fluor':'#D6F23A'};
 const colHex=n=>COLORS[(n||'').toLowerCase().trim()]||'#A9A39C';
 
+// Textos fijos de la interfaz: se pueden cambiar con "textos" en config.json (tienda.textos).
+const TX=Object.assign({midiendo:'midiendo este reel…',remate:'Este reel mide 15,5 s.',ia:'Imagen generada con IA',foto:'foto pendiente',
+  un_color:'1 color',colores:'{n} colores',datos:'Lo que te aporta',desde:'desde',decimal:','},(window.SPEC&&SPEC.m.textos)||{});
 let IMG=null,LOGO=null;
 const load=src=>new Promise(r=>{const i=new Image();i.onload=()=>r(i);i.onerror=()=>r(null);i.src=src});
 window.READY=(async()=>{await document.fonts.load('700 40px Play');await document.fonts.load('italic 700 40px Play');await document.fonts.load('600 40px Out');
@@ -60,11 +63,11 @@ function tape(t,f){
   ctx.restore();
   // marcador
   ctx.save();ctx.fillStyle=C.ink;ctx.fillRect(60,y-14,4,h+28);ctx.restore();
-  const label=t>DUR-1.2?(SPEC.m.cinta_remate||'Este reel mide 15,5 s.'):`midiendo este reel… ${(t).toFixed(1).replace('.',',')} s`;
+  const label=t>DUR-1.2?(SPEC.m.cinta_remate||TX.remate):`${TX.midiendo} ${(t).toFixed(1).replace('.',TX.decimal)} s`;
   T_(label,W-80,y-26,24,{f:SANS,w:600,al:'right',c:C.cacao,a:0.85});
 }
 function aiLabel(a){ // transparencia (AI Act art. 50) si las fotos llevan personas generadas o modificadas con IA
-  ctx.save();ctx.globalAlpha=a;ctx.font=`600 26px ${SANS}`;const s=(SPEC.m.ia&&SPEC.m.ia.texto)||'Imagen generada con IA';const w=ctx.measureText(s).width+44;
+  ctx.save();ctx.globalAlpha=a;ctx.font=`600 26px ${SANS}`;const s=(SPEC.m.ia&&SPEC.m.ia.texto)||TX.ia;const w=ctx.measureText(s).width+44;
   ctx.fillStyle='rgba(10,10,10,.78)';rr(W/2-w/2,1590,w,52,26);ctx.fill();ctx.fillStyle=C.white;ctx.textAlign='center';ctx.fillText(s,W/2,1625);ctx.restore()}
 
 // ---------- ESCENA 1: gancho por categoría
@@ -134,7 +137,7 @@ function hero(t){
   ctx.shadowColor='rgba(43,43,43,.25)';ctx.shadowBlur=60;ctx.shadowOffsetY=24;rr(-cw/2,-ch/2,cw,ch,28);ctx.fillStyle=C.white;ctx.fill();ctx.shadowColor='transparent';
   ctx.save();rr(-cw/2,-ch/2,cw,ch,28);ctx.clip();
   if(IMG){const s=Math.max(cw/IMG.width,ch/IMG.height),iw=IMG.width*s,ih=IMG.height*s;ctx.drawImage(IMG,-iw/2,-ih/2,iw,ih)}
-  else{ctx.fillStyle=C.ivory;ctx.fillRect(-cw/2,-ch/2,cw,ch);T_('foto pendiente',0,0,40,{f:SANS,w:600,al:'center',c:C.nude})}
+  else{ctx.fillStyle=C.ivory;ctx.fillRect(-cw/2,-ch/2,cw,ch);T_(TX.foto,0,0,40,{f:SANS,w:600,al:'center',c:C.nude})}
   ctx.restore();ctx.restore();
   if(IMG&&SPEC.m.ia&&SPEC.m.ia.mostrar_si_foto)aiLabel(eOC(P(u,0.6,0.9)));
 }
@@ -155,7 +158,7 @@ function talla(t){
   T_(p.variantes.length?p.variantes.join(' · '):'—',80,980,110,{w:800});ctx.restore();
   // colores reales con su nombre
   const cols=p.colores,n=cols.length,per=Math.min(5,n),sz=Math.min(150,(W-160)/per-30);
-  T_(n===1?'1 color':`${n} colores`,80,1150,48,{f:SANS,w:600,c:C.cacao,a:eOC(P(u,1.3,1.6))});
+  T_(n===1?TX.un_color:TX.colores.replace('{n}',n),80,1150,48,{f:SANS,w:600,c:C.cacao,a:eOC(P(u,1.3,1.6))});
   cols.forEach((c,i)=>{const st=1.4+i*0.12,kk=eOB(P(u,st,st+0.35));if(kk<=0)return;const r=Math.floor(i/per),q=i%per;
     const x=80+q*(sz+30)+sz/2,y=1270+r*(sz+90);ctx.save();ctx.translate(x,y);ctx.scale(kk,kk);
     const parts=c.split('/');parts.forEach((pc,j)=>{ctx.fillStyle=colHex(pc);ctx.beginPath();ctx.moveTo(0,0);ctx.arc(0,0,sz/2,Math.PI/2+j*2*Math.PI/parts.length,Math.PI/2+(j+1)*2*Math.PI/parts.length);ctx.closePath();ctx.fill()});ctx.beginPath();ctx.arc(0,0,sz/2,0,7);ctx.strokeStyle='rgba(10,10,10,.18)';ctx.lineWidth=2;ctx.stroke();ctx.restore();
@@ -165,7 +168,7 @@ function talla(t){
 // ---------- ESCENA 4: datos de la ficha
 function facts(t){
   const p=SPEC.p,u=t-T.facts;kicker();
-  T_('Lo que te aporta',80,440,60,{f:SANS,w:600,c:C.cacao,a:eOC(P(u,0,0.3))});
+  T_(SPEC.m.titulo_datos||TX.datos,80,440,60,{f:SANS,w:600,c:C.cacao,a:eOC(P(u,0,0.3))});
   p.datos.slice(0,3).forEach((d,i)=>{const st=0.2+i*0.55,k=eOX(P(u,st,st+0.45));if(k<=0)return;const y=640+i*270;
     ctx.save();ctx.globalAlpha=k;ctx.translate(lerp(-100,0,k),0);
     ctx.fillStyle=C.nude;ctx.beginPath();ctx.arc(104,y-28,22,0,7);ctx.fill();
@@ -179,7 +182,7 @@ function facts(t){
 function price(t){
   const p=SPEC.p,u=t-T.price;kicker();
   T_(p.modelo,80,760,80,{it:1,c:C.text,a:eOC(P(u,0,0.3))});
-  if(p.desde)T_('desde',80,890,58,{f:SANS,w:600,c:C.cacao,a:eOC(P(u,0.05,0.35))});
+  if(p.desde)T_(TX.desde,80,890,58,{f:SANS,w:600,c:C.cacao,a:eOC(P(u,0.05,0.35))});
   const k=eOX(P(u,0.15,0.45)),s=lerp(1.5,1,k);ctx.save();ctx.translate(80,1130);ctx.scale(s,s);T_(p.precio,0,0,fit(p.precio,W-160,280,{w:800}),{w:800,c:C.ink,a:k});ctx.restore();
   if(p.precio_antes){const ka=eOC(P(u,0.5,0.8));T_(p.precio_antes,80,1230,64,{f:SANS,w:600,c:C.text,a:ka*0.6});ctx.save();ctx.globalAlpha=ka;ctx.strokeStyle=C.cacao;ctx.lineWidth=5;ctx.beginPath();ctx.moveTo(76,1208);ctx.lineTo(84+MW(p.precio_antes,64,{f:SANS,w:600}),1208);ctx.stroke();ctx.restore()}
   T_(SPEC.m.precio_nota||'',80,1320,48,{f:SANS,w:600,c:C.cacao,a:eOC(P(u,0.6,0.9))});

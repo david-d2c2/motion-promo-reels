@@ -45,6 +45,26 @@ In `config.json`, a phrase can be fixed text or a condition:
 - `si_variantes`: a minimum number of variants.
 - Available placeholders: `{vmin}`, `{vmax}`, `{rmin}`, `{rmax}`, `{modelo}`.
 
+## Interface strings
+
+Every fixed on-screen string has a Spanish default and can be overridden through a `textos` block. Only include the keys you want to change.
+
+| Template | Where | Keys |
+|---|---|---|
+| `persona-16x9` | `CFG.textos` in `anim.html` | `hud`, `rec`, `buscando`, `resultados` (`{n}`), `no_es`, `cero_de` (`{n}`), `fuente`, `datos_web`, `verificado`, `stack` (`{n}`), `contado`, `este_video`, `filas` (array of 4) |
+| `producto-9x16` | `marca.textos` in `productos.json` | `puntada`, `aqui`, `foto`, `colores`, `lo_que_es`, `desde`, `oferta`, `precio_real`, `decimal` |
+| `catalogo-9x16` | `tienda.textos` in `config.json` | `midiendo`, `remate`, `ia`, `foto`, `un_color`, `colores` (`{n}`), `datos`, `desde`, `decimal` |
+
+English example for `producto-9x16`:
+
+```json
+"textos": { "puntada": "stitch", "aqui": "(here)", "foto": "product photo", "colores": "colors",
+            "lo_que_es": "What it is", "desde": "from", "oferta": "On sale",
+            "precio_real": "Real price, straight from the page.", "decimal": "." }
+```
+
+In `persona-16x9`, set `no_es` to match the person (`'✕ NOT HIM'`, `'✕ NOT HER'`, `'✕ NOT THEM'`).
+
 ## Fonts and images
 
 Each `fonts/` folder holds the woff2 files the template uses, plus their OFL license. To switch fonts: `npm pack @fontsource/<family>@<version>` and copy the `.woff2` files (and their `LICENSE`).

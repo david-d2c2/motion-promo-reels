@@ -11,15 +11,23 @@ const UA = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML,
 const sleep = ms => new Promise(r => setTimeout(r, ms));
 
 async function get(url, binary = false) {
+  let last = '';
   for (let i = 0; i < 3; i++) {
-    const r = await fetch(url, { headers: { 'User-Agent': UA, Accept: binary ? 'image/*' : 'application/json' } });
-    if (r.ok) return binary ? Buffer.from(await r.arrayBuffer()) : r.json();
+    try {
+      const r = await fetch(url, { headers: { 'User-Agent': UA, Accept: binary ? 'image/*' : 'application/json' } });
+      if (r.ok) return binary ? Buffer.from(await r.arrayBuffer()) : r.json();
+      last = `HTTP ${r.status}`;
+    } catch (e) { last = e.cause ? e.cause.code || e.cause.message : e.message; }
     await sleep(4000);
   }
-  throw new Error('No se pudo descargar ' + url);
+  throw new Error(`No se pudo descargar ${url} (${last}). Revisa "tienda.base" en config.json y que la tienda tenga la Store API de WooCommerce activa.`);
 }
 
 (async () => {
+  if (/tutienda\.com/.test(CFG.tienda.base)) {
+    console.error('config.json todavía apunta a la tienda de ejemplo (tutienda.com). Pon la URL de tu tienda en "tienda.base".');
+    process.exit(1);
+  }
   const sinFotos = process.argv.includes('--sin-fotos');
   const base = CFG.tienda.base.replace(/\/$/, '');
   const all = [];
@@ -53,7 +61,8 @@ async function get(url, binary = false) {
   }
   const t = CFG.tienda;
   const marca = { nombre: t.nombre, web: t.web, envio: t.envio, logo: t.logo, nota_cierre: t.nota_cierre, precio_nota: t.precio_nota,
-    cinta_remate: t.cinta_remate, colores: t.colores_marca, etiquetas: CFG.etiquetas, ia: CFG.ia };
+    cinta_remate: t.cinta_remate, colores: t.colores_marca, etiquetas: CFG.etiquetas, ia: CFG.ia,
+    titulo_datos: CFG.titulo_datos, textos: t.textos || {} };
   fs.writeFileSync(file, JSON.stringify({ _fecha: new Date().toISOString().slice(0, 10), marca, productos }, null, 2));
   const rev = productos.filter(p => p.revisar.length);
   fs.writeFileSync(path.join(__dirname, 'REVISAR.md'),
@@ -62,4 +71,4 @@ async function get(url, binary = false) {
   const porGag = productos.reduce((a, p) => (a[p.gag] = (a[p.gag] || 0) + 1, a), {});
   console.log(`OK: ${productos.length} productos -> productos.json · ${rev.length} a revisar -> REVISAR.md`);
   console.log('Reparto por gag:', porGag);
-})();
+})().catch(e => { console.error(e.message); process.exit(1); });

@@ -40,6 +40,12 @@ motion-promo-reels/
     └── catalogo-9x16/          catálogo WooCommerce (config.json + extraer.js)
 ```
 
+## Idiomas y textos
+
+Claude te responde en tu idioma y escribe el texto del vídeo en el idioma de tu público. Los datos de ejemplo y los comentarios del código están en español. Todo el texto en pantalla se cambia sin tocar código:
+- **Copy de marca y producto:** en `CFG` (persona), `productos.json` (producto) o `config.json` (catálogo).
+- **Textos de interfaz** («desde», «colores», «NO ES ÉL», «midiendo este reel…»…): en un bloque `textos`. Vienen en español por defecto y solo cambias las claves que necesites. Ver [templates/README.es.md](templates/README.es.md#textos-de-interfaz).
+
 ## Instalación
 
 **Claude Code**: clona el repositorio directamente como skill.
@@ -54,11 +60,15 @@ git clone https://github.com/david-d2c2/motion-promo-reels "$env:USERPROFILE\.cl
 
 También puedes clonarlo en `.claude/skills/` dentro de un proyecto concreto.
 
-**claude.ai**: descarga el repositorio como zip (*Code → Download ZIP*) y súbelo desde la sección de skills.
+**claude.ai**: descarga [`motion-promo-reels.zip`](https://github.com/david-d2c2/motion-promo-reels/releases/latest/download/motion-promo-reels.zip) de la última *release*, súbelo en **Customize → Skills** (en la interfaz en español, el apartado de skills de Personalizar) y actívalo.
+
+> Para esto no uses el botón verde *Code → Download ZIP* de GitHub: nombra la carpeta `motion-promo-reels-main`, y claude.ai exige que la carpeta se llame igual que la skill (`motion-promo-reels`). El zip de la *release* ya tiene la estructura correcta.
 
 Después basta con pedirlo: *«hazme un reel promocional de este producto»*, *«investiga a [nombre] y crea un vídeo promocional con motion graphics»*, *«genera un reel por cada producto de mi tienda»*.
 
 ## Requisitos para renderizar
+
+El render usa herramientas reales, así que donde mejor funciona es en Claude Code o Cowork en tu propio equipo. En un entorno en la nube, Claude instala lo que falte cuando puede.
 
 - Node 18+ y `npm install` (instala `puppeteer-core`) en la plantilla que uses
 - Chrome o Edge (o `CHROME_PATH`)

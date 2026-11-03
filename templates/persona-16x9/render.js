@@ -11,6 +11,13 @@ const { spawn, execFileSync } = require('child_process');
 // Recuento real de líneas de código (lo usa la escena «ESTE VÍDEO»).
 const LOC = ['anim.html', 'render.js', 'audio.py'].reduce((a, f) => a + fs.readFileSync(path.join(__dirname, f), 'utf8').split('\n').length, 0);
 
+// Normalización de volumen en dos pasadas (más precisa que una sola en clips cortos): mide y luego corrige a -14 LUFS.
+function loudnormFilter(wav) {
+  const r = require('child_process').spawnSync('ffmpeg', ['-hide_banner', '-i', wav, '-af', 'loudnorm=I=-14:TP=-1:LRA=11:print_format=json', '-f', 'null', '-'], { encoding: 'utf8' });
+  const m = JSON.parse(r.stderr.slice(r.stderr.lastIndexOf('{'), r.stderr.lastIndexOf('}') + 1));
+  return `loudnorm=I=-14:TP=-1:LRA=11:measured_I=${m.input_i}:measured_TP=${m.input_tp}:measured_LRA=${m.input_lra}:measured_thresh=${m.input_thresh}:offset=${m.target_offset}:linear=true`;
+}
+
 function browserPath() {
   const c = [process.env.CHROME_PATH,
     '/usr/bin/google-chrome', '/usr/bin/chromium', '/usr/bin/chromium-browser',
@@ -58,7 +65,7 @@ function browserPath() {
     // audio sincronizado (los cues están en audio.py) + mezcla final
     execFileSync(process.platform === 'win32' ? 'python' : 'python3', [path.join(__dirname, 'audio.py')], { cwd: __dirname, stdio: 'inherit' });
     execFileSync('ffmpeg', ['-y', '-loglevel', 'error', '-i', silent, '-i', path.join(__dirname, 'audio.wav'),
-      '-af', 'loudnorm=I=-14:TP=-1:LRA=11', '-c:v', 'copy', '-c:a', 'aac', '-b:a', '256k', '-ar', '48000',
+      '-af', loudnormFilter(path.join(__dirname, 'audio.wav')), '-c:v', 'copy', '-c:a', 'aac', '-b:a', '256k', '-ar', '48000',
       '-shortest', '-movflags', '+faststart', out]);
     fs.unlinkSync(silent);
     console.log('OK', out);

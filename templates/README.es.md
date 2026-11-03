@@ -45,6 +45,18 @@ En `config.json`, una frase puede ser un texto fijo o una condición:
 - `si_variantes`: número mínimo de variantes.
 - Marcadores disponibles: `{vmin}`, `{vmax}`, `{rmin}`, `{rmax}` y `{modelo}`.
 
+## Textos de interfaz
+
+Cada texto fijo de pantalla tiene un valor por defecto en español y se puede cambiar con un bloque `textos`. Pon solo las claves que quieras cambiar.
+
+| Plantilla | Dónde | Claves |
+|---|---|---|
+| `persona-16x9` | `CFG.textos` en `anim.html` | `hud`, `rec`, `buscando`, `resultados` (`{n}`), `no_es`, `cero_de` (`{n}`), `fuente`, `datos_web`, `verificado`, `stack` (`{n}`), `contado`, `este_video`, `filas` (lista de 4) |
+| `producto-9x16` | `marca.textos` en `productos.json` | `puntada`, `aqui`, `foto`, `colores`, `lo_que_es`, `desde`, `oferta`, `precio_real`, `decimal` |
+| `catalogo-9x16` | `tienda.textos` en `config.json` | `midiendo`, `remate`, `ia`, `foto`, `un_color`, `colores` (`{n}`), `datos`, `desde`, `decimal` |
+
+En `persona-16x9`, ajusta `no_es` a la persona: `'✕ NO ES ÉL'` o `'✕ NO ES ELLA'`.
+
 ## Fuentes e imágenes
 
 En cada `fonts/` están los woff2 que usa la plantilla y su licencia OFL. Para cambiar de fuente: `npm pack @fontsource/<familia>@<versión>` y copia los `.woff2` (y su `LICENSE`).
