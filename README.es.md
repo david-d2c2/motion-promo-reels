@@ -7,8 +7,8 @@
 Skill para Claude que genera **vídeos promocionales con motion graphics y audio, 100 % por código**: canvas 2D → fotogramas → ffmpeg, y música y efectos sintetizados con numpy. Sin plantillas de vídeo, sin After Effects y sin música de terceros.
 
 Sirve para:
-- una **persona o marca personal**: vídeo de 27 s en 16:9;
-- **unos pocos productos**: reels de 15,5 s en 9:16, un gag escrito a mano por producto;
+- una **persona o marca personal**: vídeo de 27 s en 16:9, ahora con versiones A/B/C;
+- **unos pocos productos**: reels de 15,5 s en 9:16, un gag escrito a mano por producto y, desde la v2, una construcción distinta en cada reel;
 - **un catálogo entero** (WooCommerce): un reel por producto, gag por categoría, datos leídos de la tienda y, desde la v2, **una construcción distinta en cada reel**.
 
 > Método probado en producción con proyectos reales: una marca personal, una tienda online pequeña y un catálogo de más de cien productos. Los datos de ejemplo de este repositorio son ficticios.
@@ -29,9 +29,9 @@ Sirve para:
 
 ## v2: cincuenta reels que no parecen uno
 
-En la v1 todos los reels de un catálogo compartían línea de tiempo, maquetación, transición, colores, música y, dentro de una categoría, el mismo texto de gancho. Cincuenta productos daban cincuenta copias de la misma película con otros números.
+En la v1 todos los vídeos de una plantilla compartían línea de tiempo, maquetación, transición, colores, música y, dentro de una categoría del catálogo, el mismo texto de gancho. Cincuenta productos daban cincuenta copias de la misma película con otros números.
 
-La v2 asigna a cada producto un **plan**, elegido por un planificador con semilla que lo compara con los reels que se publican justo antes:
+La v2 asigna a cada vídeo un **plan**, elegido por un planificador con semilla que lo compara con los vídeos que se publican justo antes. Las tres plantillas comparten el mismo núcleo de variación (`variacion.js`) y se comportan igual. En el catálogo:
 
 | Eje | Opciones |
 |---|---|
@@ -47,15 +47,27 @@ La v2 asigna a cada producto un **plan**, elegido por un planificador con semill
 
 La firma de marca se queda fija a propósito: la cinta métrica autorreferencial y el cierre.
 
-<p align="center"><img src="assets/variacion.jpg" alt="Hoja de contactos de seis reels seguidos del mismo motor, cada uno con una construcción distinta" width="820"></p>
+<p align="center"><img src="assets/variacion.jpg" alt="Hoja de contactos de seis reels seguidos del catálogo, cada uno con una construcción distinta" width="820"></p>
+
+**Unos pocos productos** tienen los mismos ejes con layouts propios (una polaroid que cae, un abanico de colores, datos en etiquetas cosidas, un precio en etiqueta colgada) y conservan el gag escrito a mano de cada producto.
+
+**Un vídeo personal** es una historia y su orden no cambia (el gag de los homónimos depende de él). A cambio, hay **versiones** (para distintos canales o para volver a publicar) que cambian la paleta, la entrada del titular, la maquetación de cifras, método y stack, el fondo y la música:
+
+<p align="center"><img src="assets/versiones.jpg" alt="Tres versiones del mismo vídeo de marca personal: paletas neón, tinta sobre papel y lima con distintas maquetaciones" width="820"></p>
 
 ```bash
+# catálogo y producto
 node variar.js                       # planifica los productos nuevos y conserva el resto → VARIACION.md (informe del lote)
-node variar.js --temporada 2027-01   # otra cara para todo el catálogo, para volver a publicar
+node variar.js --temporada 2027-01   # otra cara para todos los reels, para volver a publicar
 node render.js all --hoja            # hojas de contactos: una fila por reel, un fotograma por escena
+
+# persona
+node variar.js 3                     # versiones A, B y C, lo más distintas posible → versiones.json
+node render.js video promo_B.mp4 --version B
+node render.js hoja                  # hoja de contactos de todas las versiones
 ```
 
-Los planes se guardan en `productos.json`: reproducibles y editables a mano (`"manual": true` los protege). Un producto sin plan se renderiza como en la v1. Detalle en [CHANGELOG.md](CHANGELOG.md).
+Los planes son reproducibles y editables a mano (`"manual": true` protege el plan de un producto). Sin plan, cada plantilla se renderiza exactamente como en la v1, salvo los fallos de la v1 corregidos por el camino. Detalle en [CHANGELOG.md](CHANGELOG.md).
 
 ## Estructura
 
@@ -66,8 +78,8 @@ motion-promo-reels/
 ├── assets/                     imágenes de este README
 └── templates/
     ├── README.md               qué tocar primero en cada plantilla
-    ├── persona-16x9/           marca personal (config CFG al inicio de anim.html)
-    ├── producto-9x16/          pocos productos (productos.json)
+    ├── persona-16x9/           marca personal (config CFG al inicio de anim.html + versiones.json)
+    ├── producto-9x16/          pocos productos (productos.json + variar.js)
     └── catalogo-9x16/          catálogo WooCommerce (config.json + extraer.js + variar.js)
 ```
 

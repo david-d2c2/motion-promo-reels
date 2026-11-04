@@ -1,7 +1,14 @@
 {
   "name": "reels-producto",
   "private": true,
-  "description": "Reels de producto (9:16) con motion graphics generados por código",
-  "scripts": { "render": "node render.js all" },
-  "dependencies": { "puppeteer-core": "^23.11.1" }
+  "description": "Reels de producto (9:16) con motion graphics generados por código y variación entre reels (v2)",
+  "scripts": {
+    "variar": "node variar.js",
+    "hoja": "node render.js all --hoja",
+    "render": "node render.js all"
+  },
+  "dependencies": {
+    "puppeteer-core": "^23.11.1"
+  },
+  "perfilVariacion": "producto"
 }

@@ -18,6 +18,15 @@ jobs:
         with:
           path: motion-promo-reels
 
+      - name: Check shared files are in sync
+        # variacion.js, variar.js y hoja.py son comunes a las tres plantillas; render.js, a las dos 9:16
+        run: |
+          cd motion-promo-reels/templates
+          for f in variacion.js variar.js hoja.py; do
+            cmp catalogo-9x16/$f producto-9x16/$f && cmp catalogo-9x16/$f persona-16x9/$f || { echo "$f differs between templates"; exit 1; }
+          done
+          cmp catalogo-9x16/render.js producto-9x16/render.js || { echo "render.js differs between 9:16 templates"; exit 1; }
+
       - name: Build zip
         run: |
           rm -rf motion-promo-reels/.git motion-promo-reels/.github motion-promo-reels/install.sh motion-promo-reels/install.ps1

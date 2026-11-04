@@ -1,6 +1,7 @@
-"""Hojas de contactos del lote: una fila por reel, una columna por escena (en el orden de ese reel).
+"""Hojas de contactos: una fila por vídeo (reel o versión), una columna por escena (en el orden de ese vídeo).
 
-Uso (lo llama render.js --hoja):  python hoja.py out/hoja/indice.json out
+Uso (lo llama render.js):  python hoja.py out/hoja/indice.json out
+Archivo común a las tres plantillas.
 Sirve para el control de calidad de la v2: si dos filas seguidas se parecen, el lote se parece.
 Requisitos: Pillow.
 """
@@ -11,8 +12,8 @@ import sys
 from PIL import Image, ImageDraw, ImageFont
 
 POR_HOJA = 10
-TW, TH = 162, 288  # miniaturas 9:16
 ROTULO = 300
+TW, TH = 162, 288  # miniaturas 9:16; para 16:9 (persona) se ajusta solo al leer la primera imagen
 
 
 def fuente(sz):
@@ -27,7 +28,11 @@ def fuente(sz):
 def main():
     idx = pathlib.Path(sys.argv[1])
     out = pathlib.Path(sys.argv[2])
+    global TW, TH
     metas = json.loads(idx.read_text(encoding="utf-8"))
+    w0, h0 = Image.open(idx.parent / metas[0]["escenas"][0]["f"]).size
+    if w0 > h0:
+        TW, TH = 288, 162
     cols = max(len(m["escenas"]) for m in metas)
     f1, f2 = fuente(20), fuente(15)
     for h in range(0, len(metas), POR_HOJA):

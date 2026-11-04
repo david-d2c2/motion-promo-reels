@@ -1,9 +1,11 @@
-// Render de reels de producto (9:16).
+// Render de reels 9:16 (plantillas catalogo-9x16 y producto-9x16: el mismo archivo en las dos).
 // Uso:
 //   node render.js all                 -> renderiza todos los productos de productos.json
 //   node render.js mi-producto        -> solo uno
 //   node render.js mi-producto --stills 1,4,7,10,12,14   -> fotogramas sueltos para revisar
-// Requisitos: Node 18+, `npm i puppeteer-core`, ffmpeg en el PATH, Python 3 con numpy y scipy.
+//   node render.js all --hoja          -> un fotograma por escena (ya construida) de cada producto y hojas de contactos
+//                                         del lote en out/hoja_NN.jpg: así se ve de un vistazo si los reels se parecen
+// Requisitos: Node 18+, `npm i puppeteer-core`, ffmpeg en el PATH, Python 3 con numpy y scipy (y Pillow para --hoja).
 const puppeteer = require('puppeteer-core');
 const fs = require('fs');
 const path = require('path');
@@ -41,6 +43,23 @@ async function renderProduct(browser, p, stills) {
   const total = await page.evaluate(() => window.TOTAL);
   const grab = f => page.evaluate(f => { window.renderFrame(f); return document.getElementById('c').toDataURL('image/jpeg', 0.93); }, f);
 
+  if (stills === 'hoja') {
+    // un fotograma por escena, cuando ya está montada (0,35 s antes de que acabe)
+    const dir = path.join(OUT, 'hoja');
+    fs.mkdirSync(dir, { recursive: true });
+    const plan = await page.evaluate(() => window.PLAN);
+    const nombre = p.modelo || (Array.isArray(p.nombre) ? p.nombre.join(' ') : p.nombre) || p.id;
+    const resumen = Object.entries(plan).filter(([k, v]) => typeof v === 'string' && !['temporada', 'orden', 'alin'].includes(k)).map(([, v]) => v).join(' · ');
+    const meta = { id: p.id, modelo: nombre, plan: plan.base ? 'v1' : resumen, escenas: [] };
+    for (const seg of plan.tiempos) {
+      const d = await grab(Math.round((seg.b - 0.35) * 30));
+      const name = `${p.id}__${seg.n}.jpg`;
+      fs.writeFileSync(path.join(dir, name), Buffer.from(d.split(',')[1], 'base64'));
+      meta.escenas.push({ n: seg.n, f: name });
+    }
+    await page.close();
+    return meta;
+  }
   if (stills) {
     const dir = path.join(OUT, 'stills');
     fs.mkdirSync(dir, { recursive: true });
@@ -79,11 +98,18 @@ async function renderProduct(browser, p, stills) {
   const [which, flag, list] = process.argv.slice(2);
   const prods = !which || which === 'all' ? DATA.productos : DATA.productos.filter(p => p.id === which);
   if (!prods.length) throw new Error('Producto no encontrado: ' + which);
-  const stills = flag === '--stills' ? list.split(',').map(Number) : null;
+  const stills = flag === '--stills' ? list.split(',').map(Number) : flag === '--hoja' ? 'hoja' : null;
   const browser = await puppeteer.launch({
     executablePath: browserPath(),
     args: ['--no-sandbox', '--disable-gpu', '--allow-file-access-from-files', '--font-render-hinting=none'],
   });
-  for (const p of prods) await renderProduct(browser, p, stills);
+  const metas = [];
+  for (const p of prods) metas.push(await renderProduct(browser, p, stills));
   await browser.close();
+  if (stills === 'hoja') {
+    const idx = path.join(OUT, 'hoja', 'indice.json');
+    fs.writeFileSync(idx, JSON.stringify(metas, null, 2));
+    const py = process.platform === 'win32' ? 'python' : 'python3';
+    execFileSync(py, [path.join(ROOT, 'hoja.py'), idx, OUT], { stdio: 'inherit' });
+  }
 })();

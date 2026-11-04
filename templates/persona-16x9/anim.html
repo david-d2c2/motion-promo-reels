@@ -9,10 +9,22 @@
 html,body{margin:0;background:#050607}canvas{display:block}</style>
 </head><body>
 <canvas id="c" width="1920" height="1080"></canvas>
+<script src="variacion.js"></script>
 <script>
 const cv=document.getElementById('c'), ctx=cv.getContext('2d');
 const W=1920,H=1080,FPS=30,DUR=27.0;
-const BG='#050607',TX='#FFFAF2',CY='#10F0FF',CO='#E85D3F',CR='#F5F0E8',RED='#FF3B3B';
+// ---------- versión (v2): render.js inyecta window.PLAN desde versiones.json (node variar.js). Sin plan = v1.
+const VP=VAR.perfil('persona');
+const PL=(window.PLAN&&window.PLAN.v===2)?window.PLAN:VP.planBase();
+// Paletas. "neon" es la de la v1. Para la marca de la persona, añade la suya en CFG.paletas (mismas claves).
+const PALETAS={
+  neon: {bg:'#050607',tx:'#FFFAF2',a1:'#10F0FF',a2:'#E85D3F',alerta:'#FF3B3B',glitch:'#FF0050',term:'#0B0F12',carta:'#0E1316',pista:'rgba(255,255,255,0.08)',grano:['rgba(255,255,255,0.05)','rgba(0,0,0,0.12)'],flash:'#FFFAF2'},
+  tinta:{bg:'#F3EEE6',tx:'#121212',a1:'#1F4BFF',a2:'#E8452C',alerta:'#D7263D',glitch:'#E8452C',term:'#FFFFFF',carta:'#FFFFFF',pista:'rgba(0,0,0,0.08)',grano:['rgba(255,255,255,0.10)','rgba(0,0,0,0.05)'],flash:'#FFFFFF'},
+  lima: {bg:'#0B0B0D',tx:'#F5F5F0',a1:'#C6FF3D',a2:'#8B5CF6',alerta:'#FF4D6D',glitch:'#8B5CF6',term:'#141418',carta:'#141418',pista:'rgba(255,255,255,0.08)',grano:['rgba(255,255,255,0.05)','rgba(0,0,0,0.12)'],flash:'#F5F5F0'},
+};
+let PAL=PALETAS.neon;
+const BG0=()=>PAL.bg;
+const al=(hex,a)=>{const h=hex.replace('#','');return `rgba(${parseInt(h.slice(0,2),16)},${parseInt(h.slice(2,4),16)},${parseInt(h.slice(4,6),16)},${a})`};
 const DISP='InterLocal, "Inter Display", Inter, "Segoe UI", sans-serif', MONO='"DejaVu Sans Mono", Consolas, "SF Mono", monospace';
 window.LOC = window.LOC || 0;
 // ================= CONFIGURA AQUÍ TU VÍDEO (datos de ejemplo ficticios) =================
@@ -57,6 +69,9 @@ const UI = Object.assign({
   filas: ['PLANTILLAS', 'AFTER EFFECTS', 'LÍNEAS DE CÓDIGO', 'IAS IMPLICADAS'],
 }, CFG.textos);
 // =========================================================================================
+Object.assign(PALETAS, CFG.paletas || {});
+PAL=PALETAS[PL.paleta]||PALETAS.neon;
+const BG=PAL.bg,TX=PAL.tx,CY=PAL.a1,CO=PAL.a2,RED=PAL.alerta;
 
 
 // ---------- helpers
@@ -101,15 +116,21 @@ function shake(t){let a=0;for(const [c,s] of IMP){if(t>=c)a+=s*Math.exp(-(t-c)*9
 // ---------- background
 function bg(t){
   ctx.fillStyle=BG;ctx.fillRect(0,0,W,H);
-  ctx.save();ctx.strokeStyle='rgba(255,250,242,0.045)';ctx.lineWidth=1;
-  const off=(t*14)%160;
-  for(let x=-160+off;x<W+160;x+=160){ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,H);ctx.stroke()}
+  if(PL.fondo==='limpio')return;
+  ctx.save();
+  if(PL.fondo==='puntos'){ // retícula de puntos que deriva en diagonal
+    ctx.fillStyle=al(TX,0.08);const o=(t*10)%48;
+    for(let y=-48+o;y<H+48;y+=48)for(let x=-48+o;x<W+48;x+=48){ctx.beginPath();ctx.arc(x,y,1.8,0,7);ctx.fill()}
+  }else{ // v1: líneas verticales que se desplazan
+    ctx.strokeStyle=al(TX,0.045);ctx.lineWidth=1;const off=(t*14)%160;
+    for(let x=-160+off;x<W+160;x+=160){ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,H);ctx.stroke()}
+  }
   ctx.restore();
 }
 function grain(f){
   ctx.save();
   for(let i=0;i<700;i++){const x=hash(f*1.7+i*3.1)*W,y=hash(f*2.3+i*5.7)*H;
-    ctx.fillStyle=hash(i+f)>.5?'rgba(255,255,255,0.05)':'rgba(0,0,0,0.12)';ctx.fillRect(x,y,2,2)}
+    ctx.fillStyle=hash(i+f)>.5?PAL.grano[0]:PAL.grano[1];ctx.fillRect(x,y,2,2)}
   ctx.restore();
 }
 
@@ -137,7 +158,7 @@ function s1(t){
   const bx=W/2-620,by=H/2-190,bw=1240,bh=380;
   const pop=eOB(P(t,0,0.35));
   ctx.save();ctx.translate(W/2,H/2);ctx.scale(lerp(0.85,1,pop),lerp(0.85,1,pop));ctx.translate(-W/2,-H/2);
-  rr(bx,by,bw,bh,22);ctx.fillStyle='#0B0F12';ctx.fill();ctx.strokeStyle='rgba(16,240,255,0.35)';ctx.lineWidth=2;ctx.stroke();
+  rr(bx,by,bw,bh,22);ctx.fillStyle=PAL.term;ctx.fill();ctx.strokeStyle=al(CY,0.35);ctx.lineWidth=2;ctx.stroke();
   [CO,'#F2C14E',CY].forEach((c,i)=>{ctx.fillStyle=c;ctx.beginPath();ctx.arc(bx+40+i*30,by+36,8,0,7);ctx.fill()});
   T('claude@estudio: ~/promo',bx+bw/2,by+43,20,{f:MONO,w:400,a:.5,al:'center'});
   const n=Math.floor(cl((t-0.25)/1.3)*CMD.length);
@@ -146,9 +167,9 @@ function s1(t){
   const w=T(CMD.slice(0,n),x,y,46,{f:MONO,w:400});
   if(t<1.7&&Math.floor(t*4)%2===0){ctx.fillStyle=TX;ctx.fillRect(x+w+4,y-38,24,46)}
   if(t>=1.7){
-    T(UI.buscando,bx+60,by+235,34,{f:MONO,w:400,c:'rgba(255,250,242,0.7)'});
+    T(UI.buscando,bx+60,by+235,34,{f:MONO,w:400,c:al(TX,0.7)});
     const k=eOC(P(t,1.75,2.15));
-    rr(bx+60,by+275,bw-120,14,7);ctx.fillStyle='rgba(255,255,255,0.08)';ctx.fill();
+    rr(bx+60,by+275,bw-120,14,7);ctx.fillStyle=PAL.pista;ctx.fill();
     rr(bx+60,by+275,(bw-120)*k,14,7);ctx.fillStyle=CY;ctx.fill();
   }
   ctx.restore();ctx.restore();
@@ -166,7 +187,7 @@ function s2(t){
     if(u<st)return;
     const y=250+i*190, x=lerp(W+200,W/2-640,k);
     ctx.save();ctx.translate(x,y);ctx.transform(1,0,lerp(-0.25,0,k),1,0,0);
-    rr(0,0,1280,160,18);ctx.fillStyle='#0E1316';ctx.fill();ctx.strokeStyle='rgba(255,250,242,0.12)';ctx.lineWidth=2;ctx.stroke();
+    rr(0,0,1280,160,18);ctx.fillStyle=PAL.carta;ctx.fill();ctx.strokeStyle=al(TX,0.12);ctx.lineWidth=2;ctx.stroke();
     T(c[0],44,78,60,{w:900});
     T(c[1],44,128,28,{f:MONO,w:400,a:.65});
     const sk=eOC(P(u,st+0.42,st+0.62));
@@ -186,8 +207,8 @@ function s2(t){
     const msg=UI.cero_de.replace('{n}',WRONG.length);
     const y=900;
     if(g>0){
-      T(msg,W/2-8*g,y,64,{c:'rgba(255,0,80,0.8)',al:'center'});
-      T(msg,W/2+8*g,y,64,{c:'rgba(16,240,255,0.8)',al:'center'});
+      T(msg,W/2-8*g,y,64,{c:al(PAL.glitch,0.8),al:'center'});
+      T(msg,W/2+8*g,y,64,{c:al(CY,0.8),al:'center'});
     }
     T(scramble(msg,k,3),W/2,y,64,{al:'center'});
   }
@@ -221,17 +242,7 @@ function s3(t){
     T(url.slice(0,n)+(u<0.8&&Math.floor(u*6)%2?'▌':''),640,250,34,{f:MONO,w:400});
   }
   T(CFG.eyebrow,284,318,24,{w:800,c:CY,ls:5,a:P(u,0.5,0.8)});
-  // IA slam
-  if(u>0.94){
-    const k=eOX(P(u,0.94,1.15));const s=lerp(1.7,1,k);
-    ctx.save();ctx.translate(270,600);ctx.scale(s,s);
-    T(CFG.titulo[0],0,0,270,{a:k,ls:-6});ctx.restore();
-  }
-  if(u>1.17){
-    const k=eOX(P(u,1.17,1.5));
-    ctx.save();ctx.beginPath();ctx.rect(0,620,W,260);ctx.clip();
-    T(CFG.titulo[1],270,lerp(1120,850,k),270,{ls:-6});ctx.restore();
-  }
+  titular(u);
   if(u>1.55){
     const k=eOC(P(u,1.55,1.9));
     ctx.save();ctx.globalAlpha*=k;ctx.translate(lerp(-40,0,k),0);
@@ -242,11 +253,65 @@ function s3(t){
   ctx.restore();
 }
 
+// titular de la escena «fuente encontrada»: golpe (v1) · mascara · maquina. Los instantes clave (0,94 s y 1,17 s) no cambian.
+function titular(u){
+  const L0=CFG.titulo[0],L1=CFG.titulo[1];
+  if(PL.titulo==='mascara'){
+    if(u>0.94){const k=eOX(P(u,0.94,1.3));ctx.save();ctx.beginPath();ctx.rect(0,360,W,262);ctx.clip();T(L0,270,lerp(880,600,k),270,{ls:-6});ctx.restore()}
+    if(u>1.17){const k=eOX(P(u,1.17,1.5)),w=MW(L1,270,900,DISP,-6);
+      ctx.save();ctx.fillStyle=CY;ctx.globalAlpha=0.9;ctx.fillRect(250,858,(w+40)*eOC(P(u,1.3,1.7)),22);ctx.restore();
+      ctx.save();ctx.beginPath();ctx.rect(0,620,W,260);ctx.clip();T(L1,270,lerp(1120,850,k),270,{ls:-6});ctx.restore()}
+  }else if(PL.titulo==='maquina'){ // máquina de escribir: letra a letra, con cursor
+    const n0=Math.floor(cl((u-0.94)/0.045,0,L0.length)),n1=Math.floor(cl((u-1.17-L0.length*0.02)/0.045,0,L1.length));
+    if(u>0.94){T(L0.slice(0,n0),270,600,270,{ls:-6})}
+    if(n1>0)T(L1.slice(0,n1),270,850,270,{ls:-6});
+    if(u>0.94&&u<2.3&&Math.floor(u*5)%2===0){const line=n1>0||n0>=L0.length?1:0,txt=line?L1.slice(0,n1):L0.slice(0,n0);
+      ctx.fillStyle=CY;ctx.fillRect(270+MW(txt,270,900,DISP,-6)+14,(line?850:600)-200,26,210)}
+  }else{ // golpe (v1)
+    if(u>0.94){const k=eOX(P(u,0.94,1.15));const s=lerp(1.7,1,k);
+      ctx.save();ctx.translate(270,600);ctx.scale(s,s);T(L0,0,0,270,{a:k,ls:-6});ctx.restore()}
+    if(u>1.17){const k=eOX(P(u,1.17,1.5));
+      ctx.save();ctx.beginPath();ctx.rect(0,620,W,260);ctx.clip();T(L1,270,lerp(1120,850,k),270,{ls:-6});ctx.restore()}
+  }
+}
+
 // ---------- S4 stats 7.6-11.4
 const STATS=CFG.stats;
+const valor=(s,u,st)=>typeof s[1]==='number'?s[0]+Math.round(s[1]*eOC(P(u,st,st+0.9))):scramble(s[1],P(u,st,st+0.8),11);
+// cifras: columnas (v1) · foco (una a una, a pantalla completa) · rejilla 2×2
 function s4(t){
   const u=t-7.6;
   T(UI.datos_web,150,230,26,{f:MONO,w:400,c:CY,a:P(u,0,0.25)});
+  if(PL.cifras==='foco')cifrasFoco(u);else if(PL.cifras==='rejilla')cifrasRejilla(u);else cifrasColumnas(u);
+  if(u>2.9){const k=eOB(P(u,2.9,3.15));
+    ctx.save();ctx.translate(150,PL.cifras==='rejilla'?960:860);ctx.scale(k,k);
+    rr(0,-40,620,58,29);ctx.strokeStyle=CY;ctx.lineWidth=2;ctx.stroke();
+    T(UI.verificado,28,-1,26,{f:MONO,w:400,c:CY});ctx.restore()}
+  // coral wipe out
+  if(u>3.45){const k=eIOC(P(u,3.45,3.8));ctx.fillStyle=CO;ctx.fillRect(0,0,W*k,H)}
+}
+function cifrasFoco(u){ // cada cifra ocupa la pantalla 0,7 s; al final, las cuatro en fila
+  STATS.forEach((s,i)=>{const st=0.1+i*0.7,en=eOX(P(u,st,st+0.35)),sa=eIX(P(u,st+0.62,st+0.82));
+    if(u<st||sa>=1||u>2.95)return;
+    ctx.save();ctx.globalAlpha=en*(1-sa);ctx.translate(lerp(160,0,en)-sa*200,0);
+    ctx.fillStyle=i%2?CO:CY;ctx.fillRect(W/2-180,350,360*eOC(P(u,st+0.1,st+0.5)),8);
+    T(valor(s,u,st),W/2,640,300,{al:'center',ls:-8});
+    T(s[2]+' '+s[3],W/2,730,34,{w:800,ls:5,a:.85,al:'center'});ctx.restore()});
+  if(u>2.85){const k=eOX(P(u,2.85,3.2));
+    STATS.forEach((s,i)=>{const x=150+i*430;ctx.save();ctx.globalAlpha=k;ctx.translate(0,lerp(40,0,k));
+      ctx.fillStyle=i%2?CO:CY;ctx.fillRect(x,450,300,6);T(valor(s,99,0),x-2,580,110,{ls:-4});
+      T(s[2],x,630,22,{w:800,ls:3,a:.85});T(s[3],x,662,22,{w:800,ls:3,a:.85});ctx.restore()})}
+}
+function cifrasRejilla(u){ // 2×2, mismo ritmo que las columnas
+  STATS.forEach((s,i)=>{const st=0.1+i*0.4,x=150+(i%2)*840,y=440+(i>>1)*330;
+    if(u<st)return;const k=eOX(P(u,st,st+0.4));
+    ctx.save();ctx.globalAlpha=k;ctx.translate(lerp(-60,0,k),0);
+    ctx.fillStyle=i%2?CO:CY;ctx.fillRect(x,y-170,8,220*eOC(P(u,st+0.1,st+0.6)));
+    T(valor(s,u,st),x+40,y,170,{ls:-6});
+    const vw=MW(valor(s,99,0),170,900,DISP,-6);
+    T(s[2],x+70+vw,y-60,26,{w:800,ls:3,a:.85});T(s[3],x+70+vw,y-20,26,{w:800,ls:3,a:.85});ctx.restore()});
+}
+function cifrasColumnas(u){ // v1
   STATS.forEach((s,i)=>{
     const st=0.1+i*0.4,x=140+i*430;
     if(u<st)return;
@@ -261,12 +326,6 @@ function s4(t){
     T(s[2],x,660,26,{w:800,ls:3,a:.85});T(s[3],x,700,26,{w:800,ls:3,a:.85});
     ctx.restore();
   });
-  if(u>2.9){const k=eOB(P(u,2.9,3.15));
-    ctx.save();ctx.translate(150,860);ctx.scale(k,k);
-    rr(0,-40,620,58,29);ctx.strokeStyle=CY;ctx.lineWidth=2;ctx.stroke();
-    T(UI.verificado,28,-1,26,{f:MONO,w:400,c:CY});ctx.restore()}
-  // coral wipe out
-  if(u>3.45){const k=eIOC(P(u,3.45,3.8));ctx.fillStyle=CO;ctx.fillRect(0,0,W*k,H)}
 }
 
 // ---------- S5 método 11.4-15.2
@@ -276,7 +335,9 @@ function s5(t){
   const ex=eIX(P(u,3.45,3.8));
   T(CFG.metodo.nombre,150,210,28,{w:900,ls:8,c:CO,a:P(u,0.25,0.5)*(1-ex)});
   T(CFG.metodo.sub,150,252,26,{w:500,a:P(u,0.3,0.55)*.7*(1-ex)});
-  FASES.forEach((d,i)=>{
+  const activa=i=>u>1.8&&Math.floor(cl((u-1.8)/0.28,0,6))===i&&u<3.3;
+  if(PL.metodo==='linea')metodoLinea(u,ex,activa);else if(PL.metodo==='escalera')metodoEscalera(u,ex,activa);
+  else FASES.forEach((d,i)=>{
     const st=0.2+i*0.28,cx=150+i*(1620/FASES.length);
     if(u<st)return;
     const k=eOB(P(u,st,st+0.35));
@@ -304,6 +365,33 @@ function s5(t){
   if(u<0.35){const k=eIOC(P(u,0,0.35));ctx.fillStyle=CO;ctx.fillRect(W*k,0,W*(1-k),H)}
 }
 
+// método como línea de tiempo: la línea se traza y cada fase es un nodo (mismos instantes que la v1)
+function metodoLinea(u,ex,activa){
+  const n=FASES.length,x0=210,x1=W-210,y=470,kl=eIOC(P(u,0.1,1.3));
+  ctx.save();ctx.globalAlpha=1-ex;ctx.translate(0,-ex*300);
+  ctx.strokeStyle=al(TX,0.35);ctx.lineWidth=4;ctx.beginPath();ctx.moveTo(x0,y);ctx.lineTo(lerp(x0,x1,kl),y);ctx.stroke();
+  FASES.forEach((d,i)=>{const st=0.2+i*0.28,cx=n>1?lerp(x0,x1,i/(n-1)):W/2;if(u<st)return;
+    const k=eOB(P(u,st,st+0.35)),on=activa(i);
+    ctx.save();ctx.translate(cx,y);ctx.scale(k,k);ctx.beginPath();ctx.arc(0,0,78,0,7);ctx.fillStyle=on?CY:BG;ctx.fill();ctx.strokeStyle=on?CY:TX;ctx.lineWidth=4;ctx.stroke();
+    T(d[0],0,30,86,{al:'center',c:on?BG:TX,ls:-2});ctx.restore();
+    const kt=eOC(P(u,st+0.25,st+0.55));ctx.save();ctx.globalAlpha*=kt;
+    T(String(i+1).padStart(2,'0'),cx,620,22,{f:MONO,w:400,c:CY,al:'center'});
+    T(d[1],cx,670,38,{w:800,al:'center'});T(d[2],cx,712,22,{w:500,a:.65,al:'center'});ctx.restore()});
+  ctx.restore();
+}
+// método como escalera: cada fase es un peldaño más alto que el anterior
+function metodoEscalera(u,ex,activa){
+  const n=FASES.length,gap=24,w=(1620-gap*(n-1))/n,base=830;
+  FASES.forEach((d,i)=>{const st=0.2+i*0.28;if(u<st)return;
+    const k=eOX(P(u,st,st+0.4)),on=activa(i),x=150+i*(w+gap),top=lerp(base,525-i*100,k)+ex*(700+i*90);
+    ctx.save();ctx.globalAlpha=1-ex;
+    rr(x,top,w,base-top,14);ctx.fillStyle=on?CY:al(TX,0.07);ctx.fill();ctx.strokeStyle=on?CY:al(TX,0.25);ctx.lineWidth=2;ctx.stroke();
+    ctx.beginPath();ctx.rect(x,top,w,base-top);ctx.clip();
+    T(d[0],x+28,top+132,130,{c:on?BG:TX,ls:-4});
+    T(String(i+1).padStart(2,'0')+'  '+d[1],x+30,top+186,30,{w:800,c:on?BG:TX});
+    T(d[2],x+30,top+222,20,{w:500,c:on?BG:TX,a:.7});ctx.restore()});
+}
+
 // ---------- S6 stack 15.2-18.9
 const ROWS=CFG.stack;
 const FZ=1.6, FZE=2.8; // freeze window (local)
@@ -316,6 +404,20 @@ function vel(u){
 function pos(u){let s=0;const dt=1/240;for(let x=0;x<u;x+=dt)s+=vel(x)*dt;return s}
 const SF=pos(FZ);
 function pillW(s){return MW(s,54,800)+80}
+// stack en cuadrícula: las herramientas aparecen en desorden y, en el mismo instante que la marquesina, todas se apagan
+// menos la primera ("↑ ese soy yo")
+function stackCuadricula(u,fz,ent){
+  const items=CFG.stack.flat(),sz=40,h=72,gap=18,lh=94,x0=150,maxW=W-300;
+  const ord=items.map((_,i)=>i).sort((a,b)=>hash(a*3.7+1)-hash(b*3.7+1)),rank=[];ord.forEach((v,j)=>rank[v]=j);
+  let x=x0,y=330,rect=null;
+  items.forEach((name,i)=>{const w=MW(name,sz,800)+56;if(x+w>x0+maxW){x=x0;y+=lh}
+    const st=0.15+rank[i]*0.03,k=eOB(P(u,st,st+0.3)),isC=i===0;
+    if(k>0){ctx.save();ctx.globalAlpha=cl(k)*(fz&&!isC?0.22:1)*ent;ctx.translate(x+w/2,y);ctx.scale(cl(k,0,1.2),cl(k,0,1.2));
+      rr(-w/2,-h/2-14,w,h,h/2);if(isC&&fz){ctx.fillStyle=CY;ctx.fill()}else{ctx.strokeStyle=al(TX,0.45);ctx.lineWidth=2;ctx.stroke()}
+      T(name,-w/2+28,8,sz,{w:800,c:isC&&fz?BG:TX});ctx.restore()}
+    if(isC)rect=[x,y-h/2-14,w,h];x+=w+gap});
+  return rect;
+}
 function s6(t){
   const u=t-15.2;
   const s=pos(u),v=vel(u);
@@ -324,7 +426,8 @@ function s6(t){
   T(UI.stack.replace('{n}',new Set(CFG.stack.flat()).size),150,180,34,{w:900,ls:2,a:ent});
   T(UI.contado,150,226,26,{f:MONO,w:400,c:CY,a:P(u,0.3,0.5)});
   let claudeRect=null;
-  ROWS.forEach((row,r)=>{
+  if(PL.stack==='cuadricula')claudeRect=stackCuadricula(u,fz,ent);
+  else ROWS.forEach((row,r)=>{
     const ws=row.map(pillW),gap=28;const per=ws.reduce((a,b)=>a+b+gap,0);
     const dir=r%2?1:-1;const y=380+r*170;
     // phase so Claude (row0 idx0) is centered at freeze
@@ -345,7 +448,7 @@ function s6(t){
             const gx=x-dir*g*blur*22;
             ctx.save();ctx.globalAlpha=(g===0?1:0.09)*dim*ent;
             rr(gx,y-60,w,90,45);
-            if(isC&&fz){ctx.fillStyle=CY;ctx.fill()}else{ctx.strokeStyle='rgba(255,250,242,0.45)';ctx.lineWidth=2;ctx.stroke()}
+            if(isC&&fz){ctx.fillStyle=CY;ctx.fill()}else{ctx.strokeStyle=al(TX,0.45);ctx.lineWidth=2;ctx.stroke()}
             T(name,gx+40,y+5,54,{w:800,c:isC&&fz?BG:TX});
             ctx.restore();
           }
@@ -358,18 +461,19 @@ function s6(t){
   if(fz&&claudeRect){
     const k=eOB(P(u,FZ,FZ+0.3));
     const [x,y,w,h]=claudeRect;
+    const lx=Math.min(W-470,Math.max(470,x+w/2)); // el rótulo nunca se sale de pantalla (en la cuadrícula la píldora puede estar en un borde)
     ctx.save();ctx.strokeStyle=CY;ctx.lineWidth=4;
     const pad=14+8*Math.sin(u*14)*(1-P(u,FZ,FZ+0.8));
     rr(x-pad,y-pad,w+pad*2,h+pad*2,60);ctx.globalAlpha=k;ctx.stroke();
     ctx.restore();
     ctx.save();ctx.globalAlpha=k;
-    rr(x+w/2-420,y+h+30,840,120,16);ctx.fillStyle='rgba(5,6,7,0.92)';ctx.fill();
-    T(CFG.yo[0],x+w/2,y+h+80,44,{w:900,c:CY,al:'center'});
-    T(CFG.yo[1],x+w/2,y+h+124,26,{f:MONO,w:400,al:'center',a:P(u,FZ+0.35,FZ+0.55)});
+    rr(lx-420,y+h+30,840,120,16);ctx.fillStyle=al(BG,0.92);ctx.fill();
+    T(CFG.yo[0],lx,y+h+80,44,{w:900,c:CY,al:'center'});
+    T(CFG.yo[1],lx,y+h+124,26,{f:MONO,w:400,al:'center',a:P(u,FZ+0.35,FZ+0.55)});
     ctx.restore();
   }
   // exit: speed lines + flash
-  if(u>3.5){const k=P(u,3.5,3.7);ctx.fillStyle=`rgba(5,6,7,${k})`;ctx.fillRect(0,0,W,H)}
+  if(u>3.5){const k=P(u,3.5,3.7);ctx.fillStyle=al(BG,k);ctx.fillRect(0,0,W,H)}
 }
 
 // ---------- S7 self-ref 18.9-22.6
@@ -414,7 +518,8 @@ function s7(t){
 }
 
 // ---------- S8 cierre: aro que se dibuja + iniciales + nombre + llamadas a la acción
-window.READY=Promise.all([400,700,900].map(w=>document.fonts.load(`${w} 40px InterLocal`)));
+// todas las caras (la v1 solo precargaba 400, 700 y 900; 600 y 800 podían salir con la fuente de reserva)
+window.READY=Promise.all([...document.fonts].map(f=>f.load().catch(()=>null)));
 function s8(t){
   const u=t-22.6;
   const ir=eOX(P(u,0,0.5));
@@ -431,7 +536,7 @@ function s8(t){
     ctx.beginPath();ctx.arc(W/2,262,40+k*420,0,7);ctx.stroke();ctx.restore()}
   const name=CFG.nombre.toUpperCase();
   if(u>0.9){const k=P(u,0.9,1.5);T(scramble(name,k,21),W/2,560,124,{al:'center',ls:-2})}
-  T(CFG.claim,W/2,650,30,{w:800,ls:7,al:'center',a:eOC(P(u,1.35,1.7)),c:'rgba(255,250,242,0.85)'});
+  T(CFG.claim,W/2,650,30,{w:800,ls:7,al:'center',a:eOC(P(u,1.35,1.7)),c:al(TX,0.85)});
   const b1=eOB(P(u,1.7,2.0)),b2=eOB(P(u,1.85,2.15));
   if(b1>0){ctx.save();ctx.translate(W/2-250,800);ctx.scale(b1,b1);rr(-220,-42,440,84,42);ctx.fillStyle=CY;ctx.fill();
     T(CFG.web,0,13,34,{c:BG,al:'center',w:900});ctx.restore()}
@@ -439,7 +544,7 @@ function s8(t){
     T(CFG.cta2,0,12,32,{al:'center',w:800});ctx.restore()}
   T(CFG.ciudad+'  ·  '+CFG.credito,W/2,940,24,{f:MONO,w:400,al:'center',a:P(u,2.5,2.8)*0.7});
   ctx.restore();
-  if(u>4.0){ctx.fillStyle=`rgba(5,6,7,${P(u,4.0,4.4)})`;ctx.fillRect(0,0,W,H)}
+  if(u>4.0){ctx.fillStyle=al(BG,P(u,4.0,4.4));ctx.fillRect(0,0,W,H)}
 }
 
 // ---------- master
@@ -461,7 +566,7 @@ function renderFrame(f){
   ctx.restore();
   // flash on drop
   const fl=Math.max(Math.exp(-(t-5.1)*14)*(t>=5.1),Math.exp(-(t-22.6)*10)*(t>=22.6)*0.6);
-  if(fl>0.01){ctx.fillStyle=`rgba(255,250,242,${fl})`;ctx.fillRect(0,0,W,H)}
+  if(fl>0.01){ctx.fillStyle=al(PAL.flash,fl);ctx.fillRect(0,0,W,H)}
   hud(t,f);
   grain(f);
 }

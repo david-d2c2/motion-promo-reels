@@ -1,4 +1,4 @@
-// Render de reels por producto para catálogos (9:16).
+// Render de reels 9:16 (plantillas catalogo-9x16 y producto-9x16: el mismo archivo en las dos).
 // Uso:
 //   node render.js all                 -> renderiza todos los productos de productos.json
 //   node render.js mi-producto        -> solo uno
@@ -48,7 +48,9 @@ async function renderProduct(browser, p, stills) {
     const dir = path.join(OUT, 'hoja');
     fs.mkdirSync(dir, { recursive: true });
     const plan = await page.evaluate(() => window.PLAN);
-    const meta = { id: p.id, modelo: p.modelo, plan: plan.base ? 'v1' : [plan.hero, plan.rango, plan.datos, plan.precio, plan.trans, plan.tema].join(' · '), escenas: [] };
+    const nombre = p.modelo || (Array.isArray(p.nombre) ? p.nombre.join(' ') : p.nombre) || p.id;
+    const resumen = Object.entries(plan).filter(([k, v]) => typeof v === 'string' && !['temporada', 'orden', 'alin'].includes(k)).map(([, v]) => v).join(' · ');
+    const meta = { id: p.id, modelo: nombre, plan: plan.base ? 'v1' : resumen, escenas: [] };
     for (const seg of plan.tiempos) {
       const d = await grab(Math.round((seg.b - 0.35) * 30));
       const name = `${p.id}__${seg.n}.jpg`;

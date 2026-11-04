@@ -6,8 +6,8 @@ Tres implementaciones completas del método. Todas renderizan tal cual, con dato
 
 | Carpeta | Caso | Formato | Qué cambiar |
 |---|---|---|---|
-| `persona-16x9/` | Persona o marca personal | 1920×1080, 27 s | El objeto `CFG` al principio de `anim.html`: nombre, homónimos reales, cifras, método, stack, frase y CTA. Todo lo demás se adapta solo. |
-| `producto-9x16/` | Pocos productos, un gag escrito a mano por producto | 1080×1920, 15,5 s | `productos.json`: marca y productos. Los gags disponibles son `contador`, `invisible`, `diagonal` y `brillo`; los nuevos van en `hook()` de `motor.html` y en `gag_sfx()` de `audio.py`. La paleta está en el objeto `C` de `motor.html`. |
+| `persona-16x9/` | Persona o marca personal, con versiones A/B/C (v2) | 1920×1080, 27 s | El objeto `CFG` al principio de `anim.html`: nombre, homónimos reales, cifras, método, stack, frase y CTA (y, si quieres, `paletas` con los colores de la persona). Todo lo demás se adapta solo. Versiones: `node variar.js 3`. |
+| `producto-9x16/` | Pocos productos, un gag escrito a mano por producto y una construcción distinta en cada reel (v2) | 1080×1920, 15,5 s | `productos.json`: marca (con `colores` opcional) y productos (con `hooks` opcional para variantes de frase). Los gags disponibles son `contador`, `invisible`, `diagonal` y `brillo`; los nuevos van en `hook()` de `motor.html` y en `gag_sfx()` de `audio.py`. Planes: `node variar.js`. |
 | `catalogo-9x16/` | Catálogo WooCommerce, gag por categoría y construcción distinta en cada reel (v2) | 1080×1920, 15,5 s | `config.json`: tienda, marcas a quitar, atributos (rango, variantes, colores, material), etiquetas, paleta, categorías con su gag y sus variantes de frase (admite condiciones) y el bloque opcional `variacion`. Después, `node extraer.js` (también planifica cada reel). |
 
 ## Uso
@@ -20,8 +20,13 @@ pip install numpy scipy          # audio
 # persona-16x9
 node render.js stills 1.9,6.6,9.5,14,17.3,20,25
 node render.js video promo.mp4
+node variar.js 3                                  # v2: versiones A, B y C -> versiones.json
+node render.js video promo_B.mp4 --version B      # una versión
+node render.js hoja                               # hoja de contactos de todas las versiones (requiere Pillow)
 
 # producto-9x16 y catalogo-9x16
+node variar.js                                          # v2: un plan de construcción por reel -> VARIACION.md
+node render.js all --hoja                               # hojas de contactos out/hoja_NN.jpg (requiere Pillow)
 node render.js all --stills 1,3.4,7.4,10.4,12.4,14.4   # revisar fotogramas en out/stills
 node render.js all                                      # vídeos finales en out/
 node render.js <id> ...                                 # un solo producto
@@ -77,6 +82,16 @@ Claves: `orden`, `hero` (`tarjeta`, `difuso`, `arco`), `rango` (`pildoras`, `reg
 - Un tema solo se usa si, con la paleta de la marca, su texto y su acento pasan el contraste WCAG sobre su fondo.
 - Los productos `calma` (sensibles) van por un carril tranquilo: tema claro, fundido/destello/zoom y sin percusión.
 - Para fijar un reel, edita su `plan` y pon `"manual": true` en el producto.
+
+## Variación en las otras plantillas (v2)
+
+`variacion.js`, `variar.js` y `hoja.py` son el mismo archivo en las tres plantillas, y `render.js` es el mismo en las dos 9:16. Cada plantilla elige su perfil en `package.json` (`perfilVariacion`). Si editas un archivo común, cópialo a las otras carpetas: el flujo de publicación comprueba que coincidan.
+
+**`producto-9x16`** funciona como el catálogo: `node variar.js` escribe un `plan` en cada producto de `productos.json`, y un bloque `variacion` en ese mismo archivo acota las opciones. Sus layouts: producto `tarjeta` · `abajo` · `polaroid`; colores `contador` · `fila` · `abanico`; datos `lista` · `numerada` · `etiquetas`; precio `grande` · `sello` · `etiqueta`. Los gags y los dibujos de producto no cambian. Añade `"hooks": [[...], [...]]` a un producto para darle variantes de frase (cambian con cada `--temporada`). La paleta de la marca va en `marca.colores` (`fondo`, `fondo_cierre`, `tinta`, `texto`, `acento`, `acento_suave`).
+
+**`persona-16x9`** hace versiones del mismo vídeo. `node variar.js 3` escribe `versiones.json` con las versiones A, B y C, elegidas para diferenciarse todo lo posible: paleta (`neon`, `tinta`, `lima`), titular (`golpe`, `mascara`, `maquina`), cifras (`columnas`, `foco`, `rejilla`), método (`letras`, `linea`, `escalera`), stack (`marquesina`, `cuadricula`), fondo (`reticula`, `puntos`, `limpio`) y música. El orden de la historia y los instantes clave no cambian, así que los efectos de sonido siguen sincronizados. Para usar los colores de la persona, añade una paleta en `CFG.paletas` con las mismas claves que `neon` (por ejemplo `marca`) y permítela en un `variacion.json` junto a `anim.html`: `{ "paleta": ["marca", "neon"] }`.
+
+En cualquier plantilla, un archivo `variacion.json` tiene prioridad sobre el bloque `variacion` de `config.json` o `productos.json`.
 
 ## Textos de interfaz
 

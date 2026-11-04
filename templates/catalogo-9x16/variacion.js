@@ -1,37 +1,72 @@
-// Variación de reels (v2). Un único módulo compartido por:
-//   - motor.html   (navegador: window.VAR) -> tema de color, línea de tiempo y plan por defecto
-//   - variar.js    (Node)                  -> planificador del lote con anti-repetición
-//   - extraer.js   (Node)                  -> planifica los productos nuevos tras cada extracción
-// audio.py no recalcula nada: lee plan.tiempos y plan.musica de productos.json.
+// Variación de vídeos (v2). Núcleo COMÚN a las tres plantillas: el mismo archivo vive en
+// catalogo-9x16/, producto-9x16/ y persona-16x9/ (si lo cambias en una, cópialo a las otras).
+// Cada plantilla elige su perfil:  VAR.perfil('catalogo' | 'producto' | 'persona').
 //
-// Idea: cada producto lleva un "plan" (orden de escenas, layout de cada escena, transición, tema, entrada del
-// texto, variante del gancho y música). El plan se elige con una semilla (id + temporada) y se compara con los
-// planes de los productos que se publican justo antes, para que dos reels vecinos no se parezcan.
+// Lo usan:
+//   - el motor (navegador: window.VAR)  -> tema de color, línea de tiempo y plan por defecto (= v1)
+//   - variar.js (Node)                   -> planificador con anti-repetición
+//   - extraer.js (Node, catálogo)        -> planifica los productos nuevos tras cada extracción
+// audio.py no recalcula nada: lee plan.tiempos y plan.musica del JSON que escribe variar.js.
+//
+// Idea: cada vídeo lleva un "plan" (orden de escenas, layout de cada escena, transición, tema, entrada del texto,
+// variante del gancho y música), elegido con una semilla (id + temporada) y comparado con los planes de los vídeos
+// que se publican justo antes, para que dos vídeos vecinos no se parezcan.
 (function (root) {
-  // ---------------------------------------------------------------- catálogo de opciones
-  const OPCIONES = {
-    orden: ['rango,datos,precio', 'rango,precio,datos', 'datos,rango,precio', 'datos,precio,rango', 'precio,rango,datos', 'precio,datos,rango'],
-    hero: ['tarjeta', 'difuso', 'arco'],
-    rango: ['pildoras', 'regla', 'rejilla'],
-    datos: ['lista', 'numerada', 'apiladas'],
-    precio: ['grande', 'sello', 'etiqueta'],
-    trans: ['barrido', 'empuje', 'iris', 'diagonal', 'persiana', 'zoom'],
-    tema: ['claro', 'oscuro', 'acento'],
-    entrada: ['subir', 'mascara', 'letras'],
-    alin: ['centro', 'izquierda'],
-    prog: [0, 1, 2, 3],
-    tono: [-2, 0, 2, 3],
-    bpm: [90, 96, 102, 108],
-    timbre: ['piano', 'celesta', 'pizzicato'],
-    patron: ['corcheas', 'alberti', 'saltos'],
+  const TRANS = ['barrido', 'empuje', 'iris', 'diagonal', 'persiana', 'zoom'];
+  const ENTRADA = ['subir', 'mascara', 'letras'];
+  const perms = xs => xs.length <= 1 ? [xs] : xs.flatMap((x, i) => perms(xs.filter((_, j) => j !== i)).map(r => [x, ...r]));
+  const ordenes = medios => perms(medios).map(p => p.join(','));
+
+  // ---------------------------------------------------------------- perfiles
+  const PERFILES = {
+    catalogo: {
+      opciones: {
+        orden: ordenes(['rango', 'datos', 'precio']),
+        hero: ['tarjeta', 'difuso', 'arco'], rango: ['pildoras', 'regla', 'rejilla'], datos: ['lista', 'numerada', 'apiladas'], precio: ['grande', 'sello', 'etiqueta'],
+        trans: TRANS, tema: ['claro', 'oscuro', 'acento'], entrada: ENTRADA, alin: ['centro', 'izquierda'],
+        prog: [0, 1, 2, 3], tono: [-2, 0, 2, 3], bpm: [90, 96, 102, 108], timbre: ['piano', 'celesta', 'pizzicato'], patron: ['corcheas', 'alberti', 'saltos'],
+      },
+      visuales: ['orden', 'hero', 'rango', 'datos', 'precio', 'trans', 'tema', 'entrada', 'alin'],
+      reparto: ['orden', 'hero', 'rango', 'datos', 'precio', 'trans', 'tema'],
+      pesos: { orden: 2, hero: 3, rango: 1.5, datos: 1.5, precio: 1.5, trans: 2.5, tema: 3, entrada: 1, alin: 1, hook: 3, prog: 1, tono: 0.5, bpm: 0.5, timbre: 1, patron: 0.75 },
+      dur: { hook: 3.0, hero: 2.8, rango: 3.0, datos: 2.6, precio: 1.8, outro: 2.3 }, inicio: ['hook', 'hero'], fin: ['outro'],
+      calma: { trans: ['fundido', 'barrido', 'zoom'], tema: ['claro'], entrada: ['subir', 'mascara'], bpm: [84, 90], timbre: ['piano', 'celesta'], patron: ['corcheas', 'saltos'] },
+      alineables: ['texto', 'calma', 'patron'],
+      base: { orden: 'rango,datos,precio', hero: 'tarjeta', rango: 'pildoras', datos: 'lista', precio: 'grande', trans: 'barrido', tema: 'claro', entrada: 'subir', alin: 'centro',
+        musica: { prog: 0, tono: 0, bpm: 96, timbre: 'piano', patron: 'corcheas' } },
+      colores: { fondo: '#F8ECE8', fondo_cierre: '#FBF6F2', tinta: '#0A0A0A', texto: '#2B2B2B', acento: '#8C6A4F', acento_suave: '#B89878' },
+    },
+    producto: {
+      opciones: {
+        orden: ordenes(['colores', 'datos', 'precio']),
+        hero: ['tarjeta', 'abajo', 'polaroid'], colores: ['contador', 'fila', 'abanico'], datos: ['lista', 'numerada', 'etiquetas'], precio: ['grande', 'sello', 'etiqueta'],
+        trans: TRANS, tema: ['claro', 'oscuro', 'acento'], entrada: ENTRADA,
+        prog: [0, 1, 2, 3], tono: [-2, 0, 2, 3], bpm: [104, 112, 120], timbre: ['pizzicato', 'marimba', 'celesta'], patron: ['corcheas', 'alberti', 'saltos'],
+      },
+      visuales: ['orden', 'hero', 'colores', 'datos', 'precio', 'trans', 'tema', 'entrada'],
+      reparto: ['orden', 'hero', 'colores', 'datos', 'precio', 'trans', 'tema'],
+      pesos: { orden: 2, hero: 3, colores: 1.5, datos: 1.5, precio: 1.5, trans: 2.5, tema: 3, entrada: 1, hook: 2, prog: 1, tono: 0.5, bpm: 0.5, timbre: 1, patron: 0.75 },
+      dur: { hook: 3.0, hero: 2.6, colores: 3.0, datos: 2.8, precio: 1.8, outro: 2.3 }, inicio: ['hook', 'hero'], fin: ['outro'],
+      calma: { trans: ['fundido', 'barrido', 'zoom'], tema: ['claro'], entrada: ['subir', 'mascara'], bpm: [96, 104], timbre: ['celesta', 'marimba'], patron: ['corcheas', 'saltos'] },
+      alineables: [],
+      base: { orden: 'colores,datos,precio', hero: 'tarjeta', colores: 'contador', datos: 'lista', precio: 'grande', trans: 'barrido', tema: 'claro', entrada: 'subir',
+        musica: { prog: 0, tono: 0, bpm: 112, timbre: 'pizzicato', patron: 'corcheas' } },
+      colores: { fondo: '#F6F0E4', fondo_cierre: '#14213D', tinta: '#14213D', texto: '#5B5648', acento: '#9A6B1E', acento_suave: '#E4B968' },
+    },
+    persona: {
+      // la historia no se reordena (el gag depende del orden): varían el aspecto y las escenas de datos
+      opciones: {
+        paleta: ['neon', 'tinta', 'lima'], titulo: ['golpe', 'mascara', 'maquina'], cifras: ['columnas', 'foco', 'rejilla'],
+        metodo: ['letras', 'linea', 'escalera'], stack: ['marquesina', 'cuadricula'], fondo: ['reticula', 'puntos', 'limpio'],
+        prog: [0, 1, 2, 3], tono: [-2, 0, 2], timbre: ['pulso', 'sierra', 'campana'],
+      },
+      visuales: ['paleta', 'titulo', 'cifras', 'metodo', 'stack', 'fondo'],
+      reparto: ['paleta', 'titulo', 'cifras', 'metodo', 'stack', 'fondo'],
+      pesos: { paleta: 4, titulo: 1.5, cifras: 2, metodo: 2, stack: 1.5, fondo: 1, prog: 1, tono: 0.5, timbre: 1 },
+      musica: ['prog', 'tono', 'timbre'],
+      base: { paleta: 'neon', titulo: 'golpe', cifras: 'columnas', metodo: 'letras', stack: 'marquesina', fondo: 'reticula', musica: { prog: 0, tono: 0, timbre: 'pulso' } },
+    },
   };
-  // Carril tranquilo para categorías sensibles (gag "calma"): nada brusco.
-  const CALMA = { trans: ['fundido', 'barrido', 'zoom'], tema: ['claro'], entrada: ['subir', 'mascara'], bpm: [84, 90], timbre: ['piano', 'celesta'], patron: ['corcheas', 'saltos'] };
-  // Gags cuyo dibujo está centrado: el texto también va centrado.
-  const ALINEABLES = ['texto', 'calma', 'patron'];
-  // Cuánto "se nota" cada eje al ver dos reels seguidos. El gancho solo cuenta si la categoría coincide.
-  const PESOS = { orden: 2, hero: 3, rango: 1.5, datos: 1.5, precio: 1.5, trans: 2.5, tema: 3, entrada: 1, alin: 1, hook: 3, prog: 1, tono: 0.5, bpm: 0.5, timbre: 1, patron: 0.75 };
-  const DUR = { hook: 3.0, hero: 2.8, rango: 3.0, datos: 2.6, precio: 1.8, outro: 2.3 }; // total 15,5 s
 
   // ---------------------------------------------------------------- utilidades
   function hash(s) { let h = 2166136261; for (let i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); } return h >>> 0; }
@@ -48,19 +83,19 @@
   // el primero de la lista (orden de preferencia de marca) que llegue al contraste mínimo; si ninguno, el mejor
   const primero = (bg, cands, min) => cands.find(c => contraste(c, bg) >= min) || mejor(bg, cands);
 
-  const BASE = { fondo: '#F8ECE8', fondo_cierre: '#FBF6F2', tinta: '#0A0A0A', texto: '#2B2B2B', acento: '#8C6A4F', acento_suave: '#B89878' };
-  // Tokens semánticos que usa el motor:
+  // Tokens semánticos que usan los motores 9:16:
   //   bg fondo de escena · fg texto principal · fg2 texto secundario · acc acento (títulos, trazos)
   //   acc2 acento suave (decoración) · onFg texto sobre relleno fg · onAcc texto sobre relleno acc · card marco de foto
-  function tema(colores, nombre) {
-    const k = Object.assign({}, BASE, colores || {});
+  function tema(base, colores, nombre) {
+    const k = Object.assign({}, base, colores || {});
     let t;
     if (nombre === 'oscuro') {
       const bg = mix(k.tinta, k.acento, 0.10);
-      const acc = primero(bg, [k.acento_suave, mix(k.acento_suave, k.fondo_cierre, 0.4), k.fondo], 3);
-      t = { bg, fg: k.fondo_cierre, fg2: mix(k.fondo_cierre, bg, 0.22), acc, acc2: mix(k.acento, k.fondo_cierre, 0.25), onFg: k.tinta };
+      const fg = primero(bg, [k.fondo_cierre, k.fondo, '#FFFFFF'], 7); // el claro de la marca que cumpla, no el blanco por defecto
+      const acc = primero(bg, [k.acento_suave, mix(k.acento_suave, fg, 0.4), k.fondo], 3);
+      t = { bg, fg, fg2: mix(fg, bg, 0.22), acc, acc2: mix(k.acento, fg, 0.25), onFg: k.tinta };
     } else if (nombre === 'acento') {
-      const bg = k.acento, fg = mejor(bg, [k.fondo_cierre, k.tinta]);
+      const bg = k.acento, fg = primero(bg, [k.fondo_cierre, k.fondo, k.tinta], 4.5);
       const acc = primero(bg, [k.tinta, k.fondo_cierre, k.fondo].filter(c => c !== fg), 3);
       t = { bg, fg, fg2: mix(fg, bg, 0.15), acc, acc2: mix(fg, bg, 0.45), onFg: bg };
     } else {
@@ -70,115 +105,116 @@
     t.cierre = k.fondo_cierre;      // el cierre de marca no cambia de tema: es la firma
     t.cierreTexto = k.texto; t.cierreTinta = k.tinta; t.cierreAcc = k.acento;
     t.card = '#FFFFFF';
-    t.onAcc = mejor(t.acc, [t.bg, k.fondo_cierre, k.tinta]);
+    t.onAcc = mejor(t.acc, [t.bg, k.fondo_cierre, k.tinta, '#FFFFFF']);
     t.ok = contraste(t.fg, t.bg) >= 4.5 && contraste(t.acc, t.bg) >= 3; // si no llega, el planificador no lo usa
     return t;
   }
 
-  // ---------------------------------------------------------------- línea de tiempo
-  function tiempos(orden) {
-    const escenas = ['hook', 'hero', ...orden.split(','), 'outro'];
-    let a = 0;
-    return escenas.map(n => { const s = { n, a: +a.toFixed(2), b: +(a + DUR[n]).toFixed(2) }; a += DUR[n]; return s; });
-  }
+  // ---------------------------------------------------------------- un perfil listo para usar
+  function perfil(nombre) {
+    const P = PERFILES[nombre];
+    if (!P) throw new Error('Perfil desconocido: ' + nombre);
+    const MUS = P.musica || ['prog', 'tono', 'bpm', 'timbre', 'patron'];
+    const MAXD = Object.values(P.pesos).reduce((s, v) => s + v, 0);
 
-  // Plan equivalente a la v1 (se usa cuando un producto no trae plan).
-  function planBase(p) {
-    return { v: 2, base: true, orden: 'rango,datos,precio', hero: 'tarjeta', rango: 'pildoras', datos: 'lista', precio: 'grande',
-      trans: 'barrido', tema: 'claro', entrada: 'subir', alin: 'centro', hook: 0,
-      musica: { prog: 0, tono: 0, bpm: 96, timbre: 'piano', patron: 'corcheas' }, tiempos: tiempos('rango,datos,precio') };
-  }
+    function tiempos(orden) {
+      if (!P.dur) return null;
+      const escenas = [...P.inicio, ...orden.split(','), ...P.fin];
+      let a = 0;
+      return escenas.map(n => { const s = { n, a: +a.toFixed(2), b: +(a + P.dur[n]).toFixed(2) }; a += P.dur[n]; return s; });
+    }
+    // plan equivalente a la v1 (se usa cuando un vídeo no trae plan)
+    function planBase() {
+      const b = JSON.parse(JSON.stringify(P.base));
+      return Object.assign({ v: 2, base: true, hook: 0 }, b, P.dur ? { tiempos: tiempos(b.orden) } : {});
+    }
+    function distancia(a, b) {
+      let d = 0;
+      for (const k of P.visuales) if (a[k] !== b[k]) d += P.pesos[k] || 0;
+      for (const k of MUS) if ((a.musica || {})[k] !== (b.musica || {})[k]) d += P.pesos[k] || 0;
+      if ('hook' in P.pesos && (a._cat !== b._cat || a.hook !== b.hook)) d += P.pesos.hook;
+      return d;
+    }
 
-  // ---------------------------------------------------------------- distancia entre dos planes
-  function distancia(a, b) {
-    let d = 0;
-    for (const k of ['orden', 'hero', 'rango', 'datos', 'precio', 'trans', 'tema', 'entrada', 'alin']) if (a[k] !== b[k]) d += PESOS[k];
-    for (const k of ['prog', 'tono', 'bpm', 'timbre', 'patron']) if (a.musica[k] !== b.musica[k]) d += PESOS[k];
-    if (a._cat !== b._cat || a.hook !== b.hook) d += PESOS.hook;
-    return d;
-  }
-  const MAXD = Object.values(PESOS).reduce((s, v) => s + v, 0);
-
-  // ---------------------------------------------------------------- planificador del lote
-  // productos: en ORDEN DE PUBLICACIÓN. Conserva los planes de la misma temporada salvo opts.rehacer.
-  function planificar(productos, colores, cfg = {}, opts = {}) {
-    const temporada = String(opts.temporada || cfg.temporada || '1');
-    const ventana = cfg.ventana || 12, intentos = cfg.intentos || 400;
-    const ops = {};
-    for (const k in OPCIONES) ops[k] = (cfg[k] || OPCIONES[k]).slice();
-    ops.tema = ops.tema.filter(n => tema(colores, n).ok);
-    if (!ops.tema.length) ops.tema = ['claro'];
-    const uso = {}; const cuenta = (k, v) => { uso[k] = uso[k] || {}; uso[k][v] = (uso[k][v] || 0) + 1; };
-    const hist = [];
-    let n = 0;
-    // El gancho no se sortea: rota por turnos DENTRO de cada categoría (con un desfase por temporada),
-    // así dos productos de la misma categoría no repiten texto aunque se publiquen lejos.
-    const turno = {};
-
-    for (const p of productos) {
-      const calma = p.gag === 'calma';
-      const nHooks = (p.hooks && p.hooks.length) || 1;
-      let plan = p.plan;
-      const conservar = plan && plan.v === 2 && !plan.base && plan.temporada === temporada && !opts.rehacer;
-      if (!conservar) {
-        const r = rng(hash(temporada + '|' + p.id));
-        // carril tranquilo: opciones de CALMA que la marca no haya excluido (el fundido siempre vale)
-        const op = k => {
-          if (!(calma && CALMA[k])) return ops[k];
-          const f = CALMA[k].filter(v => !cfg[k] || cfg[k].includes(v) || v === 'fundido');
-          return f.length ? f : CALMA[k];
-        };
-        const temasOk = op('tema').filter(t => ops.tema.includes(t));
-        let best = null, bestS = -Infinity;
-        for (let i = 0; i < intentos; i++) {
-          const orden = pick(r, ops.orden);
-          const c = {
-            v: 2, temporada, orden, hero: pick(r, ops.hero), rango: pick(r, ops.rango), datos: pick(r, ops.datos), precio: pick(r, ops.precio),
-            trans: pick(r, op('trans')), tema: pick(r, temasOk.length ? temasOk : ['claro']),
-            entrada: pick(r, op('entrada')), alin: ALINEABLES.includes(p.gag) ? pick(r, ops.alin) : 'centro',
-            hook: (hash(temporada + '|' + p.categoria) + (turno[p.categoria] || 0)) % nHooks,
-            musica: { prog: pick(r, ops.prog), tono: pick(r, ops.tono), bpm: pick(r, op('bpm')), timbre: pick(r, op('timbre')), patron: pick(r, op('patron')) },
-            _cat: p.categoria,
+    // items en ORDEN DE PUBLICACIÓN ({id, categoria?, gag?, hooks?, plan?}). Conserva los planes de la misma
+    // temporada salvo opts.rehacer. cfg: bloque "variacion" (restricciones de la marca, ventana, temporada).
+    function planificar(items, colores, cfg = {}, opts = {}) {
+      const temporada = String(opts.temporada || cfg.temporada || '1');
+      const ventana = cfg.ventana || 12, intentos = cfg.intentos || 400;
+      const ops = {};
+      for (const k in P.opciones) ops[k] = (cfg[k] || P.opciones[k]).slice();
+      if (ops.tema) { ops.tema = ops.tema.filter(n => tema(P.colores, colores, n).ok); if (!ops.tema.length) ops.tema = ['claro']; }
+      const uso = {}; const cuenta = (k, v) => { uso[k] = uso[k] || {}; uso[k][v] = (uso[k][v] || 0) + 1; };
+      const hist = [];
+      const turno = {}; // el gancho rota por turnos DENTRO de cada categoría (con desfase por temporada)
+      let n = 0;
+      for (const it of items) {
+        const calma = it.gag === 'calma' && P.calma;
+        const nHooks = (it.hooks && it.hooks.length) || 1, cat = it.categoria || it.id;
+        let plan = it.plan;
+        const conservar = plan && plan.v === 2 && !plan.base && plan.temporada === temporada && !opts.rehacer;
+        if (!conservar) {
+          const r = rng(hash(temporada + '|' + it.id));
+          const op = k => { // carril tranquilo: opciones de "calma" que la marca no haya excluido (el fundido siempre vale)
+            if (!(calma && P.calma[k])) return ops[k];
+            const f = P.calma[k].filter(v => !cfg[k] || cfg[k].includes(v) || v === 'fundido');
+            return f.length ? f : P.calma[k];
           };
-          // 1) que se parezca lo menos posible a los vecinos (más peso a los más cercanos)
-          const prev = hist.slice(-ventana);
-          let minCerca = MAXD, media = 0, wsum = 0;
-          prev.forEach((h, j) => { const age = prev.length - j; const d = distancia(c, h); if (age <= 4) minCerca = Math.min(minCerca, d); const w = 1 / age; media += w * d; wsum += w; });
-          media = wsum ? media / wsum : MAXD;
-          // 2) que cada opción se use de forma equilibrada en todo el lote
-          let desequilibrio = 0;
-          if (n) for (const k of ['hero', 'rango', 'datos', 'precio', 'trans', 'tema', 'orden']) desequilibrio += ((uso[k] && uso[k][c[k]]) || 0) / n;
-          const s = 2 * minCerca + media - 3 * desequilibrio + r() * 0.01;
-          if (s > bestS) { bestS = s; best = c; }
+          const temasOk = ops.tema ? op('tema').filter(t => ops.tema.includes(t)) : null;
+          let best = null, bestS = -Infinity;
+          for (let i = 0; i < intentos; i++) {
+            const c = { v: 2, temporada };
+            for (const k of P.visuales) {
+              if (k === 'tema') c.tema = pick(r, temasOk.length ? temasOk : ['claro']);
+              else if (k === 'alin') c.alin = P.alineables.includes(it.gag) ? pick(r, ops.alin) : 'centro';
+              else c[k] = pick(r, op(k));
+            }
+            c.musica = {}; for (const k of MUS) c.musica[k] = pick(r, op(k));
+            c.hook = (hash(temporada + '|' + cat) + (turno[cat] || 0)) % nHooks;
+            c._cat = cat;
+            // 1) que se parezca lo menos posible a los vecinos (más peso a los más cercanos)
+            const prev = hist.slice(-ventana);
+            let minCerca = MAXD, media = 0, wsum = 0;
+            prev.forEach((h, j) => { const age = prev.length - j; const d = distancia(c, h); if (age <= 4) minCerca = Math.min(minCerca, d); const w = 1 / age; media += w * d; wsum += w; });
+            media = wsum ? media / wsum : MAXD;
+            // 2) que cada opción se use de forma equilibrada en todo el lote
+            let deseq = 0;
+            if (n) for (const k of P.reparto) deseq += ((uso[k] && uso[k][c[k]]) || 0) / n;
+            const s = 2 * minCerca + media - 3 * deseq + r() * 0.01;
+            if (s > bestS) { bestS = s; best = c; }
+          }
+          plan = best;
+          if (P.dur) plan.tiempos = tiempos(plan.orden);
         }
-        plan = best;
-        plan.tiempos = tiempos(plan.orden);
+        plan._cat = cat;
+        turno[cat] = (turno[cat] || 0) + 1;
+        for (const k of P.reparto) cuenta(k, plan[k]);
+        hist.push(plan); n++;
+        const limpio = Object.assign({}, plan); delete limpio._cat;
+        it.plan = limpio;
       }
-      plan._cat = p.categoria;
-      turno[p.categoria] = (turno[p.categoria] || 0) + 1;
-      for (const k of ['hero', 'rango', 'datos', 'precio', 'trans', 'tema', 'orden']) cuenta(k, plan[k]);
-      hist.push(plan); n++;
-      const limpio = Object.assign({}, plan); delete limpio._cat;
-      p.plan = limpio;
+      return informe(hist);
     }
-    return informe(productos, hist);
+
+    function informe(hist) {
+      const ejes = P.visuales.filter(k => k !== 'alin');
+      const reparto = {};
+      for (const k of ejes) { reparto[k] = {}; for (const h of hist) reparto[k][h[k]] = (reparto[k][h[k]] || 0) + 1; }
+      const firmas = new Set(hist.map(h => ejes.map(k => h[k]).join('|')));
+      let minVecino = Infinity, suma = 0, iguales = 0;
+      for (let i = 1; i < hist.length; i++) {
+        const d = distancia(hist[i], hist[i - 1]); minVecino = Math.min(minVecino, d); suma += d;
+        if (ejes.every(k => hist[i][k] === hist[i - 1][k])) iguales++;
+      }
+      return { total: hist.length, combinacionesVisuales: firmas.size, distanciaMinVecinos: hist.length > 1 ? minVecino : null,
+        distanciaMediaVecinos: hist.length > 1 ? +(suma / (hist.length - 1)).toFixed(2) : null, maximo: MAXD, vecinosIguales: iguales, reparto };
+    }
+
+    return { nombre, P, OPCIONES: P.opciones, DUR: P.dur, MUSICA: MUS,
+      tema: (colores, n) => tema(P.colores || {}, colores, n), tiempos, planBase, distancia, planificar,
+      informe: items => informe(items.map(it => Object.assign({}, it.plan || planBase(), { _cat: it.categoria || it.id }))) };
   }
 
-  // ---------------------------------------------------------------- informe del lote
-  function informe(productos, hist) {
-    const ejes = ['orden', 'hero', 'rango', 'datos', 'precio', 'trans', 'tema', 'entrada'];
-    const reparto = {};
-    for (const k of ejes) { reparto[k] = {}; for (const h of hist) reparto[k][h[k]] = (reparto[k][h[k]] || 0) + 1; }
-    const firmas = new Set(hist.map(h => ejes.map(k => h[k]).join('|')));
-    let minVecino = Infinity, sumaVecino = 0, iguales = 0;
-    for (let i = 1; i < hist.length; i++) {
-      const d = distancia(hist[i], hist[i - 1]); minVecino = Math.min(minVecino, d); sumaVecino += d;
-      if (ejes.every(k => hist[i][k] === hist[i - 1][k])) iguales++;
-    }
-    return { total: hist.length, combinacionesVisuales: firmas.size, distanciaMinVecinos: hist.length > 1 ? minVecino : null,
-      distanciaMediaVecinos: hist.length > 1 ? +(sumaVecino / (hist.length - 1)).toFixed(2) : null, maximo: MAXD, vecinosIguales: iguales, reparto };
-  }
-
-  const api = { OPCIONES, CALMA, PESOS, DUR, hash, rng, mix, contraste, tema, tiempos, planBase, distancia, planificar, informe };
+  const api = { PERFILES, perfil, hash, rng, mix, contraste, lum };
   if (typeof module !== 'undefined' && module.exports) module.exports = api; else root.VAR = api;
 })(typeof window !== 'undefined' ? window : globalThis);

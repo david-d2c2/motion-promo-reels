@@ -1,0 +1,54 @@
+{
+  "_comentario": "Versiones del vídeo generadas por node variar.js. Renderiza una con: node render.js video promo_A.mp4 --version A",
+  "temporada": "1",
+  "versiones": {
+    "A": {
+      "v": 2,
+      "temporada": "1",
+      "paleta": "neon",
+      "titulo": "golpe",
+      "cifras": "columnas",
+      "metodo": "letras",
+      "stack": "cuadricula",
+      "fondo": "puntos",
+      "musica": {
+        "prog": 2,
+        "tono": -2,
+        "timbre": "pulso"
+      },
+      "hook": 0
+    },
+    "B": {
+      "v": 2,
+      "temporada": "1",
+      "paleta": "tinta",
+      "titulo": "mascara",
+      "cifras": "rejilla",
+      "metodo": "escalera",
+      "stack": "marquesina",
+      "fondo": "limpio",
+      "musica": {
+        "prog": 3,
+        "tono": 0,
+        "timbre": "campana"
+      },
+      "hook": 0
+    },
+    "C": {
+      "v": 2,
+      "temporada": "1",
+      "paleta": "lima",
+      "titulo": "maquina",
+      "cifras": "foco",
+      "metodo": "linea",
+      "stack": "marquesina",
+      "fondo": "reticula",
+      "musica": {
+        "prog": 0,
+        "tono": -2,
+        "timbre": "pulso"
+      },
+      "hook": 0
+    }
+  }
+}

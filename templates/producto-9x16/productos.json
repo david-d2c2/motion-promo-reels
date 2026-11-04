@@ -10,70 +10,322 @@
     {
       "id": "cinta-50m",
       "url": "https://tiendaejemplo.com/producto/cinta-50m/",
-      "nombre": ["Cinta adhesiva", "de 50 metros"],
+      "nombre": [
+        "Cinta adhesiva",
+        "de 50 metros"
+      ],
       "foto": null,
       "gag": "contador",
-      "hook": ["Este reel dura 15 segundos.", "Este rollo, 50 metros.", "No te va a dar tiempo a gastarlo."],
+      "hook": [
+        "Este reel dura 15 segundos.",
+        "Este rollo, 50 metros.",
+        "No te va a dar tiempo a gastarlo."
+      ],
       "colores": 12,
       "muestra": "circulo",
       "linea_colores": "12 colores. Los hemos puesto todos.",
-      "datos": ["50 m por rollo", "Se corta con la mano", "Para embalar y etiquetar"],
+      "datos": [
+        "50 m por rollo",
+        "Se corta con la mano",
+        "Para embalar y etiquetar"
+      ],
       "precio": "3,90 €",
       "desde": false,
       "unidad": "por rollo",
       "oferta": false,
-      "guino_final": "Cinta gastada en este reel: 0 cm. Seguimos teniendo 50 m."
+      "guino_final": "Cinta gastada en este reel: 0 cm. Seguimos teniendo 50 m.",
+      "plan": {
+        "v": 2,
+        "temporada": "1",
+        "orden": "datos,precio,colores",
+        "hero": "abajo",
+        "colores": "abanico",
+        "datos": "numerada",
+        "precio": "sello",
+        "trans": "empuje",
+        "tema": "claro",
+        "entrada": "subir",
+        "musica": {
+          "prog": 1,
+          "tono": 3,
+          "bpm": 112,
+          "timbre": "marimba",
+          "patron": "alberti"
+        },
+        "hook": 0,
+        "tiempos": [
+          {
+            "n": "hook",
+            "a": 0,
+            "b": 3
+          },
+          {
+            "n": "hero",
+            "a": 3,
+            "b": 5.6
+          },
+          {
+            "n": "datos",
+            "a": 5.6,
+            "b": 8.4
+          },
+          {
+            "n": "precio",
+            "a": 8.4,
+            "b": 10.2
+          },
+          {
+            "n": "colores",
+            "a": 10.2,
+            "b": 13.2
+          },
+          {
+            "n": "outro",
+            "a": 13.2,
+            "b": 15.5
+          }
+        ]
+      }
     },
     {
       "id": "funda-transparente",
       "url": "https://tiendaejemplo.com/producto/funda-transparente/",
-      "nombre": ["Funda", "transparente"],
+      "nombre": [
+        "Funda",
+        "transparente"
+      ],
       "foto": null,
       "gag": "invisible",
-      "hook": ["Aquí hay una funda.", "¿No la ves?", "Normal. Es transparente."],
+      "hook": [
+        "Aquí hay una funda.",
+        "¿No la ves?",
+        "Normal. Es transparente."
+      ],
       "colores": 6,
       "muestra": "barra",
       "linea_colores": "6 tintes. Todos igual de discretos.",
-      "datos": ["Deja ver el diseño original", "Bordes reforzados", "Para 20 modelos"],
+      "datos": [
+        "Deja ver el diseño original",
+        "Bordes reforzados",
+        "Para 20 modelos"
+      ],
       "precio": "9,90 €",
       "desde": true,
       "unidad": "según modelo",
       "oferta": false,
-      "guino_final": "Hemos escondido una en este reel. No la busques."
+      "guino_final": "Hemos escondido una en este reel. No la busques.",
+      "plan": {
+        "v": 2,
+        "temporada": "1",
+        "orden": "colores,precio,datos",
+        "hero": "polaroid",
+        "colores": "fila",
+        "datos": "etiquetas",
+        "precio": "grande",
+        "trans": "barrido",
+        "tema": "oscuro",
+        "entrada": "mascara",
+        "musica": {
+          "prog": 3,
+          "tono": 2,
+          "bpm": 120,
+          "timbre": "pizzicato",
+          "patron": "corcheas"
+        },
+        "hook": 0,
+        "tiempos": [
+          {
+            "n": "hook",
+            "a": 0,
+            "b": 3
+          },
+          {
+            "n": "hero",
+            "a": 3,
+            "b": 5.6
+          },
+          {
+            "n": "colores",
+            "a": 5.6,
+            "b": 8.6
+          },
+          {
+            "n": "precio",
+            "a": 8.6,
+            "b": 10.4
+          },
+          {
+            "n": "datos",
+            "a": 10.4,
+            "b": 13.2
+          },
+          {
+            "n": "outro",
+            "a": 13.2,
+            "b": 15.5
+          }
+        ]
+      }
     },
     {
       "id": "toalla-rayas",
       "url": "https://tiendaejemplo.com/producto/toalla-rayas/",
-      "nombre": ["Toalla", "de rayas diagonales"],
+      "nombre": [
+        "Toalla",
+        "de rayas diagonales"
+      ],
       "foto": null,
       "gag": "diagonal",
-      "hook": ["Este reel va en diagonal.", "Como sus rayas.", "Ni una línea recta."],
+      "hook": [
+        "Este reel va en diagonal.",
+        "Como sus rayas.",
+        "Ni una línea recta."
+      ],
       "colores": 18,
       "muestra": "diagonal",
       "linea_colores": "18 combinaciones. En diagonal, claro.",
-      "datos": ["Algodón de rizo", "Tres tamaños", "Lavable a 60 °C"],
+      "datos": [
+        "Algodón de rizo",
+        "Tres tamaños",
+        "Lavable a 60 °C"
+      ],
       "precio": "14,50 €",
       "desde": true,
       "unidad": "según tamaño",
       "oferta": true,
-      "guino_final": "Este reel se ha montado en diagonal. Ninguna recta."
+      "guino_final": "Este reel se ha montado en diagonal. Ninguna recta.",
+      "plan": {
+        "v": 2,
+        "temporada": "1",
+        "orden": "datos,colores,precio",
+        "hero": "tarjeta",
+        "colores": "contador",
+        "datos": "lista",
+        "precio": "etiqueta",
+        "trans": "iris",
+        "tema": "claro",
+        "entrada": "letras",
+        "musica": {
+          "prog": 1,
+          "tono": 2,
+          "bpm": 104,
+          "timbre": "celesta",
+          "patron": "alberti"
+        },
+        "hook": 0,
+        "tiempos": [
+          {
+            "n": "hook",
+            "a": 0,
+            "b": 3
+          },
+          {
+            "n": "hero",
+            "a": 3,
+            "b": 5.6
+          },
+          {
+            "n": "datos",
+            "a": 5.6,
+            "b": 8.4
+          },
+          {
+            "n": "colores",
+            "a": 8.4,
+            "b": 11.4
+          },
+          {
+            "n": "precio",
+            "a": 11.4,
+            "b": 13.2
+          },
+          {
+            "n": "outro",
+            "a": 13.2,
+            "b": 15.5
+          }
+        ]
+      }
     },
     {
       "id": "pintura-satinada",
       "url": "https://tiendaejemplo.com/producto/pintura-satinada/",
-      "nombre": ["Pintura", "satinada"],
+      "nombre": [
+        "Pintura",
+        "satinada"
+      ],
       "foto": null,
       "gag": "brillo",
-      "hook": ["Este texto es mate.", "Este brilla.", "Es satinado."],
+      "hook": [
+        "Este texto es mate.",
+        "Este brilla.",
+        "Es satinado."
+      ],
       "colores": 40,
       "muestra": "satinado",
       "linea_colores": "40. Sí, los hemos contado.",
-      "datos": ["Acabado satinado lavable", "Bote de 750 ml", "Interior y exterior"],
+      "datos": [
+        "Acabado satinado lavable",
+        "Bote de 750 ml",
+        "Interior y exterior"
+      ],
       "precio": "12,95 €",
       "desde": true,
       "unidad": "el bote",
       "oferta": false,
-      "guino_final": "Ningún texto mate ha sufrido daños en este reel."
+      "guino_final": "Ningún texto mate ha sufrido daños en este reel.",
+      "plan": {
+        "v": 2,
+        "temporada": "1",
+        "orden": "colores,datos,precio",
+        "hero": "abajo",
+        "colores": "abanico",
+        "datos": "lista",
+        "precio": "sello",
+        "trans": "persiana",
+        "tema": "oscuro",
+        "entrada": "letras",
+        "musica": {
+          "prog": 0,
+          "tono": -2,
+          "bpm": 120,
+          "timbre": "pizzicato",
+          "patron": "saltos"
+        },
+        "hook": 0,
+        "tiempos": [
+          {
+            "n": "hook",
+            "a": 0,
+            "b": 3
+          },
+          {
+            "n": "hero",
+            "a": 3,
+            "b": 5.6
+          },
+          {
+            "n": "colores",
+            "a": 5.6,
+            "b": 8.6
+          },
+          {
+            "n": "datos",
+            "a": 8.6,
+            "b": 11.4
+          },
+          {
+            "n": "precio",
+            "a": 11.4,
+            "b": 13.2
+          },
+          {
+            "n": "outro",
+            "a": 13.2,
+            "b": 15.5
+          }
+        ]
+      }
     }
   ]
 }
