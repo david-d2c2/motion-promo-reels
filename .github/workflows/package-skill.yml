@@ -20,7 +20,7 @@ jobs:
 
       - name: Build zip
         run: |
-          rm -rf motion-promo-reels/.git motion-promo-reels/.github
+          rm -rf motion-promo-reels/.git motion-promo-reels/.github motion-promo-reels/install.sh motion-promo-reels/install.ps1
           zip -qr motion-promo-reels.zip motion-promo-reels
           unzip -l motion-promo-reels.zip | grep -q "motion-promo-reels/SKILL.md"
 

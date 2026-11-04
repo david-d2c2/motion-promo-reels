@@ -32,6 +32,7 @@ Sirve para:
 ```
 motion-promo-reels/
 ├── SKILL.md                    instrucciones para Claude (el método completo)
+├── install.sh / install.ps1    instaladores de una línea (curl / PowerShell)
 ├── assets/                     imágenes de este README
 └── templates/
     ├── README.md               qué tocar primero en cada plantilla
@@ -48,17 +49,41 @@ Claude te responde en tu idioma y escribe el texto del vídeo en el idioma de tu
 
 ## Instalación
 
-**Claude Code**: clona el repositorio directamente como skill.
+**Claude Code**: elige el método que prefieras. Todos dejan la skill en `~/.claude/skills/motion-promo-reels` salvo que indiques otra carpeta.
 
 ```bash
-# macOS / Linux
-git clone https://github.com/david-d2c2/motion-promo-reels ~/.claude/skills/motion-promo-reels
+# npx (Node 18+), con la CLI abierta de skills
+npx skills add david-d2c2/motion-promo-reels -g -a claude-code   # para todos tus proyectos
+npx skills add david-d2c2/motion-promo-reels -a claude-code      # solo en el proyecto actual
 
-# Windows (PowerShell)
-git clone https://github.com/david-d2c2/motion-promo-reels "$env:USERPROFILE\.claude\skills\motion-promo-reels"
+# curl (macOS / Linux)
+curl -fsSL https://raw.githubusercontent.com/david-d2c2/motion-promo-reels/main/install.sh | bash
+curl -fsSL https://raw.githubusercontent.com/david-d2c2/motion-promo-reels/main/install.sh | bash -s -- --dir /ruta/a/skills
+curl -fsSL https://raw.githubusercontent.com/david-d2c2/motion-promo-reels/main/install.sh | bash -s -- --project
 ```
 
-También puedes clonarlo en `.claude/skills/` dentro de un proyecto concreto.
+```powershell
+# Windows (PowerShell)
+irm https://raw.githubusercontent.com/david-d2c2/motion-promo-reels/main/install.ps1 | iex
+& ([scriptblock]::Create((irm https://raw.githubusercontent.com/david-d2c2/motion-promo-reels/main/install.ps1))) -Dir "D:\skills"
+```
+
+Opciones de `install.sh` / `install.ps1`:
+
+| Opción | Efecto |
+|---|---|
+| `--dir RUTA` / `-Dir RUTA` | Instala en `RUTA/motion-promo-reels` |
+| `--project` / `-Project` | Instala en `./.claude/skills/` de la carpeta actual |
+| `--force` / `-Force` | Sustituye una instalación existente (para actualizar) |
+| `--version TAG` / `-Version TAG` | Instala una *release* concreta en vez de la última |
+
+Los dos scripts descargan el mismo zip de la *release* que se indica abajo. Son cortos: léelos antes de ejecutarlos con una tubería.
+
+O con git:
+
+```bash
+git clone https://github.com/david-d2c2/motion-promo-reels ~/.claude/skills/motion-promo-reels
+```
 
 **claude.ai**: descarga [`motion-promo-reels.zip`](https://github.com/david-d2c2/motion-promo-reels/releases/latest/download/motion-promo-reels.zip) de la última *release*, súbelo en **Customize → Skills** (en la interfaz en español, el apartado de skills de Personalizar) y actívalo.
 
