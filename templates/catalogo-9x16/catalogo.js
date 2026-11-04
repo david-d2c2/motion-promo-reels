@@ -26,11 +26,14 @@
   function make(cfg) {
     const stripBrands = s => (cfg.marcas_a_quitar || []).reduce((a, b) => a.replace(new RegExp('\\s*\\b' + esc(b) + '\\b', 'gi'), ''), s).replace(/\s{2,}/g, ' ').trim();
     const fill = (t, d) => t.replace(/\{vmin\}/g, d.variantes[0] || '').replace(/\{vmax\}/g, d.variantes[d.variantes.length - 1] || '')
-      .replace(/\{rmin\}/g, d.rango[0] || '').replace(/\{rmax\}/g, d.rango[d.rango.length - 1] || '').replace(/\{modelo\}/g, d.modelo);
+      .replace(/\{rmin\}/g, d.rango[0] || '').replace(/\{rmax\}/g, d.rango[d.rango.length - 1] || '').replace(/\{modelo\}/g, d.modelo)
+      .replace(/\{ncolores\}/g, d.colores.length).replace(/\{nrango\}/g, d.rango.length).replace(/\{nvariantes\}/g, d.variantes.length);
     // una frase puede ser texto fijo o condicional: {si: regex sobre la descripción | si_variantes: n mínimo, texto, sino}
     const phrase = (f, d) => {
       if (typeof f === 'string') return fill(f, d);
-      const ok = f.si_variantes != null ? d.variantes.length >= f.si_variantes : new RegExp(f.si, 'i').test(d.desc);
+      const ok = f.si_variantes != null ? d.variantes.length >= f.si_variantes
+        : f.si_colores != null ? d.colores.length >= f.si_colores
+        : new RegExp(f.si, 'i').test(d.desc);
       return fill(ok ? f.texto : (f.sino || ''), d);
     };
 
@@ -68,7 +71,10 @@
       const range = p.prices.price_range;
       const desde = !!range && range.min_amount !== range.max_amount;
 
-      const d = { desc, variantes, rango, modelo };
+      const d = { desc, variantes, rango, modelo, colores };
+      // v2: varias versiones del gancho por categoría ("frases" + "variantes"). El plan elige cuál usa cada reel.
+      // Una variante que se queda sin frases (todas condicionales y sin "sino") se descarta.
+      const sets = [rule.frases, ...(rule.variantes || [])].map(fs => fs.map(f => phrase(f, d)).filter(Boolean)).filter(fs => fs.length);
       const out = {
         id: p.slug,
         woo_id: p.id,
@@ -76,7 +82,8 @@
         modelo,
         categoria: rule.nombre === '*' ? (cats[0] || '') : rule.nombre,
         gag: rule.gag,
-        hook: rule.frases.map(f => phrase(f, d)).filter(Boolean),
+        hook: sets[0] || [],
+        hooks: sets,
         rango: rango.length ? rango : [],
         variantes,
         colores,

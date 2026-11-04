@@ -2,7 +2,9 @@
 
 Uso:  python audio.py <id-producto> salida.wav
 Todo se genera por síntesis (sin samples ni música de terceros): no hay derechos que gestionar.
-Los cues coinciden con los de motor.html (objeto T). Si cambias tiempos allí, cámbialos aquí.
+v2: los cues, el tempo, la progresión, el tono, el timbre y el patrón salen del "plan" del producto
+(productos.json, generado por variar.js), el mismo que lee motor.html: imagen y sonido no se desincronizan.
+Sin plan, suena como la v1 (Re mayor, 112 BPM, pizzicato y marimba).
 Requisitos: numpy, scipy.
 """
 import json
@@ -14,12 +16,16 @@ import numpy as np
 from scipy.signal import butter, sosfilt
 
 ROOT = pathlib.Path(__file__).resolve().parent
-T = dict(hook=0.0, hero=3.0, colors=5.6, facts=8.6, price=11.4, outro=13.2, end=15.5)
+T = dict(hook=0.0, hero=3.0, colores=5.6, datos=8.6, precio=11.4, outro=13.2)  # v1; main() los toma del plan
+CORTES = []
 SR = 48000
-DUR = T["end"]
+DUR = 15.5
 N = int(SR * DUR)
 BPM = 112
 B = 60 / BPM
+TONO = 0
+TIMBRE = "pizzicato"
+PATRON = "corcheas"
 rng = np.random.default_rng(3)
 mus = np.zeros((N, 2))
 sfx = np.zeros((N, 2))
@@ -154,49 +160,89 @@ def shimmer(d=1.0):
     return s * 0.35
 
 
-# ---------------- música: Re mayor, I–V–vi–IV, entra por capas
-PROG = [(50, [62, 66, 69]), (45, [61, 64, 69]), (47, [62, 66, 71]), (43, [62, 67, 71])]  # D A Bm G
-nb = int(DUR / B)
-for b in range(nb):
-    tb = b * B
-    root, ch = PROG[(b // 4) % 4]
-    full = tb >= T["hero"] - 0.05
-    if tb < T["outro"] + 1.6:
-        add(mus, shaker(), tb + B / 2, 0.10 if full else 0.05, 0.3)
-    if full and tb < T["outro"] + 1.6:
-        add(mus, kick(), tb, 0.55)
-        if b % 2 == 1:
-            add(mus, snap(), tb, 0.30)
-        add(mus, bass(root - 12, B * 0.95), tb, 0.30)
-    # arpegio pizzicato: corcheas
-    for e in range(2):
-        n = ch[(b * 2 + e) % 3] + (12 if (b + e) % 5 == 0 else 0)
-        add(mus, pluck(n), tb + e * B / 2, 0.16 if full else 0.12, -0.35 if e else 0.35)
-    if full and b % 4 == 0:
-        add(mus, marimba(ch[2] + 12, 1.2), tb, 0.10)
-# acorde final
-for m in [62, 66, 69, 74]:
-    add(mus, marimba(m, 2.0), T["outro"] + 1.65, 0.12)
+def celesta(m, d=0.9):
+    t = tt(d)
+    f = mtof(m + 12)
+    return (np.sin(2 * np.pi * f * t) * np.exp(-t * 4) + 0.3 * np.sin(2 * np.pi * 4.01 * f * t) * np.exp(-t * 11)) * np.minimum(1, t * 700)
 
-# ---------------- efectos comunes (mismos cues que motor.html)
-for c in (T["colors"], T["facts"], T["price"]):
-    add(sfx, whoosh(0.35), c - 0.2, 0.35)
-add(sfx, pop(480), T["hero"] + 0.05, 0.4)
-add(sfx, pop(620), T["hero"] + 0.3, 0.3)
-for i in range(18):  # muestras de color apareciendo
-    add(sfx, pop(700 + (i % 6) * 90, 0.06), T["colors"] + 0.1 + i * 1.5 / 18, 0.14, (i % 3 - 1) * 0.5)
-for i in range(30):  # contador
-    add(sfx, tick(), T["colors"] + 0.1 + i * 0.05, 0.18 * (1 - i / 32))
-add(sfx, chime(2093, 0.5), T["colors"] + 1.65, 0.18)
-for i in range(3):  # datos con check
-    add(sfx, thud(), T["facts"] + 0.2 + i * 0.6, 0.45)
-    add(sfx, pop(900, 0.08), T["facts"] + 0.38 + i * 0.6, 0.2)
-add(sfx, thud(), T["price"] + 0.15, 0.7)
-add(sfx, chime(1760, 0.8), T["price"] + 0.2, 0.28)
-add(sfx, chime(2637, 0.6), T["price"] + 0.26, 0.15)
-add(sfx, whoosh(0.5), T["outro"] - 0.2, 0.4)
-add(sfx, chime(1175, 1.2), T["outro"] + 0.75, 0.25)
-add(sfx, pop(560), T["outro"] + 0.75, 0.3)
+
+def voz(m, d):
+    """Instrumento del arpegio según el timbre del plan."""
+    m += TONO
+    if TIMBRE == "marimba":
+        return marimba(m, max(d, 0.6))
+    if TIMBRE == "celesta":
+        return celesta(m, max(d, 0.9))
+    return pluck(m, d)
+
+
+# ---------------- música: Re mayor, entra por capas; la progresión, el tono y el patrón salen del plan
+D_, A_, BM, G_, EM = (50, [62, 66, 69]), (45, [61, 64, 69]), (47, [62, 66, 71]), (43, [62, 67, 71]), (52, [64, 67, 71])
+PROGS = [[D_, A_, BM, G_], [D_, G_, A_, D_], [BM, G_, D_, A_], [D_, BM, EM, A_]]  # 0 = la de la v1 (I–V–vi–IV)
+PROG = PROGS[0]
+PATRONES = {"corcheas": [0, 1, 2, 1], "alberti": [0, 2, 1, 2], "saltos": [0, 3, 2, 3]}
+
+
+def musica():
+    nb = int(DUR / B)
+    pat = PATRONES.get(PATRON, PATRONES["corcheas"])
+    for b in range(nb):
+        tb = b * B
+        root, ch = PROG[(b // 4) % 4]
+        root += TONO
+        full = tb >= T["hero"] - 0.05
+        if tb < T["outro"] + 1.6:
+            add(mus, shaker(), tb + B / 2, 0.10 if full else 0.05, 0.3)
+        if full and tb < T["outro"] + 1.6:
+            add(mus, kick(), tb, 0.55)
+            if b % 2 == 1:
+                add(mus, snap(), tb, 0.30)
+            add(mus, bass(root - 12, B * 0.95), tb, 0.30)
+        # arpegio en corcheas con el patrón del plan (v1: "corcheas" + octava cada 5)
+        for e in range(2):
+            if PATRON == "corcheas":  # el de la v1
+                n = ch[(b * 2 + e) % 3] + (12 if (b + e) % 5 == 0 else 0)
+            else:
+                i = pat[(b * 2 + e) % len(pat)]
+                n = root - TONO + 24 if i == 3 else ch[i]
+            add(mus, voz(n, 0.45), tb + e * B / 2, 0.16 if full else 0.12, -0.35 if e else 0.35)
+        if full and b % 4 == 0:
+            add(mus, marimba(ch[2] + 12 + TONO, 1.2), tb, 0.10)
+    for m in [62, 66, 69, 74]:  # acorde final
+        add(mus, marimba(m + TONO, 2.0), T["outro"] + 1.65, 0.12)
+
+
+def trans_sfx(kind, c):
+    if kind in ("barrido", "empuje", "diagonal"):
+        add(sfx, whoosh(0.35 if kind != "diagonal" else 0.45), c - 0.2, 0.35)
+    elif kind == "persiana":
+        for i in range(8):
+            add(sfx, tick(), c - 0.12 + i * 0.045, 0.2, (-1) ** i * 0.4)
+    elif kind in ("iris", "zoom", "fundido"):
+        add(sfx, whoosh(0.6, up=False), c - 0.3, 0.2)
+
+
+def efectos():
+    """Efectos comunes, anclados al inicio de cada escena del plan."""
+    for kind, c in CORTES:
+        trans_sfx(kind, c)
+    add(sfx, pop(480), T["hero"] + 0.05, 0.4)
+    add(sfx, pop(620), T["hero"] + 0.3, 0.3)
+    for i in range(18):  # muestras de color apareciendo
+        add(sfx, pop(700 + (i % 6) * 90, 0.06), T["colores"] + 0.1 + i * 1.5 / 18, 0.14, (i % 3 - 1) * 0.5)
+    for i in range(30):  # contador
+        add(sfx, tick(), T["colores"] + 0.1 + i * 0.05, 0.18 * (1 - i / 32))
+    add(sfx, chime(2093, 0.5), T["colores"] + 1.65, 0.18)
+    for i in range(3):  # datos
+        add(sfx, thud(), T["datos"] + 0.2 + i * 0.6, 0.45)
+        add(sfx, pop(900, 0.08), T["datos"] + 0.38 + i * 0.6, 0.2)
+    add(sfx, thud(), T["precio"] + 0.15, 0.7)
+    add(sfx, chime(1760, 0.8), T["precio"] + 0.2, 0.28)
+    add(sfx, chime(2637, 0.6), T["precio"] + 0.26, 0.15)
+    if not any(c == T["outro"] for _, c in CORTES):
+        add(sfx, whoosh(0.5), T["outro"] - 0.2, 0.4)
+    add(sfx, chime(1175, 1.2), T["outro"] + 0.75, 0.25)
+    add(sfx, pop(560), T["outro"] + 0.75, 0.3)
 
 
 # ---------------- efectos propios de cada gag
@@ -223,13 +269,28 @@ def gag_sfx(gag, oferta):
         add(sfx, pop(640), 1.9, 0.25)
         add(sfx, whoosh(0.6), 2.1, 0.3)
     if oferta:
-        add(sfx, pop(980), T["price"] + 0.75, 0.3)
+        add(sfx, pop(980), T["precio"] + 0.75, 0.3)
 
 
 def main():
     pid, out = sys.argv[1], sys.argv[2]
     data = json.loads((ROOT / "productos.json").read_text(encoding="utf-8"))
+    global BPM, B, TONO, TIMBRE, PATRON, PROG
     p = next(x for x in data["productos"] if x["id"] == pid)
+    plan = p.get("plan") or {}
+    if plan.get("v") == 2 and plan.get("tiempos"):
+        for sg in plan["tiempos"]:
+            T[sg["n"]] = sg["a"]
+        mu = plan.get("musica", {})
+        BPM, TONO = mu.get("bpm", 112), mu.get("tono", 0)
+        TIMBRE, PATRON = mu.get("timbre", "pizzicato"), mu.get("patron", "corcheas")
+        PROG = PROGS[mu.get("prog", 0) % len(PROGS)]
+        B = 60 / BPM
+        CORTES.extend((plan.get("trans", "barrido"), sg["a"]) for sg in plan["tiempos"][1:])
+    else:  # v1: barrido en los cortes intermedios
+        CORTES.extend(("barrido", T[n]) for n in ("colores", "datos", "precio"))
+    musica()
+    efectos()
     gag_sfx(p["gag"], p.get("oferta"))
     mix = mus * 0.8 + sfx * 0.9
     fo = int((DUR - 0.5) * SR)

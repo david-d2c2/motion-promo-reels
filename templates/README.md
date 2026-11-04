@@ -6,9 +6,9 @@ Three complete implementations of the method. All of them render as they are, us
 
 | Folder | Case | Format | What to change |
 |---|---|---|---|
-| `persona-16x9/` | Person or personal brand | 1920×1080, 27 s | The `CFG` object at the top of `anim.html`: name, real namesakes, stats, method, stack, quote and CTA. Everything else adapts on its own. |
-| `producto-9x16/` | A few products, one hand-written gag each | 1080×1920, 15.5 s | `productos.json`: brand and products. Available gags: `contador`, `invisible`, `diagonal`, `brillo`. New ones go in `hook()` in `motor.html` and in `gag_sfx()` in `audio.py`. The palette is the `C` object in `motor.html`. |
-| `catalogo-9x16/` | WooCommerce catalog, one gag per category | 1080×1920, 15.5 s | `config.json`: store, brands to strip, attributes (range, variants, colors, material), labels, palette and categories with their gag and phrases (conditions supported). Then run `node extraer.js`. |
+| `persona-16x9/` | Person or personal brand, A/B/C versions (v2) | 1920×1080, 27 s | The `CFG` object at the top of `anim.html`: name, real namesakes, stats, method, stack, quote and CTA (and optionally `paletas` with the person's colors). Everything else adapts on its own. Versions: `node variar.js 3`. |
+| `producto-9x16/` | A few products, one hand-written gag each, a different construction per reel (v2) | 1080×1920, 15.5 s | `productos.json`: brand (optional `colores`) and products (optional `hooks` with phrase variants). Available gags: `contador`, `invisible`, `diagonal`, `brillo`. New ones go in `hook()` in `motor.html` and in `gag_sfx()` in `audio.py`. Plans: `node variar.js`. |
+| `catalogo-9x16/` | WooCommerce catalog, one gag per category, a different construction per reel (v2) | 1080×1920, 15.5 s | `config.json`: store, brands to strip, attributes (range, variants, colors, material), labels, palette, categories with their gag and phrase variants (conditions supported) and the optional `variacion` block. Then run `node extraer.js` (it also plans each reel). |
 
 ## Usage
 
@@ -20,14 +20,22 @@ pip install numpy scipy          # audio
 # persona-16x9
 node render.js stills 1.9,6.6,9.5,14,17.3,20,25
 node render.js video promo.mp4
+node variar.js 3                                  # v2: versions A, B, C -> versiones.json
+node render.js video promo_B.mp4 --version B      # one version
+node render.js hoja                               # contact sheet of all versions (needs Pillow)
 
 # producto-9x16 and catalogo-9x16
+node variar.js                                          # v2: one construction plan per reel -> VARIACION.md
+node render.js all --hoja                               # contact sheets out/hoja_NN.jpg (needs Pillow)
 node render.js all --stills 1,3.4,7.4,10.4,12.4,14.4   # review frames in out/stills
 node render.js all                                      # final videos in out/
 node render.js <id> ...                                 # a single product
 
 # catalogo-9x16 only: real data from the store
-node extraer.js            # productos.json + photos in img/ + REVISAR.md
+node extraer.js            # productos.json + photos in img/ + REVISAR.md + plans + VARIACION.md
+node variar.js             # (re)plan only: new products get a plan, existing ones keep theirs
+node variar.js --temporada 2027-01   # new season: fresh plans for the whole catalog
+node render.js all --hoja  # contact sheets out/hoja_NN.jpg: one row per reel, one frame per scene (needs Pillow)
 ```
 
 `catalogo-9x16/ejemplo_api.json` mimics a WooCommerce Store API response, so you can test `catalogo.js` offline.
@@ -42,8 +50,48 @@ In `config.json`, a phrase can be fixed text or a condition:
 ```
 
 - `si`: a regular expression matched against the product description.
-- `si_variantes`: a minimum number of variants.
-- Available placeholders: `{vmin}`, `{vmax}`, `{rmin}`, `{rmax}`, `{modelo}`.
+- `si_variantes`: a minimum number of variants. `si_colores`: a minimum number of colors.
+- Available placeholders: `{vmin}`, `{vmax}`, `{rmin}`, `{rmax}`, `{modelo}`, `{ncolores}`, `{nrango}`, `{nvariantes}`.
+
+## Hook variants and variation (catalog, v2)
+
+Give each category two or three phrase sets. `frases` is variant 1; `variantes` adds more. They rotate **within the category**, so two products of the same category never repeat a hook until the variants run out:
+
+```json
+{ "nombre": "Sin cordones", "gag": "cortar",
+  "frases": ["Este texto no lleva cordones.", "Y aquí sigue.", "Se calza y listo."],
+  "variantes": [["Este texto iba atado.", "Ya no.", "Nada que atar."]] }
+```
+
+`node variar.js` stores a `plan` in each product of `productos.json`: scene order, layout of each scene, transition, color theme, text entrance, hook variant and music. The order of `productos.json` is treated as the **publishing order**: each plan is picked to differ as much as possible from the ones published just before it, while keeping every option evenly used. `VARIACION.md` reports the result.
+
+The optional `variacion` block in `config.json` narrows the options when the brand asks for it. Any key you leave out allows everything:
+
+```json
+"variacion": {
+  "temporada": "2026-11",
+  "ventana": 12,
+  "tema": ["claro", "oscuro"],
+  "trans": ["barrido", "empuje", "iris", "zoom"],
+  "bpm": [90, 96, 102]
+}
+```
+
+Keys: `orden`, `hero` (`tarjeta`, `difuso`, `arco`), `rango` (`pildoras`, `regla`, `rejilla`), `datos` (`lista`, `numerada`, `apiladas`), `precio` (`grande`, `sello`, `etiqueta`), `trans` (`barrido`, `empuje`, `iris`, `diagonal`, `persiana`, `zoom`), `tema` (`claro`, `oscuro`, `acento`), `entrada` (`subir`, `mascara`, `letras`), `alin`, `prog`, `tono`, `bpm`, `timbre` (`piano`, `celesta`, `pizzicato`), `patron`; plus `ventana` (how many previous reels to compare with) and `temporada`.
+
+- A theme is only used if its text and accent pass WCAG contrast against its background with the brand palette.
+- `calma` (sensitive) products stay in a quiet lane: light theme, crossfade/flash/zoom, no percussion.
+- To lock a reel, edit its `plan` and set `"manual": true` on the product.
+
+## Variation in the other templates (v2)
+
+`variacion.js`, `variar.js` and `hoja.py` are the same file in all three templates, and `render.js` is the same in both 9:16 ones. Each template picks its profile in `package.json` (`perfilVariacion`). If you edit a shared file, copy it to the other folders: the release workflow checks that they match.
+
+**`producto-9x16`** works like the catalog: `node variar.js` writes a `plan` into each product of `productos.json`, and a `variacion` block in that file can restrict the options. Its layouts: product `tarjeta` · `abajo` · `polaroid`; colors `contador` · `fila` · `abanico`; facts `lista` · `numerada` · `etiquetas`; price `grande` · `sello` · `etiqueta`. Gags and product drawings are untouched. Add `"hooks": [[...], [...]]` to a product to give it phrase variants (they change with each `--temporada`). The brand palette goes in `marca.colores` (`fondo`, `fondo_cierre`, `tinta`, `texto`, `acento`, `acento_suave`).
+
+**`persona-16x9`** makes versions of the same video. `node variar.js 3` writes `versiones.json` with versions A, B and C chosen to differ from each other as much as possible: palette (`neon`, `tinta`, `lima`), headline (`golpe`, `mascara`, `maquina`), stats (`columnas`, `foco`, `rejilla`), method (`letras`, `linea`, `escalera`), stack (`marquesina`, `cuadricula`), background (`reticula`, `puntos`, `limpio`) and music. The story order and the key instants never change, so the sound effects stay in sync. To use the person's own colors, add a palette to `CFG.paletas` with the same keys as `neon` (for example `marca`) and allow it in a `variacion.json` next to `anim.html`: `{ "paleta": ["marca", "neon"] }`.
+
+In any template, a `variacion.json` file takes priority over the `variacion` block in `config.json` or `productos.json`.
 
 ## Interface strings
 

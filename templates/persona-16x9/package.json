@@ -1,7 +1,14 @@
 {
   "name": "reel-marca-personal",
   "private": true,
-  "description": "Vídeo de marca personal (16:9) con motion graphics generados por código",
-  "scripts": { "stills": "node render.js stills 1.9,6.6,9.5,14,17.3,20,25", "video": "node render.js video promo.mp4" },
-  "dependencies": { "puppeteer-core": "^23.11.1" }
+  "description": "Vídeo de marca personal (16:9) con motion graphics generados por código · versiones A/B/C (v2)",
+  "scripts": {
+    "versiones": "node variar.js 3",
+    "hoja": "node render.js hoja",
+    "render": "node render.js video promo.mp4"
+  },
+  "dependencies": {
+    "puppeteer-core": "^23.11.1"
+  },
+  "perfilVariacion": "persona"
 }

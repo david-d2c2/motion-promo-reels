@@ -51,12 +51,15 @@ async function get(url, binary = false) {
     productos.push(prod);
   }
   // Conserva ediciones manuales: un producto con "manual": true no se sobrescribe.
+  // v2: conserva también el plan de variación de cada producto ya planificado (los precios cambian; el reel, no).
   const file = path.join(__dirname, 'productos.json');
   if (fs.existsSync(file)) {
     const prev = JSON.parse(fs.readFileSync(file, 'utf8')).productos || [];
-    for (const old of prev.filter(x => x.manual)) {
+    for (const old of prev) {
       const i = productos.findIndex(x => x.id === old.id);
-      if (i >= 0) productos[i] = old;
+      if (i < 0) continue;
+      if (old.manual) productos[i] = old;
+      else if (old.plan) productos[i].plan = old.plan;
     }
   }
   const t = CFG.tienda;
@@ -71,4 +74,6 @@ async function get(url, binary = false) {
   const porGag = productos.reduce((a, p) => (a[p.gag] = (a[p.gag] || 0) + 1, a), {});
   console.log(`OK: ${productos.length} productos -> productos.json · ${rev.length} a revisar -> REVISAR.md`);
   console.log('Reparto por gag:', porGag);
+  // v2: planifica la construcción de los reels nuevos sin tocar los ya planificados -> VARIACION.md
+  require('./variar').main();
 })().catch(e => { console.error(e.message); process.exit(1); });

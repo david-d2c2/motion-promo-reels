@@ -41,6 +41,23 @@
         "Tú también.",
         "Hecho para moverte."
       ],
+      "hooks": [
+        [
+          "Este reel va a ritmo.",
+          "Tú también.",
+          "Hecho para moverte."
+        ],
+        [
+          "Uno, dos, tres, cuatro.",
+          "Así se mueve.",
+          "Hecho para moverte."
+        ],
+        [
+          "Este texto entrena.",
+          "3 colores.",
+          "Tú pones el ritmo."
+        ]
+      ],
       "rango": [
         36,
         37,
@@ -68,7 +85,60 @@
       "foto_url": null,
       "revisar": [
         "Sin foto"
-      ]
+      ],
+      "plan": {
+        "v": 2,
+        "temporada": "2026-11",
+        "orden": "datos,rango,precio",
+        "hero": "tarjeta",
+        "rango": "regla",
+        "datos": "apiladas",
+        "precio": "grande",
+        "trans": "persiana",
+        "tema": "claro",
+        "entrada": "letras",
+        "alin": "centro",
+        "hook": 1,
+        "musica": {
+          "prog": 3,
+          "tono": -2,
+          "bpm": 102,
+          "timbre": "pizzicato",
+          "patron": "saltos"
+        },
+        "tiempos": [
+          {
+            "n": "hook",
+            "a": 0,
+            "b": 3
+          },
+          {
+            "n": "hero",
+            "a": 3,
+            "b": 5.8
+          },
+          {
+            "n": "datos",
+            "a": 5.8,
+            "b": 8.4
+          },
+          {
+            "n": "rango",
+            "a": 8.4,
+            "b": 11.4
+          },
+          {
+            "n": "precio",
+            "a": 11.4,
+            "b": 13.2
+          },
+          {
+            "n": "outro",
+            "a": 13.2,
+            "b": 15.5
+          }
+        ]
+      }
     },
     {
       "id": "bota-brisa",
@@ -80,6 +150,16 @@
       "hook": [
         "No todo es ancho estándar.",
         "Aquí, del E al H."
+      ],
+      "hooks": [
+        [
+          "No todo es ancho estándar.",
+          "Aquí, del E al H."
+        ],
+        [
+          "Anchos de verdad.",
+          "4 anchos: del E al H."
+        ]
       ],
       "rango": [
         37,
@@ -111,7 +191,60 @@
       "revisar": [
         "Sin «Lo que te aporta»: datos de la descripción corta y atributos",
         "Sin foto"
-      ]
+      ],
+      "plan": {
+        "v": 2,
+        "temporada": "2026-11",
+        "orden": "precio,datos,rango",
+        "hero": "arco",
+        "rango": "pildoras",
+        "datos": "lista",
+        "precio": "etiqueta",
+        "trans": "zoom",
+        "tema": "acento",
+        "entrada": "subir",
+        "alin": "centro",
+        "hook": 1,
+        "musica": {
+          "prog": 0,
+          "tono": 3,
+          "bpm": 108,
+          "timbre": "celesta",
+          "patron": "alberti"
+        },
+        "tiempos": [
+          {
+            "n": "hook",
+            "a": 0,
+            "b": 3
+          },
+          {
+            "n": "hero",
+            "a": 3,
+            "b": 5.8
+          },
+          {
+            "n": "precio",
+            "a": 5.8,
+            "b": 7.6
+          },
+          {
+            "n": "datos",
+            "a": 7.6,
+            "b": 10.2
+          },
+          {
+            "n": "rango",
+            "a": 10.2,
+            "b": 13.2
+          },
+          {
+            "n": "outro",
+            "a": 13.2,
+            "b": 15.5
+          }
+        ]
+      }
     },
     {
       "id": "zapato-lumen",
@@ -124,6 +257,23 @@
         "Este texto no lleva cordones.",
         "Y aquí sigue.",
         "Elástico y listo."
+      ],
+      "hooks": [
+        [
+          "Este texto no lleva cordones.",
+          "Y aquí sigue.",
+          "Elástico y listo."
+        ],
+        [
+          "Este texto iba atado.",
+          "Ya no.",
+          "Elástico y listo."
+        ],
+        [
+          "Dos hilos sujetan esto.",
+          "Sobran.",
+          "Nada que atar."
+        ]
       ],
       "rango": [
         38,
@@ -151,7 +301,60 @@
       "foto_url": null,
       "revisar": [
         "Sin foto"
-      ]
+      ],
+      "plan": {
+        "v": 2,
+        "temporada": "2026-11",
+        "orden": "datos,precio,rango",
+        "hero": "difuso",
+        "rango": "regla",
+        "datos": "numerada",
+        "precio": "sello",
+        "trans": "barrido",
+        "tema": "oscuro",
+        "entrada": "letras",
+        "alin": "centro",
+        "hook": 2,
+        "musica": {
+          "prog": 2,
+          "tono": 2,
+          "bpm": 108,
+          "timbre": "celesta",
+          "patron": "corcheas"
+        },
+        "tiempos": [
+          {
+            "n": "hook",
+            "a": 0,
+            "b": 3
+          },
+          {
+            "n": "hero",
+            "a": 3,
+            "b": 5.8
+          },
+          {
+            "n": "datos",
+            "a": 5.8,
+            "b": 8.4
+          },
+          {
+            "n": "precio",
+            "a": 8.4,
+            "b": 10.2
+          },
+          {
+            "n": "rango",
+            "a": 10.2,
+            "b": 13.2
+          },
+          {
+            "n": "outro",
+            "a": 13.2,
+            "b": 15.5
+          }
+        ]
+      }
     },
     {
       "id": "sandalia-nube",
@@ -164,6 +367,18 @@
         "Este texto viene con plataforma.",
         "Así de sencillo.",
         "Unos centímetros más."
+      ],
+      "hooks": [
+        [
+          "Este texto viene con plataforma.",
+          "Así de sencillo.",
+          "Unos centímetros más."
+        ],
+        [
+          "Este texto sube.",
+          "Sin escalera.",
+          "Unos centímetros más."
+        ]
       ],
       "rango": [
         36,
@@ -191,7 +406,60 @@
       "revisar": [
         "Sin «Lo que te aporta»: datos de la descripción corta y atributos",
         "Sin foto"
-      ]
+      ],
+      "plan": {
+        "v": 2,
+        "temporada": "2026-11",
+        "orden": "rango,datos,precio",
+        "hero": "arco",
+        "rango": "rejilla",
+        "datos": "apiladas",
+        "precio": "grande",
+        "trans": "iris",
+        "tema": "oscuro",
+        "entrada": "mascara",
+        "alin": "centro",
+        "hook": 1,
+        "musica": {
+          "prog": 2,
+          "tono": 0,
+          "bpm": 96,
+          "timbre": "piano",
+          "patron": "saltos"
+        },
+        "tiempos": [
+          {
+            "n": "hook",
+            "a": 0,
+            "b": 3
+          },
+          {
+            "n": "hero",
+            "a": 3,
+            "b": 5.8
+          },
+          {
+            "n": "rango",
+            "a": 5.8,
+            "b": 8.8
+          },
+          {
+            "n": "datos",
+            "a": 8.8,
+            "b": 11.4
+          },
+          {
+            "n": "precio",
+            "a": 11.4,
+            "b": 13.2
+          },
+          {
+            "n": "outro",
+            "a": 13.2,
+            "b": 15.5
+          }
+        ]
+      }
     }
   ]
 }

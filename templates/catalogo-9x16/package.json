@@ -1,7 +1,15 @@
 {
   "name": "reels-catalogo",
   "private": true,
-  "description": "Reels por producto para catálogos WooCommerce, con motion graphics generados por código",
-  "scripts": { "extraer": "node extraer.js", "render": "node render.js all" },
-  "dependencies": { "puppeteer-core": "^23.11.1" }
+  "description": "Reels por producto para catálogos WooCommerce, con motion graphics generados por código y variación entre reels (v2)",
+  "scripts": {
+    "extraer": "node extraer.js",
+    "variar": "node variar.js",
+    "hoja": "node render.js all --hoja",
+    "render": "node render.js all"
+  },
+  "dependencies": {
+    "puppeteer-core": "^23.11.1"
+  },
+  "perfilVariacion": "catalogo"
 }

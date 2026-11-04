@@ -1,7 +1,13 @@
 """Banda sonora + efectos sintetizados para el vídeo de marca personal (16:9), sincronizados con los cues de anim.html.
 
-Uso: python audio.py  (escribe audio.wav en esta carpeta; render.js lo llama solo en modo video)
+Uso: python audio.py [--version B]  (escribe audio.wav en esta carpeta; render.js lo llama solo en modo video)
+v2: con --version, la progresión, el tono, el timbre y los efectos de las escenas que cambian de layout salen de
+versiones.json (el mismo plan que lee anim.html). Sin versión, suena como la v1.
 """
+import json
+import pathlib
+import sys
+
 import numpy as np
 from scipy.signal import butter, sosfilt
 import wave
@@ -14,6 +20,15 @@ mus = np.zeros((N, 2))
 sfx = np.zeros((N, 2))
 BPM = 128
 B = 60 / BPM
+
+# ---------- versión (v2)
+PLAN = {}
+if "--version" in sys.argv:
+    _v = sys.argv[sys.argv.index("--version") + 1]
+    PLAN = json.loads((pathlib.Path(__file__).resolve().parent / "versiones.json").read_text(encoding="utf-8"))["versiones"][_v]
+MU = PLAN.get("musica", {})
+TONO = MU.get("tono", 0)
+TIMBRE = MU.get("timbre", "pulso")
 
 
 def tt(d):
@@ -184,7 +199,24 @@ def glitch(d):
 
 
 # ---------- MUSIC
-PROG = [(57, [69, 72, 76]), (53, [69, 72, 77]), (48, [67, 72, 76]), (55, [67, 71, 74])]  # Am F C G
+AM, F_, C_, G_, EM = (57, [69, 72, 76]), (53, [69, 72, 77]), (48, [67, 72, 76]), (55, [67, 71, 74]), (52, [67, 71, 76])
+PROGS = [[AM, F_, C_, G_], [AM, C_, G_, F_], [F_, G_, AM, AM], [AM, EM, F_, G_]]  # 0 = la de la v1
+PROG = [(r + TONO, [n + TONO for n in ch]) for r, ch in PROGS[MU.get("prog", 0) % len(PROGS)]]
+
+
+def lead(m, d=0.22):
+    """Voz del arpegio según el timbre de la versión: pulso (v1), sierra o campana."""
+    if TIMBRE == "sierra":
+        t = tt(d)
+        s = saw(mtof(m), d) * 0.6 + saw(mtof(m) * 1.005, d) * 0.4
+        return lp(s, 3200) * np.exp(-t * 16)
+    if TIMBRE == "campana":
+        t = tt(0.5)
+        f = mtof(m)
+        return np.sin(2 * np.pi * f * t + 2.2 * np.exp(-t * 6) * np.sin(2 * np.pi * f * 3.5 * t)) * np.exp(-t * 7) * 0.8
+    return pluck(m, d)
+
+
 ARP = [0, 1, 2, 1, 2, 0, 1, 2]
 
 
@@ -206,17 +238,17 @@ def groove(t0, t1, kick_on=True, full=True, gain=1.0):
         if full:
             for s in range(4):
                 n = ch[ARP[(b * 4 + s) % 8] % 3] + (12 if (b + s) % 7 == 0 else 0)
-                add(mus, pluck(n), tb + s * B / 4, 0.12 * gain, 0.4 if s % 2 else -0.4)
+                add(mus, lead(n), tb + s * B / 4, 0.12 * gain, 0.4 if s % 2 else -0.4)
         if b % 4 == 0:
             add(mus, pad([root - 12] + ch, 4 * B), tb, 0.16 * gain)
 
 
 # intro drone
-add(mus, pad([45, 52, 57], 2.4), 0.0, 0.12)
+add(mus, pad([45 + TONO, 52 + TONO, 57 + TONO], 2.4), 0.0, 0.12)
 # tension 2.2 - 5.1 : bass pulse + soft kick
 for b in range(int((5.1 - 2.2) / (B / 2))):
     tb = 2.2 + b * B / 2
-    add(mus, bass(33, B / 2 * 0.8), tb, 0.3 + 0.2 * b / 12)
+    add(mus, bass(33 + TONO, B / 2 * 0.8), tb, 0.3 + 0.2 * b / 12)
     if b % 2 == 0:
         add(mus, kick(0.3), tb, 0.45)
     add(mus, hat(), tb + B / 4, 0.08 + 0.1 * b / 12)
@@ -231,12 +263,12 @@ pos = np.clip(pos, 0, len(seg) - 1)
 for c in range(2):
     mus[a:z, c] = np.interp(pos, np.arange(len(seg)), seg[:, c]) * np.linspace(1, 0.2, z - a)
 mus[z:int(18.9 * SR)] = 0
-add(mus, pad([45, 57, 64], 2.1), 16.8, 0.08)
+add(mus, pad([45 + TONO, 57 + TONO, 64 + TONO], 2.1), 16.8, 0.08)
 # section B 18.9 - 22.6
 groove(18.9, 22.55)
 # section C outro 22.6 - 25.6 (kick-less, lush)
 groove(22.6, 25.6, kick_on=False, full=True, gain=0.85)
-add(mus, pad([33, 45, 57, 64, 69, 72], 3.4), 25.6, 0.22)
+add(mus, pad([m + TONO for m in (33, 45, 57, 64, 69, 72)], 3.4), 25.6, 0.22)
 add(mus, impact(0.7), 25.6, 0.5)
 
 # sidechain on music (duck pads/bass under kicks)
@@ -267,11 +299,16 @@ add(sfx, impact(1.0), 5.1, 0.9)
 add(sfx, pop(700), 5.2, 0.3)
 for i in range(27):
     add(sfx, click(), 5.3 + i * 0.55 / 27, 0.3)
-add(sfx, impact(0.6), 6.04, 0.55)
-add(sfx, thud(), 6.27, 0.7)
+if PLAN.get("titulo") == "maquina":  # el titular se teclea: teclas en vez de golpe
+    for i in range(14):
+        add(sfx, click(), 6.04 + i * 0.045 + (0.11 if i >= 6 else 0), 0.55, rng.uniform(-0.3, 0.3))
+else:
+    add(sfx, impact(0.6), 6.04, 0.55)
+    add(sfx, thud(), 6.27, 0.7)
 add(sfx, whoosh(0.25, up=False), 6.2, 0.35)
+PASO_CIFRAS = 0.7 if PLAN.get("cifras") == "foco" else 0.4  # en "foco" cada cifra ocupa 0,7 s
 for i in range(4):
-    st = 7.6 + 0.1 + i * 0.4
+    st = 7.6 + 0.1 + i * PASO_CIFRAS
     add(sfx, pop(420 + i * 90), st, 0.4)
     for k in range(14):
         add(sfx, tick(), st + k * 0.055, 0.12 * (1 - k / 16))
