@@ -9,7 +9,7 @@ A Claude skill that generates **promotional videos with motion graphics and audi
 It covers three cases:
 - **a person or personal brand**: a 27 s video in 16:9;
 - **a handful of products**: 15.5 s reels in 9:16, one hand-written gag per product;
-- **a whole catalog** (WooCommerce): one reel per product, a gag per category, data read straight from the store.
+- **a whole catalog** (WooCommerce): one reel per product, a gag per category, data read straight from the store — and, since v2, **a different construction for every reel**.
 
 > Battle-tested in production on real projects: a personal brand, a small online shop and a catalog of 100+ products. All sample data in this repository is fictional.
 
@@ -27,6 +27,36 @@ It covers three cases:
   - an AI label (EU AI Act, art. 50) when photos show AI-generated people;
   - a calm tone for sensitive categories.
 
+## v2: fifty reels that don't look like one
+
+In v1 every catalog reel shared the same timeline, layout, transition, colors, music and — within a category — the same hook text. Fifty products gave you fifty copies of one film with different numbers.
+
+v2 gives each product a **plan**, chosen by a seeded planner that compares it with the reels published right before it:
+
+| Axis | Options |
+|---|---|
+| Scene order | 6 orders of range, facts and price after the product reveal |
+| Product scene | card · blurred backdrop + full photo · arch frame |
+| Range scene | pills · ruler + color stripes · tile grid |
+| Facts scene | checklist · numbered 01–03 · stacked cards |
+| Price scene | big · round stamp · hanging tag |
+| Transition | flash · push · iris · diagonal · blinds · zoom (crossfade for sensitive categories) |
+| Color theme | light · dark · accent — derived from the brand palette, only when WCAG contrast passes |
+| Hook | text entrance (rise · mask · letters) and **phrase variants that rotate within each category** |
+| Music | progression · key · tempo · timbre · arpeggio pattern (audio reads the same plan, so sound and picture stay in sync) |
+
+The brand signature stays fixed on purpose: the self-referential tape measure and the closing card.
+
+<p align="center"><img src="assets/variacion.jpg" alt="Contact sheet of six consecutive reels from the same engine, each with a different construction" width="820"></p>
+
+```bash
+node variar.js                       # plan new products, keep existing plans → VARIACION.md (batch report)
+node variar.js --temporada 2027-01   # a fresh look for the whole catalog, to publish again
+node render.js all --hoja            # contact sheets: one row per reel, one frame per scene
+```
+
+Plans are stored in `productos.json`, reproducible and hand-editable (`"manual": true` protects them). Products without a plan render like v1. See [CHANGELOG.md](CHANGELOG.md).
+
 ## Structure
 
 ```
@@ -38,7 +68,7 @@ motion-promo-reels/
     ├── README.md               what to change first in each template
     ├── persona-16x9/           personal brand (CFG block at the top of anim.html)
     ├── producto-9x16/          a few products (productos.json)
-    └── catalogo-9x16/          WooCommerce catalog (config.json + extraer.js)
+    └── catalogo-9x16/          WooCommerce catalog (config.json + extraer.js + variar.js)
 ```
 
 The skill is language-agnostic: Claude replies in your language and writes the on-screen copy in your audience's language. The sample data and code comments are in Spanish. All on-screen text can be changed without touching code:
@@ -96,7 +126,7 @@ Rendering runs real tools, so it works best where they're installed: Claude Code
 - Node 18+ and `npm install` (installs `puppeteer-core`) inside the template you use
 - Chrome or Edge (or `CHROME_PATH`)
 - ffmpeg on your PATH
-- Python 3 with `numpy` and `scipy`
+- Python 3 with `numpy` and `scipy` (plus `Pillow` for the batch contact sheets)
 
 ```bash
 cd templates/producto-9x16

@@ -8,7 +8,7 @@ Tres implementaciones completas del método. Todas renderizan tal cual, con dato
 |---|---|---|---|
 | `persona-16x9/` | Persona o marca personal | 1920×1080, 27 s | El objeto `CFG` al principio de `anim.html`: nombre, homónimos reales, cifras, método, stack, frase y CTA. Todo lo demás se adapta solo. |
 | `producto-9x16/` | Pocos productos, un gag escrito a mano por producto | 1080×1920, 15,5 s | `productos.json`: marca y productos. Los gags disponibles son `contador`, `invisible`, `diagonal` y `brillo`; los nuevos van en `hook()` de `motor.html` y en `gag_sfx()` de `audio.py`. La paleta está en el objeto `C` de `motor.html`. |
-| `catalogo-9x16/` | Catálogo WooCommerce, gag por categoría | 1080×1920, 15,5 s | `config.json`: tienda, marcas a quitar, atributos (rango, variantes, colores, material), etiquetas, paleta y categorías con su gag y sus frases (admite condiciones). Después, `node extraer.js`. |
+| `catalogo-9x16/` | Catálogo WooCommerce, gag por categoría y construcción distinta en cada reel (v2) | 1080×1920, 15,5 s | `config.json`: tienda, marcas a quitar, atributos (rango, variantes, colores, material), etiquetas, paleta, categorías con su gag y sus variantes de frase (admite condiciones) y el bloque opcional `variacion`. Después, `node extraer.js` (también planifica cada reel). |
 
 ## Uso
 
@@ -27,7 +27,10 @@ node render.js all                                      # vídeos finales en out
 node render.js <id> ...                                 # un solo producto
 
 # solo catalogo-9x16: datos reales de la tienda
-node extraer.js            # productos.json + fotos en img/ + REVISAR.md
+node extraer.js            # productos.json + fotos en img/ + REVISAR.md + planes + VARIACION.md
+node variar.js             # solo planificar: los productos nuevos reciben plan y los demás conservan el suyo
+node variar.js --temporada 2027-01   # temporada nueva: planes nuevos para todo el catálogo
+node render.js all --hoja  # hojas de contactos out/hoja_NN.jpg: una fila por reel, un fotograma por escena (requiere Pillow)
 ```
 
 `catalogo-9x16/ejemplo_api.json` imita la respuesta de la Store API de WooCommerce. Sirve para probar `catalogo.js` sin conexión.
@@ -42,8 +45,38 @@ En `config.json`, una frase puede ser un texto fijo o una condición:
 ```
 
 - `si`: expresión regular que se busca en la descripción del producto.
-- `si_variantes`: número mínimo de variantes.
-- Marcadores disponibles: `{vmin}`, `{vmax}`, `{rmin}`, `{rmax}` y `{modelo}`.
+- `si_variantes`: número mínimo de variantes. `si_colores`: número mínimo de colores.
+- Marcadores disponibles: `{vmin}`, `{vmax}`, `{rmin}`, `{rmax}`, `{modelo}`, `{ncolores}`, `{nrango}` y `{nvariantes}`.
+
+## Variantes de gancho y variación (catálogo, v2)
+
+Da a cada categoría dos o tres juegos de frases. `frases` es la variante 1 y `variantes` añade más. Rotan **dentro de la categoría**: dos productos de la misma categoría no repiten gancho hasta agotar las variantes.
+
+```json
+{ "nombre": "Sin cordones", "gag": "cortar",
+  "frases": ["Este texto no lleva cordones.", "Y aquí sigue.", "Se calza y listo."],
+  "variantes": [["Este texto iba atado.", "Ya no.", "Nada que atar."]] }
+```
+
+`node variar.js` guarda un `plan` en cada producto de `productos.json`: orden de escenas, layout de cada escena, transición, tema de color, entrada del texto, variante del gancho y música. El orden de `productos.json` se toma como **orden de publicación**: cada plan se elige para parecerse lo menos posible a los que se publican justo antes, y a la vez repartir todas las opciones por igual. `VARIACION.md` resume el resultado.
+
+El bloque opcional `variacion` de `config.json` acota las opciones si la marca lo pide. Lo que no pongas queda permitido:
+
+```json
+"variacion": {
+  "temporada": "2026-11",
+  "ventana": 12,
+  "tema": ["claro", "oscuro"],
+  "trans": ["barrido", "empuje", "iris", "zoom"],
+  "bpm": [90, 96, 102]
+}
+```
+
+Claves: `orden`, `hero` (`tarjeta`, `difuso`, `arco`), `rango` (`pildoras`, `regla`, `rejilla`), `datos` (`lista`, `numerada`, `apiladas`), `precio` (`grande`, `sello`, `etiqueta`), `trans` (`barrido`, `empuje`, `iris`, `diagonal`, `persiana`, `zoom`), `tema` (`claro`, `oscuro`, `acento`), `entrada` (`subir`, `mascara`, `letras`), `alin`, `prog`, `tono`, `bpm`, `timbre` (`piano`, `celesta`, `pizzicato`), `patron`; además de `ventana` (con cuántos reels anteriores se compara) y `temporada`.
+
+- Un tema solo se usa si, con la paleta de la marca, su texto y su acento pasan el contraste WCAG sobre su fondo.
+- Los productos `calma` (sensibles) van por un carril tranquilo: tema claro, fundido/destello/zoom y sin percusión.
+- Para fijar un reel, edita su `plan` y pon `"manual": true` en el producto.
 
 ## Textos de interfaz
 

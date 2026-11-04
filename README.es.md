@@ -9,7 +9,7 @@ Skill para Claude que genera **vídeos promocionales con motion graphics y audio
 Sirve para:
 - una **persona o marca personal**: vídeo de 27 s en 16:9;
 - **unos pocos productos**: reels de 15,5 s en 9:16, un gag escrito a mano por producto;
-- **un catálogo entero** (WooCommerce): un reel por producto, gag por categoría, datos leídos de la tienda.
+- **un catálogo entero** (WooCommerce): un reel por producto, gag por categoría, datos leídos de la tienda y, desde la v2, **una construcción distinta en cada reel**.
 
 > Método probado en producción con proyectos reales: una marca personal, una tienda online pequeña y un catálogo de más de cien productos. Los datos de ejemplo de este repositorio son ficticios.
 
@@ -27,6 +27,36 @@ Sirve para:
   - etiqueta de IA (AI Act, art. 50) cuando las fotos llevan personas generadas con IA;
   - tono sereno para categorías sensibles.
 
+## v2: cincuenta reels que no parecen uno
+
+En la v1 todos los reels de un catálogo compartían línea de tiempo, maquetación, transición, colores, música y, dentro de una categoría, el mismo texto de gancho. Cincuenta productos daban cincuenta copias de la misma película con otros números.
+
+La v2 asigna a cada producto un **plan**, elegido por un planificador con semilla que lo compara con los reels que se publican justo antes:
+
+| Eje | Opciones |
+|---|---|
+| Orden de escenas | 6 órdenes de surtido, datos y precio tras presentar el producto |
+| Escena de producto | tarjeta · fondo desenfocado + foto entera · marco en arco |
+| Surtido | píldoras · regla + franjas de color · rejilla de casillas |
+| Datos | lista · numerada 01–03 · tarjetas apiladas |
+| Precio | grande · sello circular · etiqueta colgada |
+| Transición | destello · empuje · iris · diagonal · persiana · zoom (fundido en categorías sensibles) |
+| Tema de color | claro · oscuro · acento, derivados de la paleta de la marca y solo si pasan el contraste WCAG |
+| Gancho | entrada del texto (subir · máscara · letras) y **variantes de frase que rotan dentro de cada categoría** |
+| Música | progresión · tono · tempo · timbre · patrón de arpegio (el audio lee el mismo plan: imagen y sonido van sincronizados) |
+
+La firma de marca se queda fija a propósito: la cinta métrica autorreferencial y el cierre.
+
+<p align="center"><img src="assets/variacion.jpg" alt="Hoja de contactos de seis reels seguidos del mismo motor, cada uno con una construcción distinta" width="820"></p>
+
+```bash
+node variar.js                       # planifica los productos nuevos y conserva el resto → VARIACION.md (informe del lote)
+node variar.js --temporada 2027-01   # otra cara para todo el catálogo, para volver a publicar
+node render.js all --hoja            # hojas de contactos: una fila por reel, un fotograma por escena
+```
+
+Los planes se guardan en `productos.json`: reproducibles y editables a mano (`"manual": true` los protege). Un producto sin plan se renderiza como en la v1. Detalle en [CHANGELOG.md](CHANGELOG.md).
+
 ## Estructura
 
 ```
@@ -38,7 +68,7 @@ motion-promo-reels/
     ├── README.md               qué tocar primero en cada plantilla
     ├── persona-16x9/           marca personal (config CFG al inicio de anim.html)
     ├── producto-9x16/          pocos productos (productos.json)
-    └── catalogo-9x16/          catálogo WooCommerce (config.json + extraer.js)
+    └── catalogo-9x16/          catálogo WooCommerce (config.json + extraer.js + variar.js)
 ```
 
 ## Idiomas y textos
@@ -98,7 +128,7 @@ El render usa herramientas reales, así que donde mejor funciona es en Claude Co
 - Node 18+ y `npm install` (instala `puppeteer-core`) en la plantilla que uses
 - Chrome o Edge (o `CHROME_PATH`)
 - ffmpeg en el PATH
-- Python 3 con `numpy` y `scipy`
+- Python 3 con `numpy` y `scipy` (y `Pillow` para las hojas de contactos del lote)
 
 ```bash
 cd templates/producto-9x16
