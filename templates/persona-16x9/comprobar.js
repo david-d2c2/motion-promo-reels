@@ -129,13 +129,18 @@ function comprobarLocucion(R, conRed) {
   const L = jsonValido(R, 'locucion.json');
   if (!L) return;
   const p = L.proveedor;
-  const PROV = ['elevenlabs', 'voicebox', 'openai', 'comando', 'ninguna'];
+  const PROV = ['piper', 'elevenlabs', 'voicebox', 'openai', 'comando', 'ninguna'];
   if (!PROV.includes(p)) return R.error('locucion.json', `"proveedor": "${p}" no existe`, PROV.join(', '));
   if (p === 'ninguna') return;
   if (p === 'elevenlabs') {
     if (!esTexto(L.voz)) R.error('locucion.json', 'falta "voz" (voice_id de ElevenLabs)', 'cópialo de la web de ElevenLabs (Voices → ID)');
     const { secreto } = require('./voz');
     if (!secreto('ELEVENLABS_API_KEY')) R.error('locucion.json', 'no encuentro la clave de ElevenLabs', 'define ELEVENLABS_API_KEY o escribe ELEVENLABS_API_KEY=... en ~/.config/motion-promo-reels/env (chmod 600). Nunca en el repo.');
+  }
+  if (p === 'piper') {
+    const V = require('./voz');
+    if (!V.piperListo()) R.error('locucion.json', 'Piper no está instalado', `pregunta al usuario si lo quiere (gratis, sin conexión después, ~240 MB) y, si dice que sí: node voz.js --instalar piper ${L.idioma || 'es'}`);
+    else if (!fs.existsSync(V.modeloPiper(V.vozPiper(L)))) R.aviso('locucion.json', `la voz ${V.vozPiper(L)} aún no está descargada`, 'se descargará sola la primera vez (~60 MB, necesita conexión)');
   }
   if (p === 'voicebox' && !esTexto(L.voz)) R.aviso('locucion.json', 'sin "voz": Voicebox usará su voz por defecto', 'pon el nombre del perfil (créalo en español)');
   if (p === 'comando' && !(esTexto(L.comando) && L.comando.includes('{salida}'))) R.error('locucion.json', '"comando" tiene que incluir {salida}', 'p. ej. "piper --model es_ES.onnx --output_file {salida}"');

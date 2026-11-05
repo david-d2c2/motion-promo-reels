@@ -6,7 +6,11 @@
 //   voicebox    Voicebox en local (gratis): http://127.0.0.1:17493, endpoint compatible con OpenAI. "voz" = nombre
 //               o id del perfil; el idioma lo pone el perfil (créalo en español).
 //   openai      Cualquier servidor compatible con POST /v1/audio/speech ("url"); clave en OPENAI_API_KEY si hace falta.
-//   comando     Cualquier programa local (piper, say, espeak…): "comando" con {salida} y, opcional, {texto}.
+//   piper       GRATIS y local, sin conexión una vez instalado (v3.2). Se instala SOLO si el usuario dice que sí:
+//                 node voz.js --instalar piper es      (o en; ~180 MB del motor + ~60 MB de la voz)
+//               Va en su propio entorno de Python dentro de ~/.cache/motion-promo-reels/piper (no toca el Python del
+//               sistema; para desinstalar, borra esa carpeta). Piper es GPL-3.0 y se usa como programa aparte.
+//   comando     Cualquier programa local (say, espeak, edge-tts…): "comando" con {salida} y, opcional, {texto}.
 //               Si no lleva {texto}, el texto entra por la entrada estándar.
 //   ninguna     Sin voz.
 //
@@ -16,6 +20,8 @@
 //   out/voz/<id>.json   líneas colocadas [{t, wav, texto, dur}] -> audio.py hace el ducking de música y efectos
 //   out/<nombre>.srt    subtítulos de la locución
 // Uso directo (prueba sin renderizar):  node voz.js <id-producto | versión A> [--confirmar] [--rehacer 2]
+//                                      node voz.js --instalar piper es|en|<voz>    (pide permiso antes)
+//                                      node voz.js --voces                         (voces gratis recomendadas)
 const fs = require('fs');
 const os = require('os');
 const path = require('path');
@@ -26,6 +32,55 @@ const ROOT = __dirname;
 const CACHE = process.env.MPR_CACHE || path.join(os.homedir(), '.cache', 'motion-promo-reels', 'voz');
 const ENV = path.join(os.homedir(), '.config', 'motion-promo-reels', 'env');
 const DEF = { velocidad: 1, tope_caracteres: 3000, etiqueta: 'Voz generada con IA', idioma: 'es' };
+
+// ---------------------------------------------------------------- piper (voz gratis y local)
+const PIPER = process.env.MPR_PIPER_DIR || path.join(os.homedir(), '.cache', 'motion-promo-reels', 'piper');
+const PIPER_PY = path.join(PIPER, 'venv', process.platform === 'win32' ? 'Scripts\\python.exe' : 'bin/python');
+const PIPER_VOCES = path.join(PIPER, 'voces');
+// voces por idioma (las de uso más extendido; hay más en https://huggingface.co/rhasspy/piper-voices)
+const VOCES_PIPER = { es: 'es_ES-davefx-medium', en: 'en_US-lessac-medium' };
+const pythonDelSistema = () => process.platform === 'win32' ? 'python' : 'python3';
+let _piperOk = false; // se comprueba una vez por ejecución (una vez instalado, no deja de estarlo)
+const piperListo = () => _piperOk || (_piperOk = fs.existsSync(PIPER_PY) && spawnSync(PIPER_PY, ['-m', 'piper', '--help']).status === 0);
+const vozPiper = cfg => cfg.voz || VOCES_PIPER[(cfg.idioma || 'es').slice(0, 2)] || VOCES_PIPER.es;
+const modeloPiper = voz => path.join(PIPER_VOCES, voz + '.onnx');
+
+function descargarVozPiper(voz, log = console.log) {
+  if (fs.existsSync(modeloPiper(voz))) return;
+  log(`  Descargando la voz ${voz} (unos 60 MB, solo la primera vez)…`);
+  fs.mkdirSync(PIPER_VOCES, { recursive: true });
+  const r = spawnSync(PIPER_PY, ['-m', 'piper.download_voices', voz, '--data-dir', PIPER_VOCES], { encoding: 'utf8' });
+  if (r.status !== 0 || !fs.existsSync(modeloPiper(voz))) {
+    const red = /URLError|Tunnel|resolve|timed out|Connection/i.test(r.stderr || '');
+    throw new Error(`No se pudo descargar la voz ${voz}${red ? ' (sin conexión con huggingface.co)' : ''}. ` +
+      `Comprueba el nombre en https://huggingface.co/rhasspy/piper-voices o descárgala a mano: ` +
+      `"${PIPER_PY}" -m piper.download_voices ${voz} --data-dir "${PIPER_VOCES}"`);
+  }
+}
+
+// Instala Piper en su propio entorno y descarga la voz. NO se ejecuta nunca sin que el usuario lo haya aceptado.
+function instalarPiper(arg = 'es', log = console.log) {
+  const voz = VOCES_PIPER[arg] || arg;
+  if (!/^[a-z]{2}_[A-Z]{2}-[a-z0-9_]+-(x_low|low|medium|high)$/.test(voz)) throw new Error(`"${arg}" no es un idioma (es, en) ni un nombre de voz de Piper (p. ej. es_ES-davefx-medium).`);
+  if (!piperListo()) {
+    log(`Instalando Piper en ${path.join(PIPER, 'venv')} (unos 180 MB, aislado del Python del sistema)…`);
+    fs.mkdirSync(PIPER, { recursive: true });
+    let r = spawnSync(pythonDelSistema(), ['-m', 'venv', path.join(PIPER, 'venv')], { encoding: 'utf8' });
+    if (r.status !== 0) throw new Error('No se pudo crear el entorno de Python: ' + (r.stderr || '').slice(-300) + '\n(En Debian/Ubuntu: sudo apt install python3-venv)');
+    r = spawnSync(PIPER_PY, ['-m', 'pip', 'install', '--quiet', '--disable-pip-version-check', 'piper-tts'], { encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'] });
+    if (r.status !== 0 || !piperListo()) throw new Error('No se pudo instalar piper-tts: ' + (r.stderr || '').slice(-400));
+  } else log('Piper ya estaba instalado.');
+  descargarVozPiper(voz, log);
+  // deja locucion.json listo (conserva el resto de ajustes)
+  const f = path.join(ROOT, 'locucion.json');
+  const cfg = fs.existsSync(f) ? JSON.parse(fs.readFileSync(f, 'utf8')) : {};
+  Object.assign(cfg, { proveedor: 'piper', voz, idioma: voz.slice(0, 2) });
+  if (!('etiqueta' in cfg)) cfg.etiqueta = DEF.etiqueta;
+  fs.writeFileSync(f, JSON.stringify(cfg, null, 2) + '\n');
+  log(`Listo: voz ${voz}. locucion.json usa ahora "proveedor": "piper".`);
+  log('Licencias: Piper es GPL-3.0 (se usa como programa aparte). Cada voz tiene su propia licencia en su ficha (MODEL_CARD) de https://huggingface.co/rhasspy/piper-voices: revísala antes de un uso comercial.');
+  log(`Para desinstalar: borra ${PIPER}`);
+}
 
 // ---------------------------------------------------------------- configuración y secretos
 function leerConfig() {
@@ -141,6 +196,17 @@ async function sintetizar(cfg, linea, vecinas, semilla, destinoCrudo) {
     fs.writeFileSync(destinoCrudo + '.wav', audio);
     return destinoCrudo + '.wav';
   }
+  if (prov === 'piper') {
+    if (!piperListo()) throw new Error('Piper no está instalado. Pregunta al usuario si quiere instalarlo (unos 240 MB, gratis y sin conexión después) y, si dice que sí: node voz.js --instalar piper ' + (cfg.idioma || 'es'));
+    const voz = vozPiper(cfg);
+    descargarVozPiper(voz);
+    const salida = destinoCrudo + '.wav';
+    const args = ['-m', 'piper', '-m', voz, '--data-dir', PIPER_VOCES, '-f', salida];
+    if (cfg.velocidad && cfg.velocidad !== 1) args.push('--length-scale', String(+(1 / cfg.velocidad).toFixed(3)));
+    const r = spawnSync(PIPER_PY, args, { input: linea.hablado.replace(/\s+/g, ' ') + '\n', encoding: 'utf8' });
+    if (r.status !== 0 || !fs.existsSync(salida)) throw new Error(`Piper falló (${r.status}): ${(r.stderr || '').slice(-300)}`);
+    return salida;
+  }
   if (prov === 'comando') {
     if (!cfg.comando || !cfg.comando.includes('{salida}')) throw new Error('locucion.json: "comando" tiene que incluir {salida} (dónde escribe el audio).');
     const salida = destinoCrudo + '.' + (cfg.extension || 'wav');
@@ -151,7 +217,7 @@ async function sintetizar(cfg, linea, vecinas, semilla, destinoCrudo) {
     if (r.status !== 0 || !fs.existsSync(salida)) throw new Error(`El comando de voz falló (${r.status}): ${(r.stderr || '').slice(0, 300)}`);
     return salida;
   }
-  throw new Error(`locucion.json: proveedor desconocido "${prov}". Usa elevenlabs, voicebox, openai, comando o ninguna.`);
+  throw new Error(`locucion.json: proveedor desconocido "${prov}". Usa piper, elevenlabs, voicebox, openai, comando o ninguna.`);
 }
 
 // ---------------------------------------------------------------- audio: a WAV 48 kHz mono sin silencios en los bordes
@@ -164,7 +230,7 @@ function aWav(entrada, salida, tempo = 1) {
 const duracion = f => parseFloat(execFileSync('ffprobe', ['-v', 'error', '-show_entries', 'format=duration', '-of', 'csv=p=0', f], { encoding: 'utf8' }));
 
 const clave = (cfg, texto, toma) => crypto.createHash('sha1')
-  .update(JSON.stringify([cfg.proveedor, cfg.voz || '', cfg.modelo || '', cfg.velocidad || 1, cfg.ajustes || null, cfg.instrucciones || '', cfg.comando || '', texto, toma])).digest('hex').slice(0, 20);
+  .update(JSON.stringify([cfg.proveedor, cfg.proveedor === 'piper' ? vozPiper(cfg) : (cfg.voz || ''), cfg.modelo || '', cfg.velocidad || 1, cfg.ajustes || null, cfg.instrucciones || '', cfg.comando || '', texto, toma])).digest('hex').slice(0, 20);
 
 // ---------------------------------------------------------------- colocar sin que se pisen
 function colocar(L, dur, fin) {
@@ -239,12 +305,24 @@ async function preparar({ id, L, dur, fin = 0.35, cfg = leerConfig(), confirmar 
   return { json, lineas, avisos, etiqueta: cfg.etiqueta };
 }
 
-module.exports = { leerConfig, guionProducto, guionPersona, preparar, srt, hablado, colocar, secreto };
+module.exports = { leerConfig, guionProducto, guionPersona, preparar, srt, hablado, colocar, secreto, instalarPiper, piperListo, vozPiper, modeloPiper, VOCES_PIPER, PIPER };
 
 // ---------------------------------------------------------------- prueba directa
 if (require.main === module) {
   (async () => {
     const args = process.argv.slice(2);
+    if (args.includes('--instalar')) {
+      const que = args[args.indexOf('--instalar') + 1];
+      if (que !== 'piper') throw new Error('Solo se instala piper: node voz.js --instalar piper es|en|<voz>');
+      return instalarPiper(args[args.indexOf('--instalar') + 2] || 'es');
+    }
+    if (args.includes('--voces')) {
+      console.log('Voces gratis y locales (Piper), sin conexión una vez instaladas:');
+      for (const [l, v] of Object.entries(VOCES_PIPER)) console.log(`  ${l}: ${v}${fs.existsSync(modeloPiper(v)) ? '  (descargada)' : ''}`);
+      console.log('  Más voces e idiomas: https://huggingface.co/rhasspy/piper-voices  ->  node voz.js --instalar piper <nombre>');
+      console.log(`Piper ${piperListo() ? 'instalado' : 'NO instalado'} (${PIPER}).`);
+      return;
+    }
     const id = args.find(a => !a.startsWith('--'));
     const cfg = leerConfig();
     if (!cfg) { console.log('Sin locución: no hay locucion.json o "proveedor" es "ninguna".'); return; }

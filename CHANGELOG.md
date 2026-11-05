@@ -1,5 +1,17 @@
 # Changelog
 
+## v3.2 · 2026-11
+
+**A free local voice.**
+
+- New provider `piper`: free, local and offline once installed. Default voices `es_ES-davefx-medium` and `en_US-lessac-medium` (by `"idioma"`); any voice from rhasspy/piper-voices in `"voz"`; `"velocidad"` maps to Piper's length scale.
+- `node voz.js --instalar piper es|en|<voice>` installs Piper into its own Python environment under `~/.cache/motion-promo-reels/piper` (about 180 MB, plus about 60 MB per voice), downloads the voice and sets `locucion.json`. The system Python is not touched; deleting the folder uninstalls it. Piper (GPL-3.0) runs as a separate program and is not bundled. `node voz.js --voces` lists voices and what is installed.
+- `SKILL.md`: when the user wants a voice and none is set up, ask one question (no voice / free local / ElevenLabs / Voicebox) and install only after an explicit yes.
+- `comprobar.js` knows `piper`: it reports a missing installation (with the consent-first instruction) and voices that will download on first use.
+- Fixed: the voice cache key now uses the resolved voice, so changing `"idioma"` with Piper doesn't reuse takes from the other language.
+- Documented `say` (macOS) and edge-tts as `comando` examples (edge-tts: online and unofficial; check its terms before commercial use).
+- Tested: the real install into the isolated environment; the voice download (blocked in the build environment, so its error message was tested); and the synthesis calls, cache, speed, language switch and a full render against a stand-in with Piper's exact command line. Piper's own synthesis was not run here.
+
 ## v3.1 · 2026-11
 
 **Choosing the look.** Until now the options were only documented in tables, and nothing told the agent to offer them.

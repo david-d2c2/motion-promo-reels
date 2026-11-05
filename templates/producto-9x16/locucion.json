@@ -1,5 +1,5 @@
 {
-  "_comentario": "Locución OPCIONAL. proveedor: ninguna | elevenlabs | voicebox | openai | comando. El guion sale solo de lo que ya está en pantalla (gancho, nombre, precio y web); para escribirlo a mano, pon 'locucion' en el producto. Detalles en templates/README.md.",
+  "_comentario": "Locución OPCIONAL. proveedor: ninguna | piper (gratis y local: node voz.js --instalar piper es) | elevenlabs | voicebox | openai | comando. El guion sale solo de lo que ya está en pantalla (gancho, nombre, precio y web); para escribirlo a mano, pon 'locucion' en el producto. Detalles en templates/README.md.",
   "proveedor": "ninguna",
   "voz": "",
   "modelo": "",
