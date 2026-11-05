@@ -1,5 +1,17 @@
 # Changelog
 
+## v3.3 · 2026-11
+
+**One engine, kept once.** Nothing changes in the videos; this is about keeping the skill small as it grows.
+
+- The engine shared by the templates (`variacion.js`, `variar.js`, `hoja.py`, `sonido.py`, `voz.js`, `comprobar.js`, and `render.js` for the 9:16 ones) now lives once in `core/` instead of three copies kept in sync by CI. Around 2,000 duplicated lines removed.
+- `node core/nuevo.js catalogo|producto|persona <folder>` creates a project: the template plus its own copy of the engine, so a project keeps working wherever the skill is installed. It refuses a folder that isn't empty.
+- `node core/nuevo.js --actualizar <folder>` brings an existing project (v3.2 or older too) to the current engine without touching its data. It records the engine version and a fingerprint of each file in `.motor.json`, and leaves alone any engine file you edited (`--forzar` replaces them).
+- `node core/nuevo.js --dev` copies the engine into `templates/*` to work in the repo (git ignores those copies).
+- `SKILL.md` goes from 278 to about 210 lines: the details of choosing the look, variation, voice-over, engine internals and catalog extraction move to `references/`, which the agent reads only when the task needs them. The rules that matter every time (ask one question, ask before installing a voice, nothing made up) stay in `SKILL.md`.
+- CI now creates a project from each template and runs the data check and the planner, instead of comparing copies.
+- Tested: the three templates created with `nuevo.js`, checked, planned, contact sheets and full renders (a catalog reel and a person video); `--actualizar` on a v3.2 project, on a project with edited engine files, and with `--forzar`.
+
 ## v3.2 · 2026-11
 
 **A free local voice.**

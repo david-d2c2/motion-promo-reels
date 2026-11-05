@@ -7,3 +7,13 @@ REVISAR.md
 VARIACION.md
 __pycache__/
 *.pyc
+# copias del motor dentro de templates/ (node core/nuevo.js --dev): la fuente es core/
+templates/*/variacion.js
+templates/*/variar.js
+templates/*/hoja.py
+templates/*/sonido.py
+templates/*/voz.js
+templates/*/comprobar.js
+templates/catalogo-9x16/render.js
+templates/producto-9x16/render.js
+.motor.json

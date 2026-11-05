@@ -2,7 +2,14 @@
 
 [English](README.md) · **Español**
 
-Tres implementaciones completas del método. Todas renderizan tal cual, con datos de ejemplo **ficticios**. Copia la que más se parezca a tu caso y sustituye los datos.
+Tres implementaciones completas del método. Todas renderizan tal cual, con datos de ejemplo **ficticios**. Crea un proyecto a partir de la que más se parezca a tu caso y sustituye los datos:
+
+```bash
+node core/nuevo.js catalogo|producto|persona ruta/al/proyecto   # plantilla + motor común de core/
+node core/nuevo.js --actualizar ruta/al/proyecto               # más adelante: motor nuevo, tus datos intactos
+```
+
+Aquí solo está lo propio de cada plantilla; el motor que comparten (`variacion.js`, `variar.js`, `hoja.py`, `sonido.py`, `voz.js`, `comprobar.js`, y `render.js` en las 9:16) vive una sola vez en `core/`. Para ejecutar una plantilla directamente en el repo: `node core/nuevo.js --dev`.
 
 | Carpeta | Caso | Formato | Qué cambiar |
 |---|---|---|---|
@@ -86,7 +93,7 @@ Claves: `orden`, `hero` (`tarjeta`, `difuso`, `arco`), `rango` (`pildoras`, `reg
 
 ## Variación en las otras plantillas (v2)
 
-`variacion.js`, `variar.js` y `hoja.py` son el mismo archivo en las tres plantillas, y `render.js` es el mismo en las dos 9:16. Cada plantilla elige su perfil en `package.json` (`perfilVariacion`). Si editas un archivo común, cópialo a las otras carpetas: el flujo de publicación comprueba que coincidan.
+`variacion.js`, `variar.js` y `hoja.py` salen de `core/comun/` para las tres plantillas, y `render.js` de `core/9x16/` para las dos 9:16. Cada plantilla elige su perfil en `package.json` (`perfilVariacion`). Para mejorar un archivo común, edítalo en `core/` y actualiza tus proyectos con `node core/nuevo.js --actualizar`.
 
 **`producto-9x16`** funciona como el catálogo: `node variar.js` escribe un `plan` en cada producto de `productos.json`, y un bloque `variacion` en ese mismo archivo acota las opciones. Sus layouts: producto `tarjeta` · `abajo` · `polaroid`; colores `contador` · `fila` · `abanico`; datos `lista` · `numerada` · `etiquetas`; precio `grande` · `sello` · `etiqueta`. Los gags y los dibujos de producto no cambian. Añade `"hooks": [[...], [...]]` a un producto para darle variantes de frase (cambian con cada `--temporada`). La paleta de la marca va en `marca.colores` (`fondo`, `fondo_cierre`, `tinta`, `texto`, `acento`, `acento_suave`).
 

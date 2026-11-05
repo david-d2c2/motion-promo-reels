@@ -1,6 +1,6 @@
 """Motor de sonido común (v3): música, efectos, voz y mezcla, todo sintetizado (sin samples ni música de terceros).
 
-Archivo COMÚN a las tres plantillas (catalogo-9x16, producto-9x16, persona-16x9): si lo cambias, cópialo a las otras.
+Archivo COMÚN a las tres plantillas. Fuente única: core/comun/ en la skill; cada proyecto lleva su copia (core/nuevo.js).
 Cada audio.py de plantilla solo decide CUÁNDO pasa cada cosa (secciones y efectos); aquí está CÓMO suena.
 
     import sonido as S

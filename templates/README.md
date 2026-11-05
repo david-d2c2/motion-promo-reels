@@ -2,7 +2,14 @@
 
 **English** · [Español](README.es.md)
 
-Three complete implementations of the method. All of them render as they are, using **fictional** sample data. Copy the one closest to your case and replace the data.
+Three complete implementations of the method. All of them render as they are, using **fictional** sample data. Create a project from the one closest to your case and replace the data:
+
+```bash
+node core/nuevo.js catalogo|producto|persona path/to/project   # template + shared engine from core/
+node core/nuevo.js --actualizar path/to/project               # later: newer engine, your data untouched
+```
+
+The folders here hold only what is specific to each template; the engine shared by all of them (`variacion.js`, `variar.js`, `hoja.py`, `sonido.py`, `voz.js`, `comprobar.js`, and `render.js` for the 9:16 ones) lives once in `core/`. To run a template straight from the repo: `node core/nuevo.js --dev`.
 
 | Folder | Case | Format | What to change |
 |---|---|---|---|
@@ -86,7 +93,7 @@ Keys: `orden`, `hero` (`tarjeta`, `difuso`, `arco`), `rango` (`pildoras`, `regla
 
 ## Variation in the other templates (v2)
 
-`variacion.js`, `variar.js` and `hoja.py` are the same file in all three templates, and `render.js` is the same in both 9:16 ones. Each template picks its profile in `package.json` (`perfilVariacion`). If you edit a shared file, copy it to the other folders: the release workflow checks that they match.
+`variacion.js`, `variar.js` and `hoja.py` come from `core/comun/` for all three templates, and `render.js` from `core/9x16/` for both 9:16 ones. Each template picks its profile in `package.json` (`perfilVariacion`). To improve a shared file, edit it in `core/` and update your projects with `node core/nuevo.js --actualizar`.
 
 **`producto-9x16`** works like the catalog: `node variar.js` writes a `plan` into each product of `productos.json`, and a `variacion` block in that file can restrict the options. Its layouts: product `tarjeta` · `abajo` · `polaroid`; colors `contador` · `fila` · `abanico`; facts `lista` · `numerada` · `etiquetas`; price `grande` · `sello` · `etiqueta`. Gags and product drawings are untouched. Add `"hooks": [[...], [...]]` to a product to give it phrase variants (they change with each `--temporada`). The brand palette goes in `marca.colores` (`fondo`, `fondo_cierre`, `tinta`, `texto`, `acento`, `acento_suave`).
 

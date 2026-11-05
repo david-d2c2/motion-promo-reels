@@ -12,7 +12,7 @@ description: Promotional videos with motion graphics, music and optional voice-o
 
 **Guiding principle: nothing made up.** Every figure, price, color or feature shown in the video comes from a verified source: website, store API, product page or project documents. If something can't be confirmed, flag it as pending and say so.
 
-This package ships three complete templates in `${CLAUDE_SKILL_DIR}/templates/` (in chat on claude.ai: `templates/`, next to this file). **Copy the closest one into the user's project and adapt it** instead of rebuilding the engine (see section 4). `templates/README.md` lists what to change in each one.
+This package ships three complete templates in `${CLAUDE_SKILL_DIR}/templates/` and their shared engine in `${CLAUDE_SKILL_DIR}/core/` (in chat on claude.ai: `templates/` and `core/`, next to this file). **Create the project from the closest template and adapt its data** instead of rebuilding the engine (section 4). `templates/README.md` lists what to change in each one.
 
 Write all on-screen copy in the language of the brand's audience, and reply to the user in their language. Fixed interface strings ("from", "colors", "NOT HIM"…) are overridden through the template's `textos` block, never by editing the engine. Match the person's gender in `no_es`.
 
@@ -20,7 +20,7 @@ Write all on-screen copy in the language of the brand's audience, and reply to t
 
 The templates do the hard work; you only edit data files and run commands. Follow these steps in order and **do not continue past a step that reports an error** — read the message, fix exactly what it says, run it again.
 
-1. Copy the template folder (table in section 0) into the user's project, then inside it: `npm install`.
+1. Create the project (template names in section 0): `node ${CLAUDE_SKILL_DIR}/core/nuevo.js catalogo|producto|persona <folder>`, then inside the folder: `npm install`. It refuses a folder that isn't empty. Without a shell, copy `templates/<template>/` plus every file in `core/comun/` (and `core/9x16/` for the two 9:16 templates) into one folder.
 2. `node comprobar.js` → must end with `OK`. It checks Node, ffmpeg, Python (numpy, scipy), Chrome and the data, and every error says where it is, what is wrong and how to fix it.
 3. Edit **only** the data: `productos.json` (+ `config.json` for a catalog) or the `CFG` block at the top of `anim.html` (person). Real data only (section 1). Gag and hook: section 2.
 4. The look (section 3a): if the request says nothing about tone, ask **one** question; then `node variar.js --preferencias ...`. Voice-over is optional (section 3c): ask before installing anything.
@@ -29,7 +29,7 @@ The templates do the hard work; you only edit data files and run commands. Follo
 7. Final videos: `node render.js all` (person: `node render.js video promo_A.mp4 --version A`). `render.js` validates the data again and stops with a clear message if something is wrong.
 8. Deliver (section 7).
 
-Never edit `motor.html`/`anim.html` engine code, `sonido.py`, `variacion.js`, `voz.js` or `comprobar.js` to make data fit: change the data, or the `textos`/`variacion` blocks.
+Never edit `motor.html`/`anim.html` engine code or the shared engine files (`sonido.py`, `variacion.js`, `voz.js`, `comprobar.js`…) to make data fit: change the data, or the `textos`/`variacion` blocks. A project made with an older version: `node ${CLAUDE_SKILL_DIR}/core/nuevo.js --actualizar <folder>`.
 
 ## 0. Pick the case
 
@@ -101,86 +101,36 @@ In both 9:16 templates the three middle scenes change order and layout per reel;
 
 **16:9 person or brand (27 s):** terminal → namesakes crossed out with a glitch → drop (source found + headline) → stats with counters → method in phases → tool stack marquee (freezes on a self-referential item: "↑ that's me") → "THIS VIDEO: 0 templates · N lines of code" (real count) → the person's quote → outro with monogram, name and CTA.
 
-## 3a. Choosing the look (v3.1)
+## 3a. Choosing the look
 
-The **format** comes from the template: products and catalogs are vertical 9:16 (Reels, TikTok, Shorts); a personal brand is horizontal 16:9. If the user asks for a format a template doesn't have (a vertical personal video, a horizontal product reel), say so in one line: it needs adapting the engine by hand.
+The format comes from the template (products 9:16, person 16:9); a format a template doesn't have means adapting the engine by hand — say so in one line. Everything else is chosen per video by the planner; the user only steers it:
+- the request already says it ("calm music", "dark background") → translate it, don't ask;
+- it says nothing about tone → ask **one** question (music calm/energetic/elegant/doesn't matter · colors light/dark/mixed · effects subtle/playful/doesn't matter);
+- the user asks what can be chosen → `node variar.js --opciones`.
 
-Everything else (music, sound effects, colors, transitions, layouts) is chosen per video by the planner. The user only steers it:
+Then `node variar.js --preferencias musica=tranquila efectos=sutiles colores=claro movimiento=suave`. Brand rules beat preferences. Full word → option table: **[references/look.md](references/look.md)**.
 
-- **The request already says it** ("calm music", "dark background", "no silly sounds") → translate it directly, don't ask.
-- **It says nothing about tone** → ask **one** question before planning (multiple choice if your tools allow it), for example: music *calm / energetic / elegant / doesn't matter* · colors *light / dark / mixed* · sound effects *subtle / playful / doesn't matter*. "Doesn't matter" means no restriction: the planner varies everything.
-- **The user asks what can be chosen** → run `node variar.js --opciones` and show its menu (it lists every option with a one-line description, and marks themes the brand's colors can't support).
-- **A specific video** ("the case one with synthwave and the polaroid") → edit that product's `plan` (`musica.estilo`, `hero`…) and set `"manual": true`.
+## 3b. Variation: no two videos built the same way
 
-Translate with one command — it writes `variacion.json`, keeps what it already had, and re-plans only the videos that no longer comply:
+Every video gets a **plan** (scene order, layouts, transition, theme, text entrance, hook variant, music style, tempo, key, seed, sound-effects pack) chosen by a seeded planner that keeps it away from the videos published just before it. Engine, audio and contact sheets all read that plan.
+- Batches: `node variar.js` → `plan` in each product, report in `VARIACION.md`. Person: `node variar.js 3` → A/B/C in `versiones.json`.
+- Existing plans are kept; `--temporada <name>` re-plans everything; `"manual": true` locks a video; no plan = v1 look.
+- What never varies: the signature element, the closing card and the key instants the audio is synced to.
 
-```bash
-node variar.js --preferencias musica=tranquila efectos=sutiles colores=claro movimiento=suave
-node variar.js --preferencias estilo=lofi,piano tema=claro      # exact names also work
-node variar.js --preferencias limpiar                           # back to everything
-```
+Axes per template, scoring, hooks, themes and contrast, sensitive categories, music styles: **[references/variation.md](references/variation.md)**.
 
-| The user says | Preference |
-|---|---|
-| calm, relaxed, soft · elegant, premium · energetic, upbeat · fun, playful · techy · acoustic, handmade · epic | `musica=tranquila` · `elegante` · `energica` · `divertida` · `tecnologica` · `acustica` · `epica` |
-| subtle / no silly sounds · playful · techy · cinematic | `efectos=sutiles` · `divertidos` · `tecnologicos` · `cinematograficos` |
-| light / white · dark · in the brand color | `colores=claro` · `oscuro` · `color` |
-| smooth cuts · dynamic cuts | `movimiento=suave` · `dinamico` |
+## 3c. Voice-over (optional)
 
-Brand rules beat preferences: if the brand guide says "never dark backgrounds", `colores=claro` stays even if a later request says otherwise — tell the user. Sensitive categories keep their quiet lane whatever the preferences.
+Without `locucion.json` (or with `"proveedor": "ninguna"`) nothing changes. **If the user wants a voice and none is set up, ask before installing anything** — one question: *No voice* · *Free and local (Piper, ~240 MB once, offline after)* · *ElevenLabs (paid, needs their key)* · *Voicebox (if they use it)*. Only after an explicit yes: `node voz.js --instalar piper es` (or `en`).
+- The narration says only what is on screen, like the visuals.
+- Keys never go in the project, logs or chat (env var or `~/.config/motion-promo-reels/env`).
+- Keep the "Voz generada con IA" label unless the user decides otherwise; cloned voices only with the owner's consent.
 
-## 3b. Variation (v2): no two videos built the same way
-
-A batch fails when every video is the same film with different numbers. Since v2, every template gives each video a **plan** — chosen by a seeded planner and compared with the videos published just before it — and the engine, the audio and the contact sheets all read that same plan.
-
-**Shared core.** `variacion.js`, `variar.js` and `hoja.py` are **the same file in all three templates** (each template declares its profile in `package.json` → `perfilVariacion`); `render.js` is the same in both 9:16 templates. If you change one, copy it to the others — the GitHub workflow fails when they drift.
-
-| Template | What varies | Where the plan lives | Command |
-|---|---|---|---|
-| `catalogo-9x16` | order of range/facts/price (6), product (`tarjeta`, `difuso`, `arco`), range (`pildoras`, `regla`, `rejilla`), facts (`lista`, `numerada`, `apiladas`), price (`grande`, `sello`, `etiqueta`), transition (`barrido`, `empuje`, `iris`, `diagonal`, `persiana`, `zoom`), theme (`claro`, `oscuro`, `acento`), text entrance (`subir`, `mascara`, `letras`), hook variant, music (progression, key, tempo, timbre, arpeggio) | `plan` in each product of `productos.json` | `node variar.js` |
-| `producto-9x16` | the same axes, with its own layouts: product (`tarjeta`, `abajo`, `polaroid`), colors (`contador`, `fila`, `abanico` — a fan deck), facts (`lista`, `numerada`, `etiquetas` — sewn labels), price (`grande`, `sello`, `etiqueta`). Hand-written gags and product drawings are kept. | `plan` in each product of `productos.json` | `node variar.js` |
-| `persona-16x9` | **versions** of the same video (A/B/C…): palette (`neon`, `tinta`, `lima`, or the person's own in `CFG.paletas`), headline (`golpe`, `mascara`, `maquina`), stats (`columnas`, `foco`, `rejilla`), method (`letras`, `linea`, `escalera`), stack (`marquesina`, `cuadricula`), background (`reticula`, `puntos`, `limpio`), music. The story order never changes: the namesake gag depends on it. | `versiones.json` | `node variar.js 3`, then `node render.js video promo_B.mp4 --version B` |
-
-Rules:
-- **What stays fixed is the signature:** the self-referential element (tape measure, stitch line, HUD) and the closing card. For a person, the opening terminal and the namesakes too.
-- **Key instants don't move.** Alternative layouts keep the beats the audio is synced to (a stat lands, a letter drops, the stack freezes). When a layout changes a beat, `audio.py` reads the plan and follows it (e.g. stats every 0.7 s in `foco`, key clicks instead of an impact in `maquina`). Never hard-code timings in only one of engine and audio.
-- **How plans are chosen (batches):** the order of `productos.json` is the publishing order. Each candidate is scored by its distance to the last ~12 videos (closest neighbours weigh most) minus how overused its options already are. Seeded by id + season: reproducible. Person versions are compared all against all.
-- **Hooks rotate within each category** (catalog) or across seasons (products, with an optional `hooks` list per product). Write 2–3 phrase variants per category (`frases` + `variantes`), all backed by the data — conditions (`si`, `si_variantes`, `si_colores`) and placeholders (`{ncolores}`, `{nrango}`, `{vmin}`…) adapt one variant to each product.
-- **Themes** are derived from the brand palette and used only when text and accent pass WCAG contrast (4.5 and 3) against their background; otherwise the planner drops them (e.g. the product template's sample palette has no valid accent theme). A brand can restrict any axis in a `variacion` block (`config.json` for the catalog, `productos.json` for products). Brand rules come first.
-- **Sensitive categories** (`calma`) stay in a quiet lane: light theme, crossfade/flash/zoom, no percussion.
-- **Re-publishing:** `node variar.js --temporada <name>` gives every video a fresh plan. Without it, existing plans are kept and only new products are planned (`extraer.js` does this after each extraction, so price updates never reshuffle the reels).
-- **Locking:** edit a product's `plan` by hand and set `"manual": true`.
-- **No plan = v1.** A product without a plan, or a person video rendered without `--version`, keeps v1's construction (pixel-identical except for the v1 bugs fixed in v2).
-- **Look at the batch:** `node render.js all --hoja` (9:16) or `node render.js hoja` (person) builds contact sheets — one row per video, one frame per scene — and `VARIACION.md` reports the distances. Two consecutive rows that look alike mean the batch looks alike.
-- **Music and sound effects vary too (v3).** `plan.musica` holds a **style** (`piano`, `pizzicato`, `electro`, `lofi`, `funk`, `synthwave`, `acustico`, `cinematico`, `ambiente`, `house` — each with its own instruments, drums, groove and harmony), a tempo inside that style's range, key, progression, a **seed** that composes the melody and picks drum pattern, fills, harmonic rhythm and arpeggio, and a **sound-effects pack** (`digital`, `organico`, `cinematico`, `minimo`, `juguete`; chimes are tuned to the music's key). The planner keeps neighbouring videos in different styles. Narrow them to the brand with `node variar.js --preferencias` (section 3a) — an elegant lingerie shop and a gaming store should not share a list. `python3 sonido.py --demo out/demo` renders 15 s of every style to listen to.
-- **The arrangement follows the scenes:** sparse intro under the gag, full band with the product, lighter while facts are read, a drum fill before every cut, a final chord on the outro. Sensitive categories get `ambiente`, `piano` or `acustico` with no drums or bass.
-- **Plans from v2** (no music style) keep their visuals: `node variar.js` adds only the music.
-
-## 3c. Voice-over (optional, v3)
-
-A video without `locucion.json` (or with `"proveedor": "ninguna"`) renders exactly as before. With it, `render.js` writes a narration, synthesizes it, ducks music (~−10 dB) and effects under it, and saves an `.srt` next to the MP4.
-
-**If the user wants a voice and none is set up, ask before installing anything** — one question:
-*No voice* · *Free and local (Piper, Spanish or English; downloads ~240 MB once, then works offline; sounds clear but less natural)* · *ElevenLabs (paid, the most natural; needs their API key)* · *Voicebox (if they already use it)*.
-Only after an explicit yes to the free option: `node voz.js --instalar piper es` (or `en`). It installs Piper into its own Python environment under `~/.cache/motion-promo-reels/piper` (the system Python is not touched; deleting that folder uninstalls it), downloads the voice and sets `locucion.json`. It needs internet once (pypi.org and huggingface.co); in a sandbox without it, say so and give the user the same command to run on their machine.
-
-| `proveedor` | What it is | Setup |
-|---|---|---|
-| `piper` | Piper: free, local, offline once installed | `node voz.js --instalar piper es\|en\|<voice>` (with the user's consent). `"idioma"` picks `es_ES-davefx-medium` or `en_US-lessac-medium`; any other voice from huggingface.co/rhasspy/piper-voices goes in `"voz"`. Each voice has its own license (MODEL_CARD): check it before commercial use. |
-| `elevenlabs` | ElevenLabs API | `"voz"`: voice_id. Key in `ELEVENLABS_API_KEY` or `~/.config/motion-promo-reels/env` (`chmod 600`). `"modelo"` defaults to `eleven_multilingual_v2`. |
-| `voicebox` | Voicebox, local and free (`http://127.0.0.1:17493`, OpenAI-compatible endpoint) | `"voz"`: profile name or id. The language comes from the profile: create it in the target language. Open the app before rendering. |
-| `openai` | Any server with `POST /v1/audio/speech` | `"url"`, `"modelo"`, `"voz"`; key in `OPENAI_API_KEY` if it needs one. |
-| `comando` | Any local program (piper, `say`, espeak…) | `"comando"` with `{salida}` (output file) and optionally `{texto}`; otherwise the text arrives on stdin. |
-
-Rules:
-- **The script only says what is on screen.** By default (9:16): the hook, the product name, the price ("Desde 39,90 €" is spoken as "desde 39 euros con 90") and the website. To write it by hand: `"locucion": [{"escena": "hook", "texto": "..."}, ...]` in the product, or `"locucion": false` for no voice. Person: `"lineas": [{"t": 2.4, "texto": "..."}]` in `locucion.json`, with facts from `CFG` only.
-- Lines are placed in their scene without overlapping. If they don't fit, the voice speeds up to 15 %, then the least important lines are dropped (hook > price > website > name). Warnings are printed: read them.
-- **Cost:** takes are cached per sentence (`~/.cache/motion-promo-reels/voz`), so re-rendering is free. ElevenLabs runs stop at `tope_caracteres` (default 3000) unless you pass `--confirmar`; spending is logged in `gasto.jsonl`.
-- **Keys never go in the project**, in logs or in the chat. If the user pastes a key, tell them to store it in the env file instead.
-- **Cloned voices:** only with the voice owner's consent. The outro shows `"etiqueta"` ("Voz generada con IA" by default); keep it unless the user decides otherwise, and disclose AI voice when publishing.
-- `node voz.js <id>` generates and places the voice without rendering, to check timings; `node render.js all --sin-voz` skips it.
+Providers, script rules, placement, cost cap and cache: **[references/voice-over.md](references/voice-over.md)**.
 
 ## 4. Engine
+
+The skill keeps each template once in `templates/` and the shared engine once in `core/` (`comun/` for all three, `9x16/` for the vertical ones). `node core/nuevo.js` puts both together in the project folder, so a project never depends on where the skill is installed. A project looks like this:
 
 ```
 <project>/<reels-folder>/
@@ -189,17 +139,18 @@ Rules:
 ├── config.json      (catalog) store, attributes, labels, palette and categories → gag + phrases
 ├── productos.json   brand + one block per product
 ├── motor.html       1080×1920 or 1920×1080 canvas; window.renderFrame(f) is DETERMINISTIC
-├── render.js        puppeteer-core → one JPEG per frame → ffmpeg image2pipe; then audio and mux
+├── render.js        (9:16 from core; person has its own) puppeteer-core → one JPEG per frame → ffmpeg image2pipe; then audio and mux
 ├── audio.py         numpy/scipy synthesis using the SAME cue table as motor.html
 ├── catalogo.js      (catalog) API → product sheet: gag, phrase variants, facts, brand stripping
 ├── extraer.js       (catalog) downloads catalog and photos with a browser UA and pauses; REVISAR.md; then plans
-├── variacion.js     (all) shared by browser and Node: profiles, options, color themes + contrast, timeline, planner
-├── variar.js        (all) plans each product, or the A/B/C versions of a person video → VARIACION.md
-├── hoja.py          (all) contact sheets: one row per video, one frame per scene
+├── .motor.json      engine version + fingerprints (core/nuevo.js --actualizar reads it)
+├── variacion.js     (all, core) shared by browser and Node: profiles, options, color themes + contrast, timeline, planner
+├── variar.js        (all, core) plans each product, or the A/B/C versions of a person video → VARIACION.md
+├── hoja.py          (all, core) contact sheets: one row per video, one frame per scene
 ├── versiones.json   (person) the versions written by `node variar.js 3`
-├── sonido.py        (all) music styles, sound-effect packs, voice ducking and mix; audio.py only says WHEN
-├── voz.js           (all) voice-over: script, providers, cache, cost cap, placement, .srt
-├── comprobar.js     (all) checks environment and data with fix-it messages; render.js runs it first
+├── sonido.py        (all, core) music styles, sound-effect packs, voice ducking and mix; audio.py only says WHEN
+├── voz.js           (all, core) voice-over: script, providers, cache, cost cap, placement, .srt
+├── comprobar.js     (all, core) checks environment and data with fix-it messages; render.js runs it first
 ├── locucion.json    (all, optional) voice-over settings
 ├── variacion.json   (all, optional) options the brand allows (styles, themes, transitions…)
 ├── fonts/           local woff2 + their license (fontsource: `npm pack @fontsource/<family>@<version>`)
@@ -207,31 +158,11 @@ Rules:
 └── out/             final videos
 ```
 
-Technical keys:
-- **Determinism:** every frame is computed from `t = f/FPS`. No `requestAnimationFrame`, no unseeded randomness (use `hash(n)`).
-- Helpers: `clamp`, `P(t,a,b)` (progress), easings (`eOC`, `eIOC`, `eOX`, `eIX`, `eOB` with bounce), `T_()` for text with letterSpacing and alpha, `fit()` to shrink text until it fits, `rr()` for rounded rectangles.
-- Scenes are functions that receive local time `u = t - T.scene`. In v1 templates, transitions are a ±0.16 s background-color wipe at every cut. In the catalog template, each scene is painted to an offscreen canvas and two of them are composited during a cut, so any transition shape works (push, iris, diagonal, blinds, zoom).
-- **Preload every font face** before rendering (`document.fonts` → `load()` for each). Loading only a few weights lets the first frames of other weights fall back to a system font — invisible in a single still, glaring in a batch.
-- `render.js`: `page.evaluateOnNewDocument(spec => window.SPEC = spec)`, wait for `window.READY` (fonts and images loaded), then `canvas.toDataURL('image/jpeg', .93)` → stdin of `ffmpeg -f image2pipe -c:v mjpeg -i - -c:v libx264 -preset veryfast -crf 18 -pix_fmt yuv420p`.
-  - Launch Chrome with `--allow-file-access-from-files`; otherwise local images taint the canvas.
-  - Look for Chrome or Edge in their standard paths, or in `CHROME_PATH`.
-  - Keep a `--stills t1,t2,…` mode for review.
-- Mux: `-af loudnorm=I=-14:TP=-1:LRA=11 -c:a aac -movflags +faststart -shortest`.
-- Audio (v3): `sonido.py` is shared; each `audio.py` declares sections (`intro`, `tension`, `lleno`, `ligero`, `pausa`, `final`) at scene times and calls `s.efecto(type, t)` (`corte`, `aparece`, `tick`, `check`, `precio`, `cierre`, `golpe`, `golpe_suave`, `subida`, `tecla`, `error`, `glitch`, `barrido`) at the animation's instants. Load the voice (`s.voz`) **before** `s.musica` so melody and chords make room.
-  - Per-gag effects stay in the template (`s.sonido(signal, t)`): zipper = an accelerating burst of clicks; machine = a click train + hum; scissors = two snaps; shine = a high arpeggio.
-  - Sidechain under four-on-the-floor kicks, a gentle cut below 110 Hz for phone speakers, `tanh` to limit, normalize, then `loudnorm` to −14 LUFS.
-- Shared files (`variacion.js`, `variar.js`, `hoja.py`, `sonido.py`, `voz.js`, `comprobar.js`) are identical in the three templates; `render.js` in both 9:16 ones. Copy, never fork them.
-- On Windows the scripts call `python`; on Linux and macOS, `python3`.
+Determinism, rendering, mux and audio internals: **[references/engine.md](references/engine.md)**. Update an existing project's engine without touching its data: `node ${CLAUDE_SKILL_DIR}/core/nuevo.js --actualizar <project>` (it leaves alone any engine file the user edited and says so).
 
-## 5. Catalog data without making anything up (catalogo.js + config.json)
+## 5. Catalog data
 
-- **Display name:** the product name without `marcas_a_quitar` (brands to strip, if the copy rules require it) and without `palabras_tipo` (generic type words such as "Sneaker" or "Boot"). If only a code remains, use the name without the brand.
-- **Facts:** the bullets under `titulo_datos` in the description, excluding composition. If there are none, take phrases from the short description split on "." and ":". The third fact is the composition from the material attribute, keeping acronyms like EVA.
-- **Trimming:** cut phrases to ~54 characters. Cut at a comma first; otherwise before the last subordinate clause ("with", "for", "that", "and"). Never end on a preposition or article.
-- **Colors:** name → hex table in `motor.html`. Two-tone colors ("Black/White") get a split swatch. Unknown colors render neutral grey with their real name.
-- **Manual edits:** `"manual": true` on a product protects it from being overwritten on the next extraction.
-- **`REVISAR.md`** (review list): sensitive tone, pages without bullets, products without photo or attributes.
-- **Test the transformation against the real catalog** by pasting the function into the store's browser console before trusting the extractor. If the download step couldn't be tested, say so.
+The catalog template turns store data into reels without inventing anything: display names without stripped brands, facts from the description bullets, trimmed at natural breaks, real color names, `REVISAR.md` for anything doubtful. Rules and the extractor workflow: **[references/catalog-data.md](references/catalog-data.md)**. Test the transformation against the real catalog before trusting it.
 
 ## 6. Quality control (mandatory before delivery)
 

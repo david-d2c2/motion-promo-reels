@@ -184,7 +184,7 @@ function comprobarEntorno(R) {
   const s = spawnSync(py, [path.join(ROOT, 'sonido.py'), '--estilos'], { encoding: 'utf8' });
   if (s.status === 0) {
     const py_ = Object.keys(JSON.parse(s.stdout)).sort().join(','), js = Object.keys(require('./variacion').ESTILOS).sort().join(',');
-    if (py_ !== js) R.error('sonido.py / variacion.js', 'los estilos de música no coinciden', 'copia los dos archivos de la misma versión en las tres plantillas');
+    if (py_ !== js) R.error('sonido.py / variacion.js', 'los estilos de música no coinciden', 'el motor de este proyecto está mezclado: node <carpeta de la skill>/core/nuevo.js --actualizar .');
   }
 }
 
