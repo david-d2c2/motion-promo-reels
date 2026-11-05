@@ -46,7 +46,7 @@ function escribirInforme(items, inf, temporada, nombreDe) {
     const q = p.plan, mu = q.musica || {};
     const celdas = [nombreDe(p), ...ejes.map(k => k === 'orden' ? q.orden.replace(/,/g, ' → ') : q[k])];
     if ('hook' in VP.P.pesos) celdas.push(`${q.hook + 1}/${(p.hooks || [p.hook]).length}`);
-    celdas.push(VP.MUSICA.map(k => k === 'bpm' ? mu.bpm + ' BPM' : k === 'prog' ? 'prog ' + mu.prog : k === 'tono' ? 'tono ' + (mu.tono > 0 ? '+' : '') + mu.tono : mu[k]).join(' · '));
+    celdas.push(`${mu.estilo || '—'} · ${mu.bpm || '—'} BPM · efectos ${mu.sfx || '—'}`);
     return '| ' + celdas.join(' | ') + ' |';
   };
   const rep = Object.entries(inf.reparto).map(([k, o]) => `- **${k}**: ${Object.entries(o).sort((a, b) => b[1] - a[1]).map(([v, n]) => `${v} ${pct(n, inf.total)}`).join(' · ')}`).join('\n');
@@ -56,7 +56,7 @@ Generado por \`node variar.js\`. ${PERFIL === 'persona' ? 'Cada fila es una vers
 
 - Vídeos: **${inf.total}** · combinaciones visuales distintas: **${inf.combinacionesVisuales}**
 - Distancia entre vídeos consecutivos (0 = idénticos, ${inf.maximo} = no comparten nada): mínima **${inf.distanciaMinVecinos ?? '—'}**, media **${inf.distanciaMediaVecinos ?? '—'}**
-- Parejas consecutivas con la misma construcción visual: **${inf.vecinosIguales}**
+- Parejas consecutivas con la misma construcción visual: **${inf.vecinosIguales}** · con el mismo estilo de música: **${inf.musicaVecinaIgual}**
 
 ## Reparto por eje
 

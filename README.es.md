@@ -9,6 +9,7 @@ Skill para Claude que genera **vídeos promocionales con motion graphics y audio
 Sirve para:
 - una **persona o marca personal**: vídeo de 27 s en 16:9, ahora con versiones A/B/C;
 - **unos pocos productos**: reels de 15,5 s en 9:16, un gag escrito a mano por producto y, desde la v2, una construcción distinta en cada reel;
+- desde la v3, **estilos de música, paquetes de efectos y locución opcional** en las tres;
 - **un catálogo entero** (WooCommerce): un reel por producto, gag por categoría, datos leídos de la tienda y, desde la v2, **una construcción distinta en cada reel**.
 
 > Método probado en producción con proyectos reales: una marca personal, una tienda online pequeña y un catálogo de más de cien productos. Los datos de ejemplo de este repositorio son ficticios.
@@ -26,6 +27,20 @@ Sirve para:
   - −14 LUFS;
   - etiqueta de IA (AI Act, art. 50) cuando las fotos llevan personas generadas con IA;
   - tono sereno para categorías sensibles.
+
+## v3: tampoco suenan igual, y pueden hablar
+
+La v2 variaba la imagen; la música seguía siendo un mismo loop con otro tempo u otro timbre. La v3 la sustituye:
+
+- **Diez estilos de música** con instrumentos, batería, groove y armonía propios: no son ajustes del mismo loop. Una **semilla** compone la melodía de cada vídeo y elige su batería, rellenos, ritmo armónico y arpegio, así que dos vídeos del mismo estilo tampoco suenan igual.
+- **El arreglo sigue las escenas**: intro despejada bajo el gag, la banda entera con el producto, una base más ligera mientras se leen los datos, un relleno de batería antes de cada corte y un acorde final.
+- **Cinco paquetes de efectos** (`digital`, `organico`, `cinematico`, `minimo`, `juguete`), con las campanas afinadas en la tonalidad de la música.
+- **Locución opcional** con ElevenLabs, [Voicebox](https://github.com/jamiepine/voicebox) (local y gratis) o cualquier comando de voz local. Solo dice lo que sale en pantalla, guarda cada frase en caché (volver a renderizar es gratis), se para en un tope de caracteres, baja la música unos 10 dB y escribe un `.srt`.
+- **Pensada para cualquier modelo:** `node comprobar.js` revisa el entorno y los datos y dice dónde está cada problema y cómo arreglarlo; `SKILL.md` empieza con una ruta rápida paso a paso, y `install.sh --agents` la instala en `~/.agents/skills` para agentes como pi.
+
+<p align="center"><img src="assets/estilos.jpg" alt="Espectrogramas del mismo reel de 15,5 segundos en los diez estilos de música: cada uno tiene textura, batería y densidad distintas" width="820"></p>
+
+Nada nuevo es obligatorio: no hay dependencias nuevas y, sin `locucion.json`, no hay voz.
 
 ## v2: cincuenta reels que no parecen uno
 
@@ -116,6 +131,7 @@ Opciones de `install.sh` / `install.ps1`:
 |---|---|
 | `--dir RUTA` / `-Dir RUTA` | Instala en `RUTA/motion-promo-reels` |
 | `--project` / `-Project` | Instala en `./.claude/skills/` de la carpeta actual |
+| `--agents` / `-Agents` | Instala en `~/.agents/skills/`, para agentes que leen esa carpeta (como pi) |
 | `--force` / `-Force` | Sustituye una instalación existente (para actualizar) |
 | `--version TAG` / `-Version TAG` | Instala una *release* concreta en vez de la última |
 
@@ -135,7 +151,7 @@ Después basta con pedirlo: *«hazme un reel promocional de este producto»*, *�
 
 ## Requisitos para renderizar
 
-El render usa herramientas reales, así que donde mejor funciona es en Claude Code o Cowork en tu propio equipo. En un entorno en la nube, Claude instala lo que falte cuando puede.
+El render usa herramientas reales, así que donde mejor funciona es en Claude Code, Cowork o cualquier agente de código en tu propio equipo. En un entorno en la nube, el agente instala lo que falte cuando puede.
 
 - Node 18+ y `npm install` (instala `puppeteer-core`) en la plantilla que uses
 - Chrome o Edge (o `CHROME_PATH`)
@@ -145,6 +161,7 @@ El render usa herramientas reales, así que donde mejor funciona es en Claude Co
 ```bash
 cd templates/producto-9x16
 npm install
+node comprobar.js                                        # comprueba entorno y datos, con mensajes para arreglarlo
 node render.js all --stills 1.6,3.4,7.4,10.4,12.4,14.4   # revisar
 node render.js all                                       # vídeos en out/
 ```
@@ -153,4 +170,4 @@ node render.js all                                       # vídeos en out/
 
 - Código: [MIT](LICENSE).
 - Fuentes incluidas (Inter, Gelasio, Playfair Display y Outfit): SIL Open Font License 1.1. Cada carpeta `fonts/` lleva su texto de licencia.
-- Los vídeos que generes son tuyos. La música y los efectos se sintetizan en `audio.py`: no usan samples ni pistas de terceros.
+- Los vídeos que generes son tuyos. La música y los efectos se sintetizan en `sonido.py`: no usan samples ni pistas de terceros. La locución queda sujeta a las condiciones del proveedor que elijas (ElevenLabs, los motores de Voicebox…), y una voz clonada necesita el consentimiento de su dueño.

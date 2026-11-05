@@ -357,6 +357,7 @@ function outro(u){
   ctx.fillStyle=MARCA.gold;rr(-300,-62,600,124,62);ctx.fill();T_(m.web,0,20,fit(m.web,560,58,{}),{c:MARCA.navy,al:'center'});ctx.restore();
   T_(m.envio||'',W/2,1220,48,{f:SANS,w:600,c:MARCA.cream,al:'center',a:eOC(P(u,1.0,1.3))});
   const g=p.guino_final||'';T_(g,W/2,1500,fit(g,W-160,38,{f:SANS,w:500}),{f:SANS,w:500,c:MARCA.crema2,al:'center',a:eOC(P(u,1.3,1.6))*0.9});
+  if(SP.voz&&SP.voz.etiqueta)T_(SP.voz.etiqueta,W/2,1580,26,{f:SANS,w:600,c:MARCA.crema2,al:'center',a:0.75*eOC(P(u,1.4,1.7))}); // v3: locución sintética
 }
 
 // ============================================================== composición: escenas + transiciones

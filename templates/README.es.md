@@ -16,6 +16,7 @@ Tres implementaciones completas del método. Todas renderizan tal cual, con dato
 npm install                      # puppeteer-core
 pip install numpy scipy          # audio
 # ffmpeg en el PATH · Chrome o Edge instalado (o CHROME_PATH)
+node comprobar.js                # v3: comprueba todo lo anterior y tus datos, con mensajes de cómo arreglarlo
 
 # persona-16x9
 node render.js stills 1.9,6.6,9.5,14,17.3,20,25
@@ -92,6 +93,58 @@ Claves: `orden`, `hero` (`tarjeta`, `difuso`, `arco`), `rango` (`pildoras`, `reg
 **`persona-16x9`** hace versiones del mismo vídeo. `node variar.js 3` escribe `versiones.json` con las versiones A, B y C, elegidas para diferenciarse todo lo posible: paleta (`neon`, `tinta`, `lima`), titular (`golpe`, `mascara`, `maquina`), cifras (`columnas`, `foco`, `rejilla`), método (`letras`, `linea`, `escalera`), stack (`marquesina`, `cuadricula`), fondo (`reticula`, `puntos`, `limpio`) y música. El orden de la historia y los instantes clave no cambian, así que los efectos de sonido siguen sincronizados. Para usar los colores de la persona, añade una paleta en `CFG.paletas` con las mismas claves que `neon` (por ejemplo `marca`) y permítela en un `variacion.json` junto a `anim.html`: `{ "paleta": ["marca", "neon"] }`.
 
 En cualquier plantilla, un archivo `variacion.json` tiene prioridad sobre el bloque `variacion` de `config.json` o `productos.json`.
+
+## Música y efectos (v3)
+
+`sonido.py` (común) hace la banda sonora; cada `audio.py` solo dice *cuándo* pasa cada cosa. `node variar.js` escribe en cada plan un **estilo** de música, un tempo dentro de su rango, tonalidad, progresión, una **semilla** y un **paquete de efectos**, y evita que dos vídeos vecinos compartan estilo.
+
+| Estilo | Carácter | Tempo |
+|---|---|---|
+| `piano` | elegante: piano, cuerdas, escobillas | 88–104 |
+| `pizzicato` | artesanal: pizzicato, marimba, shaker | 104–120 |
+| `electro` | tecnológico: bombo, palmas, bajo de sierra, pluck | 120–128 |
+| `lofi` | piano eléctrico, swing, vinilo | 76–90 |
+| `funk` | bajo slap, clavinet, semicorcheas | 98–112 |
+| `synthwave` | bajo en octavas, caja gated, sierras | 96–112 |
+| `acustico` | guitarra rasgueada, palmas, pisotones | 92–108 |
+| `cinematico` | ostinato de cuerdas, tambores, campanas | 80–96 |
+| `ambiente` | pads y campanas, sin percusión | 70–84 |
+| `house` | cuatro en el suelo, órgano, charles abierto | 118–124 |
+
+Paquetes de efectos: `digital`, `organico`, `cinematico`, `minimo`, `juguete`. Para escuchar todos los estilos: `python3 sonido.py --demo out/demo`.
+
+Acota los dos a la marca en `variacion.json` (junto a `render.js`; tiene prioridad sobre los bloques `variacion`):
+
+```json
+{ "estilo": ["piano", "lofi", "acustico", "ambiente"], "sfx": ["organico", "minimo"] }
+```
+
+Las categorías sensibles (`calma`) siempre van con `ambiente`, `piano` o `acustico`, sin batería ni bajo. Los planes de la v2 conservan lo visual: `node variar.js` solo les añade la música.
+
+## Locución (v3)
+
+Opcional. Sin `locucion.json`, o con `"proveedor": "ninguna"`, no cambia nada. Ajustes en `locucion.json`:
+
+```json
+{ "proveedor": "elevenlabs", "voz": "VOICE_ID", "modelo": "eleven_multilingual_v2", "velocidad": 1.0,
+  "tope_caracteres": 3000, "etiqueta": "Voz generada con IA" }
+```
+
+| `proveedor` | Notas |
+|---|---|
+| `elevenlabs` | Clave en `ELEVENLABS_API_KEY` o en `~/.config/motion-promo-reels/env` como `ELEVENLABS_API_KEY=...` (`chmod 600`). Nunca en el proyecto. |
+| `voicebox` | Local y gratis. `"voz"`: nombre o id del perfil; `"url"` por defecto `http://127.0.0.1:17493`. El idioma lo pone el perfil. |
+| `openai` | Cualquier servidor con `POST /v1/audio/speech`: `"url"`, `"modelo"`, `"voz"`; clave en `OPENAI_API_KEY` si hace falta. |
+| `comando` | Cualquier programa local: `"comando": "piper --model es_ES.onnx --output_file {salida}"` (texto por la entrada estándar, o usa `{texto}`). |
+
+- La locución solo dice lo que sale en pantalla: gancho, nombre, precio y web (9:16), o `"lineas": [{"t": 2.4, "texto": "..."}]` (persona). Por producto: `"locucion": [{"escena": "precio", "texto": "Desde 9,90 €"}]` o `"locucion": false`.
+- Las tomas se guardan en caché por frase: volver a renderizar no cuesta nada. ElevenLabs se para en `tope_caracteres` salvo que añadas `--confirmar`.
+- Las frases se colocan sin pisarse (hasta un 15 % más rápidas; si no caben, se quitan las menos importantes y se avisa). La música baja unos 10 dB bajo la voz. Junto a cada MP4 se escribe un `.srt`.
+- `node voz.js <id>` prueba la voz sin renderizar; `--sin-voz` renderiza sin ella.
+
+## Comprobación (v3)
+
+`node comprobar.js` revisa Node, ffmpeg, Python con numpy y scipy, Chrome, las dependencias y todos los archivos de datos, y de cada problema dice dónde está, qué pasa y cómo se arregla. `render.js` hace la parte de datos antes de renderizar y para si hay errores.
 
 ## Textos de interfaz
 

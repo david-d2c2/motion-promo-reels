@@ -4,10 +4,12 @@
 #   curl -fsSL https://raw.githubusercontent.com/david-d2c2/motion-promo-reels/main/install.sh | bash
 #   curl -fsSL https://raw.githubusercontent.com/david-d2c2/motion-promo-reels/main/install.sh | bash -s -- --project
 #   curl -fsSL https://raw.githubusercontent.com/david-d2c2/motion-promo-reels/main/install.sh | bash -s -- --dir /path/to/skills
+#   curl -fsSL https://raw.githubusercontent.com/david-d2c2/motion-promo-reels/main/install.sh | bash -s -- --agents
 #
 # Options:
 #   --dir PATH   skills folder to install into (the skill goes in PATH/motion-promo-reels)
 #   --project    install into ./.claude/skills of the current folder
+#   --agents     install into ~/.agents/skills (agents that read that folder, such as pi)
 #   --force      replace an existing installation
 #   --version    tag to install (default: latest)
 set -euo pipefail
@@ -23,6 +25,7 @@ while [ $# -gt 0 ]; do
     --dir)      [ $# -ge 2 ] || { echo "--dir needs a path" >&2; exit 1; }; DEST_PARENT="$2"; shift 2 ;;
     --dir=*)    DEST_PARENT="${1#--dir=}"; shift ;;
     --project)  DEST_PARENT="$(pwd)/.claude/skills"; shift ;;
+    --agents)   DEST_PARENT="${HOME}/.agents/skills"; shift ;;
     --force)    FORCE=1; shift ;;
     --version)  [ $# -ge 2 ] || { echo "--version needs a tag" >&2; exit 1; }; TAG="$2"; shift 2 ;;
     -h|--help)  sed -n '2,14p' "$0" 2>/dev/null || true; exit 0 ;;
@@ -70,5 +73,5 @@ rm -rf "$DEST"
 mv "$TMP/x/$NAME" "$DEST"
 
 echo "Installed: $DEST"
-echo "Restart Claude Code (or open a new session) and ask: \"make a promo reel for this product\"."
+echo "Restart your agent (or open a new session) and ask: \"make a promo reel for this product\"."
 echo "Rendering needs Node 18+, ffmpeg, Python 3 (numpy, scipy) and Chrome or Edge. See README.md."

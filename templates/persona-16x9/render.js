@@ -13,7 +13,7 @@ const path = require('path');
 const { spawn, execFileSync } = require('child_process');
 
 // Recuento real de líneas de código (lo usa la escena «ESTE VÍDEO»): todo lo que se ejecuta para hacerlo.
-const LOC = ['anim.html', 'render.js', 'audio.py', 'variacion.js'].reduce((a, f) => a + fs.readFileSync(path.join(__dirname, f), 'utf8').split('\n').length, 0);
+const LOC = ['anim.html', 'render.js', 'audio.py', 'variacion.js', 'sonido.py'].reduce((a, f) => a + fs.readFileSync(path.join(__dirname, f), 'utf8').split('\n').length, 0);
 
 // Normalización de volumen en dos pasadas (más precisa que una sola en clips cortos): mide y luego corrige a -14 LUFS.
 function loudnormFilter(wav) {
@@ -42,10 +42,10 @@ function planDe(version) {
   return v;
 }
 
-async function abrir(browser, plan) {
+async function abrir(browser, plan, voz) {
   const page = await browser.newPage();
   await page.setViewport({ width: 1920, height: 1080 });
-  await page.evaluateOnNewDocument((l, p) => { window.LOC = l; if (p) window.PLAN = p; }, LOC, plan);
+  await page.evaluateOnNewDocument((l, p, v) => { window.LOC = l; if (p) window.PLAN = p; if (v) window.VOZ = v; }, LOC, plan, voz || null);
   await page.goto('file://' + path.join(__dirname, 'anim.html'));
   await page.evaluate(async () => { await document.fonts.ready; await window.READY; });
   return page;
@@ -56,7 +56,19 @@ async function abrir(browser, plan) {
   const iv = args.indexOf('--version');
   const version = iv >= 0 ? args[iv + 1] : null;
   if (iv >= 0) args.splice(iv, 2);
-  const [mode, arg] = args;
+  const sinVoz = args.includes('--sin-voz'), confirmar = args.includes('--confirmar');
+  const [mode, arg] = args.filter(a => !a.startsWith('--'));
+  require('./comprobar').comprobarDatos({ salir: true });
+  // v3: locución opcional (locucion.json), solo en el vídeo final
+  let voz = null;
+  if (mode === 'video' && !sinVoz) {
+    const VOZ = require('./voz');
+    const cfg = VOZ.leerConfig();
+    if (cfg) {
+      voz = await VOZ.preparar({ id: version || 'persona', L: VOZ.guionPersona(cfg), dur: 27, fin: 1.2, cfg, confirmar, outDir: path.join(__dirname, 'out') });
+      if (voz) for (const a of voz.avisos) console.log('  Aviso: ' + a);
+    }
+  }
   const browser = await puppeteer.launch({
     executablePath: browserPath(),
     args: ['--no-sandbox', '--disable-gpu', '--font-render-hinting=none', '--allow-file-access-from-files'],
@@ -87,7 +99,7 @@ async function abrir(browser, plan) {
     await browser.close();
     return;
   }
-  const page = await abrir(browser, planDe(version));
+  const page = await abrir(browser, planDe(version), voz ? { etiqueta: voz.etiqueta } : null);
   const total = await page.evaluate(() => window.TOTAL);
   const grab = f => page.evaluate(f => { window.renderFrame(f); return document.getElementById('c').toDataURL('image/jpeg', 0.95); }, f);
 
@@ -111,13 +123,14 @@ async function abrir(browser, plan) {
     ff.stdin.end();
     await new Promise(r => ff.on('close', r));
     // audio sincronizado (los cues están en audio.py) + mezcla final
-    execFileSync(process.platform === 'win32' ? 'python' : 'python3', [path.join(__dirname, 'audio.py'), ...(version ? ['--version', version] : [])], { cwd: __dirname, stdio: 'inherit' });
+    execFileSync(process.platform === 'win32' ? 'python' : 'python3', [path.join(__dirname, 'audio.py'), ...(version ? ['--version', version] : []), ...(voz ? ['--voz', voz.json] : [])], { cwd: __dirname, stdio: 'inherit' });
     execFileSync('ffmpeg', ['-y', '-loglevel', 'error', '-i', silent, '-i', path.join(__dirname, 'audio.wav'),
       '-af', loudnormFilter(path.join(__dirname, 'audio.wav')), '-c:v', 'copy', '-c:a', 'aac', '-b:a', '256k', '-ar', '48000',
       '-shortest', '-movflags', '+faststart', out]);
     fs.unlinkSync(silent);
+    if (voz) require('./voz').srt(voz.lineas, out.replace(/\.mp4$/, '.srt'));
     console.log('OK', out);
   }
   await browser.close();
   console.log('Líneas de código:', LOC);
-})();
+})().catch(e => { console.error('\nERROR: ' + e.message + (/ElevenLabs|Voicebox|voz|locucion/i.test(e.message) ? '\n(Para renderizar sin voz: añade --sin-voz)' : '')); process.exit(1); });

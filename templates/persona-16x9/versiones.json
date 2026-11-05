@@ -7,34 +7,21 @@
       "temporada": "1",
       "paleta": "neon",
       "titulo": "golpe",
-      "cifras": "columnas",
-      "metodo": "letras",
+      "cifras": "rejilla",
+      "metodo": "escalera",
       "stack": "cuadricula",
-      "fondo": "puntos",
+      "fondo": "limpio",
       "musica": {
-        "prog": 2,
-        "tono": -2,
-        "timbre": "pulso"
+        "estilo": "electro",
+        "sfx": "juguete",
+        "prog": 0,
+        "tono": -1,
+        "bpm": 124,
+        "semilla": 483589
       },
       "hook": 0
     },
     "B": {
-      "v": 2,
-      "temporada": "1",
-      "paleta": "tinta",
-      "titulo": "mascara",
-      "cifras": "rejilla",
-      "metodo": "escalera",
-      "stack": "marquesina",
-      "fondo": "limpio",
-      "musica": {
-        "prog": 3,
-        "tono": 0,
-        "timbre": "campana"
-      },
-      "hook": 0
-    },
-    "C": {
       "v": 2,
       "temporada": "1",
       "paleta": "lima",
@@ -42,11 +29,33 @@
       "cifras": "foco",
       "metodo": "linea",
       "stack": "marquesina",
-      "fondo": "reticula",
+      "fondo": "puntos",
       "musica": {
-        "prog": 0,
-        "tono": -2,
-        "timbre": "pulso"
+        "estilo": "house",
+        "sfx": "cinematico",
+        "prog": 2,
+        "tono": 2,
+        "bpm": 120,
+        "semilla": 414181
+      },
+      "hook": 0
+    },
+    "C": {
+      "v": 2,
+      "temporada": "1",
+      "paleta": "tinta",
+      "titulo": "mascara",
+      "cifras": "columnas",
+      "metodo": "letras",
+      "stack": "cuadricula",
+      "fondo": "puntos",
+      "musica": {
+        "estilo": "synthwave",
+        "sfx": "digital",
+        "prog": 3,
+        "tono": 0,
+        "bpm": 96,
+        "semilla": 526852
       },
       "hook": 0
     }
