@@ -16,6 +16,7 @@ Three complete implementations of the method. All of them render as they are, us
 npm install                      # puppeteer-core
 pip install numpy scipy          # audio
 # ffmpeg on your PATH · Chrome or Edge installed (or CHROME_PATH)
+node comprobar.js                # v3: checks all of the above and your data, with fix-it messages
 
 # persona-16x9
 node render.js stills 1.9,6.6,9.5,14,17.3,20,25
@@ -92,6 +93,58 @@ Keys: `orden`, `hero` (`tarjeta`, `difuso`, `arco`), `rango` (`pildoras`, `regla
 **`persona-16x9`** makes versions of the same video. `node variar.js 3` writes `versiones.json` with versions A, B and C chosen to differ from each other as much as possible: palette (`neon`, `tinta`, `lima`), headline (`golpe`, `mascara`, `maquina`), stats (`columnas`, `foco`, `rejilla`), method (`letras`, `linea`, `escalera`), stack (`marquesina`, `cuadricula`), background (`reticula`, `puntos`, `limpio`) and music. The story order and the key instants never change, so the sound effects stay in sync. To use the person's own colors, add a palette to `CFG.paletas` with the same keys as `neon` (for example `marca`) and allow it in a `variacion.json` next to `anim.html`: `{ "paleta": ["marca", "neon"] }`.
 
 In any template, a `variacion.json` file takes priority over the `variacion` block in `config.json` or `productos.json`.
+
+## Music and sound effects (v3)
+
+`sonido.py` (shared) builds the soundtrack; each `audio.py` only says *when* things happen. `node variar.js` writes into every plan a music **style**, a tempo inside its range, key, progression, a **seed** and a **sound-effects pack**, and keeps neighbouring videos in different styles.
+
+| Style | Character | Tempo |
+|---|---|---|
+| `piano` | elegant: piano, strings, brushes | 88–104 |
+| `pizzicato` | craft: pizzicato, marimba, shaker | 104–120 |
+| `electro` | tech: kick, clap, saw bass, pluck | 120–128 |
+| `lofi` | electric piano, swing, vinyl crackle | 76–90 |
+| `funk` | slap bass, clavinet, sixteenth hats | 98–112 |
+| `synthwave` | octave bass, gated snare, saws | 96–112 |
+| `acustico` | strummed guitar, claps, stomps | 92–108 |
+| `cinematico` | string ostinato, toms, bells | 80–96 |
+| `ambiente` | pads and bells, no percussion | 70–84 |
+| `house` | four on the floor, organ, open hats | 118–124 |
+
+Sound-effect packs: `digital`, `organico`, `cinematico`, `minimo`, `juguete`. Listen to every style: `python3 sonido.py --demo out/demo`.
+
+Restrict both to the brand in `variacion.json` (next to `render.js`; it takes priority over the `variacion` blocks):
+
+```json
+{ "estilo": ["piano", "lofi", "acustico", "ambiente"], "sfx": ["organico", "minimo"] }
+```
+
+Sensitive categories (`calma`) always get `ambiente`, `piano` or `acustico`, without drums or bass. Plans from v2 keep their visuals: `node variar.js` adds only the music.
+
+## Voice-over (v3)
+
+Optional. With no `locucion.json`, or `"proveedor": "ninguna"`, nothing changes. Settings in `locucion.json`:
+
+```json
+{ "proveedor": "elevenlabs", "voz": "VOICE_ID", "modelo": "eleven_multilingual_v2", "velocidad": 1.0,
+  "tope_caracteres": 3000, "etiqueta": "Voz generada con IA" }
+```
+
+| `proveedor` | Notes |
+|---|---|
+| `elevenlabs` | Key in `ELEVENLABS_API_KEY` or in `~/.config/motion-promo-reels/env` as `ELEVENLABS_API_KEY=...` (`chmod 600`). Never in the project. |
+| `voicebox` | Local and free. `"voz"`: profile name or id; `"url"` defaults to `http://127.0.0.1:17493`. The language comes from the profile. |
+| `openai` | Any `POST /v1/audio/speech` server: `"url"`, `"modelo"`, `"voz"`; key in `OPENAI_API_KEY` if needed. |
+| `comando` | Any local program: `"comando": "piper --model es_ES.onnx --output_file {salida}"` (text on stdin, or use `{texto}`). |
+
+- The narration only uses what is on screen: hook, product name, price and website (9:16), or `"lineas": [{"t": 2.4, "texto": "..."}]` (person). Per product: `"locucion": [{"escena": "precio", "texto": "Desde 9,90 €"}]` or `"locucion": false`.
+- Takes are cached per sentence, so re-rendering costs nothing. ElevenLabs stops at `tope_caracteres` unless you add `--confirmar`.
+- Lines are placed without overlapping (up to 15 % faster, then the least important are dropped, with a warning). Music ducks about 10 dB under the voice. An `.srt` is written next to each MP4.
+- `node voz.js <id>` tests the voice without rendering; `--sin-voz` renders without it.
+
+## Checking (v3)
+
+`node comprobar.js` checks Node, ffmpeg, Python with numpy and scipy, Chrome, the dependencies and every data file, and says for each problem where it is, what is wrong and how to fix it. `render.js` runs the data part before rendering and stops on errors.
 
 ## Interface strings
 

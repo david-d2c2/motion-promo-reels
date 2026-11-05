@@ -13,6 +13,12 @@
 // que se publican justo antes, para que dos vídeos vecinos no se parezcan.
 (function (root) {
   const TRANS = ['barrido', 'empuje', 'iris', 'diagonal', 'persiana', 'zoom'];
+  // v3: estilos de música de sonido.py (nombre -> rango de tempo). La comprobación de sincronía exige que coincidan.
+  const ESTILOS = { piano: [88, 104], pizzicato: [104, 120], electro: [120, 128], lofi: [76, 90], funk: [98, 112], synthwave: [96, 112],
+    acustico: [92, 108], cinematico: [80, 96], ambiente: [70, 84], house: [118, 124] };
+  const CALMA_EST = ['ambiente', 'piano', 'acustico'];
+  const SFX = ['digital', 'organico', 'cinematico', 'minimo', 'juguete'];
+  const TODOS = Object.keys(ESTILOS);
   const ENTRADA = ['subir', 'mascara', 'letras'];
   const perms = xs => xs.length <= 1 ? [xs] : xs.flatMap((x, i) => perms(xs.filter((_, j) => j !== i)).map(r => [x, ...r]));
   const ordenes = medios => perms(medios).map(p => p.join(','));
@@ -24,16 +30,16 @@
         orden: ordenes(['rango', 'datos', 'precio']),
         hero: ['tarjeta', 'difuso', 'arco'], rango: ['pildoras', 'regla', 'rejilla'], datos: ['lista', 'numerada', 'apiladas'], precio: ['grande', 'sello', 'etiqueta'],
         trans: TRANS, tema: ['claro', 'oscuro', 'acento'], entrada: ENTRADA, alin: ['centro', 'izquierda'],
-        prog: [0, 1, 2, 3], tono: [-2, 0, 2, 3], bpm: [90, 96, 102, 108], timbre: ['piano', 'celesta', 'pizzicato'], patron: ['corcheas', 'alberti', 'saltos'],
+        estilo: TODOS, sfx: SFX, prog: [0, 1, 2, 3], tono: [-2, -1, 0, 1, 2, 3],
       },
       visuales: ['orden', 'hero', 'rango', 'datos', 'precio', 'trans', 'tema', 'entrada', 'alin'],
       reparto: ['orden', 'hero', 'rango', 'datos', 'precio', 'trans', 'tema'],
-      pesos: { orden: 2, hero: 3, rango: 1.5, datos: 1.5, precio: 1.5, trans: 2.5, tema: 3, entrada: 1, alin: 1, hook: 3, prog: 1, tono: 0.5, bpm: 0.5, timbre: 1, patron: 0.75 },
+      pesos: { orden: 2, hero: 3, rango: 1.5, datos: 1.5, precio: 1.5, trans: 2.5, tema: 3, entrada: 1, alin: 1, hook: 3, estilo: 3.5, sfx: 1.5, prog: 1, tono: 0.5 },
       dur: { hook: 3.0, hero: 2.8, rango: 3.0, datos: 2.6, precio: 1.8, outro: 2.3 }, inicio: ['hook', 'hero'], fin: ['outro'],
-      calma: { trans: ['fundido', 'barrido', 'zoom'], tema: ['claro'], entrada: ['subir', 'mascara'], bpm: [84, 90], timbre: ['piano', 'celesta'], patron: ['corcheas', 'saltos'] },
+      calma: { trans: ['fundido', 'barrido', 'zoom'], tema: ['claro'], entrada: ['subir', 'mascara'], estilo: CALMA_EST, sfx: ['minimo', 'organico'] },
       alineables: ['texto', 'calma', 'patron'],
       base: { orden: 'rango,datos,precio', hero: 'tarjeta', rango: 'pildoras', datos: 'lista', precio: 'grande', trans: 'barrido', tema: 'claro', entrada: 'subir', alin: 'centro',
-        musica: { prog: 0, tono: 0, bpm: 96, timbre: 'piano', patron: 'corcheas' } },
+        musica: { estilo: 'piano', sfx: 'digital', prog: 0, tono: 0, bpm: 96 } },
       colores: { fondo: '#F8ECE8', fondo_cierre: '#FBF6F2', tinta: '#0A0A0A', texto: '#2B2B2B', acento: '#8C6A4F', acento_suave: '#B89878' },
     },
     producto: {
@@ -41,16 +47,16 @@
         orden: ordenes(['colores', 'datos', 'precio']),
         hero: ['tarjeta', 'abajo', 'polaroid'], colores: ['contador', 'fila', 'abanico'], datos: ['lista', 'numerada', 'etiquetas'], precio: ['grande', 'sello', 'etiqueta'],
         trans: TRANS, tema: ['claro', 'oscuro', 'acento'], entrada: ENTRADA,
-        prog: [0, 1, 2, 3], tono: [-2, 0, 2, 3], bpm: [104, 112, 120], timbre: ['pizzicato', 'marimba', 'celesta'], patron: ['corcheas', 'alberti', 'saltos'],
+        estilo: TODOS, sfx: SFX, prog: [0, 1, 2, 3], tono: [-2, -1, 0, 1, 2, 3],
       },
       visuales: ['orden', 'hero', 'colores', 'datos', 'precio', 'trans', 'tema', 'entrada'],
       reparto: ['orden', 'hero', 'colores', 'datos', 'precio', 'trans', 'tema'],
-      pesos: { orden: 2, hero: 3, colores: 1.5, datos: 1.5, precio: 1.5, trans: 2.5, tema: 3, entrada: 1, hook: 2, prog: 1, tono: 0.5, bpm: 0.5, timbre: 1, patron: 0.75 },
+      pesos: { orden: 2, hero: 3, colores: 1.5, datos: 1.5, precio: 1.5, trans: 2.5, tema: 3, entrada: 1, hook: 2, estilo: 3.5, sfx: 1.5, prog: 1, tono: 0.5 },
       dur: { hook: 3.0, hero: 2.6, colores: 3.0, datos: 2.8, precio: 1.8, outro: 2.3 }, inicio: ['hook', 'hero'], fin: ['outro'],
-      calma: { trans: ['fundido', 'barrido', 'zoom'], tema: ['claro'], entrada: ['subir', 'mascara'], bpm: [96, 104], timbre: ['celesta', 'marimba'], patron: ['corcheas', 'saltos'] },
+      calma: { trans: ['fundido', 'barrido', 'zoom'], tema: ['claro'], entrada: ['subir', 'mascara'], estilo: CALMA_EST, sfx: ['minimo', 'organico'] },
       alineables: [],
       base: { orden: 'colores,datos,precio', hero: 'tarjeta', colores: 'contador', datos: 'lista', precio: 'grande', trans: 'barrido', tema: 'claro', entrada: 'subir',
-        musica: { prog: 0, tono: 0, bpm: 112, timbre: 'pizzicato', patron: 'corcheas' } },
+        musica: { estilo: 'pizzicato', sfx: 'digital', prog: 0, tono: 0, bpm: 112 } },
       colores: { fondo: '#F6F0E4', fondo_cierre: '#14213D', tinta: '#14213D', texto: '#5B5648', acento: '#9A6B1E', acento_suave: '#E4B968' },
     },
     persona: {
@@ -58,13 +64,12 @@
       opciones: {
         paleta: ['neon', 'tinta', 'lima'], titulo: ['golpe', 'mascara', 'maquina'], cifras: ['columnas', 'foco', 'rejilla'],
         metodo: ['letras', 'linea', 'escalera'], stack: ['marquesina', 'cuadricula'], fondo: ['reticula', 'puntos', 'limpio'],
-        prog: [0, 1, 2, 3], tono: [-2, 0, 2], timbre: ['pulso', 'sierra', 'campana'],
+        estilo: TODOS.filter(e => e !== 'ambiente'), sfx: ['digital', 'cinematico', 'minimo', 'juguete'], prog: [0, 1, 2, 3], tono: [-2, -1, 0, 1, 2],
       },
       visuales: ['paleta', 'titulo', 'cifras', 'metodo', 'stack', 'fondo'],
       reparto: ['paleta', 'titulo', 'cifras', 'metodo', 'stack', 'fondo'],
-      pesos: { paleta: 4, titulo: 1.5, cifras: 2, metodo: 2, stack: 1.5, fondo: 1, prog: 1, tono: 0.5, timbre: 1 },
-      musica: ['prog', 'tono', 'timbre'],
-      base: { paleta: 'neon', titulo: 'golpe', cifras: 'columnas', metodo: 'letras', stack: 'marquesina', fondo: 'reticula', musica: { prog: 0, tono: 0, timbre: 'pulso' } },
+      pesos: { paleta: 4, titulo: 1.5, cifras: 2, metodo: 2, stack: 1.5, fondo: 1, estilo: 3.5, sfx: 1.5, prog: 1, tono: 0.5 },
+      base: { paleta: 'neon', titulo: 'golpe', cifras: 'columnas', metodo: 'letras', stack: 'marquesina', fondo: 'reticula', musica: { estilo: 'electro', sfx: 'digital', prog: 0, tono: 0, bpm: 128 } },
     },
   };
 
@@ -114,7 +119,7 @@
   function perfil(nombre) {
     const P = PERFILES[nombre];
     if (!P) throw new Error('Perfil desconocido: ' + nombre);
-    const MUS = P.musica || ['prog', 'tono', 'bpm', 'timbre', 'patron'];
+    const MUS = ['estilo', 'sfx', 'prog', 'tono'];
     const MAXD = Object.values(P.pesos).reduce((s, v) => s + v, 0);
 
     function tiempos(orden) {
@@ -153,7 +158,9 @@
         const nHooks = (it.hooks && it.hooks.length) || 1, cat = it.categoria || it.id;
         let plan = it.plan;
         const conservar = plan && plan.v === 2 && !plan.base && plan.temporada === temporada && !opts.rehacer;
-        if (!conservar) {
+        // v3: un plan conservado de la v2 no tiene estilo de música -> se planifica SOLO la música y lo visual se queda
+        const soloMusica = conservar && !(plan.musica && plan.musica.estilo);
+        if (!conservar || soloMusica) {
           const r = rng(hash(temporada + '|' + it.id));
           const op = k => { // carril tranquilo: opciones de "calma" que la marca no haya excluido (el fundido siempre vale)
             if (!(calma && P.calma[k])) return ops[k];
@@ -163,14 +170,18 @@
           const temasOk = ops.tema ? op('tema').filter(t => ops.tema.includes(t)) : null;
           let best = null, bestS = -Infinity;
           for (let i = 0; i < intentos; i++) {
-            const c = { v: 2, temporada };
-            for (const k of P.visuales) {
+            const c = soloMusica ? Object.assign({}, plan) : { v: 2, temporada };
+            if (!soloMusica) for (const k of P.visuales) {
               if (k === 'tema') c.tema = pick(r, temasOk.length ? temasOk : ['claro']);
               else if (k === 'alin') c.alin = P.alineables.includes(it.gag) ? pick(r, ops.alin) : 'centro';
               else c[k] = pick(r, op(k));
             }
             c.musica = {}; for (const k of MUS) c.musica[k] = pick(r, op(k));
-            c.hook = (hash(temporada + '|' + cat) + (turno[cat] || 0)) % nHooks;
+            // el tempo sale del rango del estilo (pares); la semilla compone la melodía y elige batería y rellenos
+            const [b0, b1] = ESTILOS[c.musica.estilo] || [96, 96];
+            c.musica.bpm = b0 + 2 * Math.floor(r() * ((b1 - b0) / 2 + 1));
+            c.musica.semilla = Math.floor(r() * 1e6);
+            if (!soloMusica) c.hook = (hash(temporada + '|' + cat) + (turno[cat] || 0)) % nHooks;
             c._cat = cat;
             // 1) que se parezca lo menos posible a los vecinos (más peso a los más cercanos)
             const prev = hist.slice(-ventana);
@@ -180,15 +191,17 @@
             // 2) que cada opción se use de forma equilibrada en todo el lote
             let deseq = 0;
             if (n) for (const k of P.reparto) deseq += ((uso[k] && uso[k][c[k]]) || 0) / n;
+            if (n) for (const k of ['estilo', 'sfx']) deseq += 1.5 * ((uso[k] && uso[k][c.musica[k]]) || 0) / n; // la música, tan repartida como lo visual
             const s = 2 * minCerca + media - 3 * deseq + r() * 0.01;
             if (s > bestS) { bestS = s; best = c; }
           }
           plan = best;
-          if (P.dur) plan.tiempos = tiempos(plan.orden);
+          if (P.dur && !soloMusica) plan.tiempos = tiempos(plan.orden);
         }
         plan._cat = cat;
         turno[cat] = (turno[cat] || 0) + 1;
         for (const k of P.reparto) cuenta(k, plan[k]);
+        if (plan.musica) for (const k of ['estilo', 'sfx']) cuenta(k, plan.musica[k]);
         hist.push(plan); n++;
         const limpio = Object.assign({}, plan); delete limpio._cat;
         it.plan = limpio;
@@ -200,6 +213,9 @@
       const ejes = P.visuales.filter(k => k !== 'alin');
       const reparto = {};
       for (const k of ejes) { reparto[k] = {}; for (const h of hist) reparto[k][h[k]] = (reparto[k][h[k]] || 0) + 1; }
+      for (const k of ['estilo', 'sfx']) { reparto['música: ' + k] = {}; for (const h of hist) { const v = (h.musica || {})[k] || '—'; reparto['música: ' + k][v] = (reparto['música: ' + k][v] || 0) + 1; } }
+      let musIguales = 0;
+      for (let i = 1; i < hist.length; i++) if ((hist[i].musica || {}).estilo && (hist[i].musica || {}).estilo === (hist[i - 1].musica || {}).estilo) musIguales++;
       const firmas = new Set(hist.map(h => ejes.map(k => h[k]).join('|')));
       let minVecino = Infinity, suma = 0, iguales = 0;
       for (let i = 1; i < hist.length; i++) {
@@ -207,7 +223,7 @@
         if (ejes.every(k => hist[i][k] === hist[i - 1][k])) iguales++;
       }
       return { total: hist.length, combinacionesVisuales: firmas.size, distanciaMinVecinos: hist.length > 1 ? minVecino : null,
-        distanciaMediaVecinos: hist.length > 1 ? +(suma / (hist.length - 1)).toFixed(2) : null, maximo: MAXD, vecinosIguales: iguales, reparto };
+        distanciaMediaVecinos: hist.length > 1 ? +(suma / (hist.length - 1)).toFixed(2) : null, maximo: MAXD, vecinosIguales: iguales, musicaVecinaIgual: musIguales, reparto };
     }
 
     return { nombre, P, OPCIONES: P.opciones, DUR: P.dur, MUSICA: MUS,
@@ -215,6 +231,6 @@
       informe: items => informe(items.map(it => Object.assign({}, it.plan || planBase(), { _cat: it.categoria || it.id }))) };
   }
 
-  const api = { PERFILES, perfil, hash, rng, mix, contraste, lum };
+  const api = { PERFILES, perfil, hash, rng, mix, contraste, lum, ESTILOS, SFX, CALMA_EST };
   if (typeof module !== 'undefined' && module.exports) module.exports = api; else root.VAR = api;
 })(typeof window !== 'undefined' ? window : globalThis);

@@ -543,6 +543,7 @@ function s8(t){
   if(b2>0){ctx.save();ctx.translate(W/2+250,800);ctx.scale(b2,b2);rr(-220,-42,440,84,42);ctx.strokeStyle=TX;ctx.lineWidth=3;ctx.stroke();
     T(CFG.cta2,0,12,32,{al:'center',w:800});ctx.restore()}
   T(CFG.ciudad+'  ·  '+CFG.credito,W/2,940,24,{f:MONO,w:400,al:'center',a:P(u,2.5,2.8)*0.7});
+  if(window.VOZ&&window.VOZ.etiqueta)T(window.VOZ.etiqueta,W/2,985,22,{f:MONO,w:400,al:'center',a:P(u,2.6,2.9)*0.7}); // v3: locución sintética
   ctx.restore();
   if(u>4.0){ctx.fillStyle=al(BG,P(u,4.0,4.4));ctx.fillRect(0,0,W,H)}
 }

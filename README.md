@@ -9,6 +9,7 @@ A Claude skill that generates **promotional videos with motion graphics and audi
 It covers three cases:
 - **a person or personal brand**: a 27 s video in 16:9, now with A/B/C versions on demand;
 - **a handful of products**: 15.5 s reels in 9:16, one hand-written gag per product and, since v2, a different construction per reel;
+- since v3, **music styles, sound-effect packs and an optional voice-over** in all three;
 - **a whole catalog** (WooCommerce): one reel per product, a gag per category, data read straight from the store — and, since v2, **a different construction for every reel**.
 
 > Battle-tested in production on real projects: a personal brand, a small online shop and a catalog of 100+ products. All sample data in this repository is fictional.
@@ -26,6 +27,20 @@ It covers three cases:
   - −14 LUFS loudness;
   - an AI label (EU AI Act, art. 50) when photos show AI-generated people;
   - a calm tone for sensitive categories.
+
+## v3: they don't sound alike either, and they can talk
+
+v2 varied the picture; the music was still one loop with a different tempo or timbre. v3 replaces it:
+
+- **Ten music styles** with their own instruments, drums, groove and harmony — not presets of the same loop. A **seed** composes each video's melody and picks its drum pattern, fills, harmonic rhythm and arpeggio, so two videos in the same style don't sound the same either.
+- **The arrangement follows the scenes**: a sparse intro under the gag, the full band with the product, a lighter bed while facts are read, a drum fill before each cut and a final chord.
+- **Five sound-effect packs** (`digital`, `organico`, `cinematico`, `minimo`, `juguete`), with chimes tuned to the music's key.
+- **Optional voice-over** with ElevenLabs, [Voicebox](https://github.com/jamiepine/voicebox) (local and free) or any local TTS command. It only says what is on screen, caches every sentence (re-renders are free), stops at a character budget, ducks the music about 10 dB and writes an `.srt`.
+- **Built to be run by any model:** `node comprobar.js` checks the environment and the data and says where each problem is and how to fix it; `SKILL.md` opens with a step-by-step quick path; `install.sh --agents` installs into `~/.agents/skills` for agents such as pi.
+
+<p align="center"><img src="assets/estilos.jpg" alt="Spectrograms of the same 15.5-second reel in the ten music styles: each one has a different texture, drum pattern and density" width="820"></p>
+
+Nothing new is mandatory: no new dependencies, and without `locucion.json` there is no voice.
 
 ## v2: fifty reels that don't look like one
 
@@ -114,6 +129,7 @@ The `install.sh` / `install.ps1` options:
 |---|---|
 | `--dir PATH` / `-Dir PATH` | Installs into `PATH/motion-promo-reels` |
 | `--project` / `-Project` | Installs into `./.claude/skills/` of the current folder |
+| `--agents` / `-Agents` | Installs into `~/.agents/skills/`, for agents that read that folder (such as pi) |
 | `--force` / `-Force` | Replaces an existing installation (updating) |
 | `--version TAG` / `-Version TAG` | Installs a specific release instead of the latest |
 
@@ -133,7 +149,7 @@ Then just ask: *"make a promo reel for this product"*, *"research [name] and cre
 
 ## Rendering requirements
 
-Rendering runs real tools, so it works best where they're installed: Claude Code or Cowork on your own machine. In a cloud sandbox, Claude installs what's missing when it can.
+Rendering runs real tools, so it works best where they're installed: Claude Code, Cowork or any coding agent on your own machine. In a cloud sandbox, the agent installs what's missing when it can.
 
 - Node 18+ and `npm install` (installs `puppeteer-core`) inside the template you use
 - Chrome or Edge (or `CHROME_PATH`)
@@ -143,6 +159,7 @@ Rendering runs real tools, so it works best where they're installed: Claude Code
 ```bash
 cd templates/producto-9x16
 npm install
+node comprobar.js                                        # environment + data check, with fix-it messages
 node render.js all --stills 1.6,3.4,7.4,10.4,12.4,14.4   # review frames
 node render.js all                                       # final videos in out/
 ```
@@ -151,4 +168,4 @@ node render.js all                                       # final videos in out/
 
 - Code: [MIT](LICENSE).
 - Bundled fonts (Inter, Gelasio, Playfair Display, Outfit): SIL Open Font License 1.1. Each `fonts/` folder includes its license text.
-- The videos you generate are yours. Music and sound effects are synthesized in `audio.py`: no samples or third-party tracks.
+- The videos you generate are yours. Music and sound effects are synthesized in `sonido.py`: no samples or third-party tracks. A voice-over is subject to the terms of the provider you choose (ElevenLabs, Voicebox's engines…), and a cloned voice needs its owner's consent.

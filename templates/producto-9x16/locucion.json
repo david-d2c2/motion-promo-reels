@@ -1,0 +1,9 @@
+{
+  "_comentario": "Locución OPCIONAL. proveedor: ninguna | elevenlabs | voicebox | openai | comando. El guion sale solo de lo que ya está en pantalla (gancho, nombre, precio y web); para escribirlo a mano, pon 'locucion' en el producto. Detalles en templates/README.md.",
+  "proveedor": "ninguna",
+  "voz": "",
+  "modelo": "",
+  "velocidad": 1.0,
+  "tope_caracteres": 3000,
+  "etiqueta": "Voz generada con IA"
+}

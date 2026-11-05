@@ -19,13 +19,17 @@ jobs:
           path: motion-promo-reels
 
       - name: Check shared files are in sync
-        # variacion.js, variar.js y hoja.py son comunes a las tres plantillas; render.js, a las dos 9:16
+        # archivos comunes a las tres plantillas; render.js, a las dos 9:16. Y los estilos de música de
+        # sonido.py (Python) y variacion.js (JavaScript) tienen que ser los mismos.
         run: |
           cd motion-promo-reels/templates
-          for f in variacion.js variar.js hoja.py; do
+          for f in variacion.js variar.js hoja.py sonido.py voz.js comprobar.js; do
             cmp catalogo-9x16/$f producto-9x16/$f && cmp catalogo-9x16/$f persona-16x9/$f || { echo "$f differs between templates"; exit 1; }
           done
           cmp catalogo-9x16/render.js producto-9x16/render.js || { echo "render.js differs between 9:16 templates"; exit 1; }
+          py=$(python3 -c "import ast,sys;src=open('catalogo-9x16/sonido.py').read();t=ast.parse(src);n=[x for x in t.body if isinstance(x,ast.Assign) and getattr(x.targets[0],'id','')=='ESTILOS'][0];print(','.join(sorted(k.value for k in n.value.keys)))")
+          js=$(node -e "console.log(Object.keys(require('./catalogo-9x16/variacion.js').ESTILOS).sort().join(','))")
+          [ "$py" = "$js" ] || { echo "music styles differ: sonido.py=$py variacion.js=$js"; exit 1; }
 
       - name: Build zip
         run: |

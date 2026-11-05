@@ -9,11 +9,13 @@
 #
 #   -Dir PATH   skills folder to install into (the skill goes in PATH\motion-promo-reels)
 #   -Project    install into .\.claude\skills of the current folder
+#   -Agents     install into ~\.agents\skills (agents that read that folder, such as pi)
 #   -Force      replace an existing installation
 #   -Version    tag to install (default: latest)
 param(
   [string]$Dir,
   [switch]$Project,
+  [switch]$Agents,
   [switch]$Force,
   [string]$Version = 'latest'
 )
@@ -23,6 +25,10 @@ $Name = 'motion-promo-reels'
 $Repo = 'david-d2c2/motion-promo-reels'
 
 if ($Project) { $Parent = Join-Path (Join-Path (Get-Location).Path '.claude') 'skills' }
+elseif ($Agents) {
+  $UserHome = if ($env:USERPROFILE) { $env:USERPROFILE } else { $HOME }
+  $Parent = Join-Path (Join-Path $UserHome '.agents') 'skills'
+}
 elseif ($Dir) { $Parent = $ExecutionContext.SessionState.Path.GetUnresolvedProviderPathFromPSPath($Dir) }
 else {
   $UserHome = if ($env:USERPROFILE) { $env:USERPROFILE } else { $HOME }
@@ -56,7 +62,7 @@ try {
   Move-Item -LiteralPath $Src -Destination $Dest
 
   Write-Host "Installed: $Dest"
-  Write-Host 'Restart Claude Code (or open a new session) and ask: "make a promo reel for this product".'
+  Write-Host 'Restart your agent (or open a new session) and ask: "make a promo reel for this product".'
   Write-Host 'Rendering needs Node 18+, ffmpeg, Python 3 (numpy, scipy) and Chrome or Edge. See README.md.'
 }
 finally {

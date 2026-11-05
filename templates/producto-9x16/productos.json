@@ -46,11 +46,12 @@
         "tema": "claro",
         "entrada": "subir",
         "musica": {
-          "prog": 1,
-          "tono": 3,
-          "bpm": 112,
-          "timbre": "marimba",
-          "patron": "alberti"
+          "estilo": "pizzicato",
+          "sfx": "cinematico",
+          "prog": 3,
+          "tono": 0,
+          "bpm": 110,
+          "semilla": 360203
         },
         "hook": 0,
         "tiempos": [
@@ -126,11 +127,12 @@
         "tema": "oscuro",
         "entrada": "mascara",
         "musica": {
-          "prog": 3,
-          "tono": 2,
-          "bpm": 120,
-          "timbre": "pizzicato",
-          "patron": "corcheas"
+          "estilo": "acustico",
+          "sfx": "minimo",
+          "prog": 0,
+          "tono": -2,
+          "bpm": 96,
+          "semilla": 615166
         },
         "hook": 0,
         "tiempos": [
@@ -206,11 +208,12 @@
         "tema": "claro",
         "entrada": "letras",
         "musica": {
-          "prog": 1,
-          "tono": 2,
-          "bpm": 104,
-          "timbre": "celesta",
-          "patron": "alberti"
+          "estilo": "lofi",
+          "sfx": "juguete",
+          "prog": 2,
+          "tono": 3,
+          "bpm": 80,
+          "semilla": 55580
         },
         "hook": 0,
         "tiempos": [
@@ -286,11 +289,12 @@
         "tema": "oscuro",
         "entrada": "letras",
         "musica": {
-          "prog": 0,
-          "tono": -2,
-          "bpm": 120,
-          "timbre": "pizzicato",
-          "patron": "saltos"
+          "estilo": "ambiente",
+          "sfx": "digital",
+          "prog": 1,
+          "tono": 2,
+          "bpm": 70,
+          "semilla": 180506
         },
         "hook": 0,
         "tiempos": [

@@ -1,5 +1,40 @@
 # Changelog
 
+## v3 · 2026-11
+
+**They don't sound alike either, and they can talk.** v2 varied the picture, but the music was still one loop with a different tempo or timbre, and the sound effects were the same in every video.
+
+### Music (`sonido.py`, shared by the three templates)
+- **Ten styles** with their own instruments, drums, groove, mode and harmony: `piano`, `pizzicato`, `electro`, `lofi`, `funk`, `synthwave`, `acustico`, `cinematico`, `ambiente`, `house`.
+- A **seed** per video composes the melody (a two-bar motif with variations) and picks the drum pattern, fills, harmonic rhythm, arpeggio pattern and register. Measured on the same style, two seeds plus the plan's key and progression bring spectral correlation down to about 0.75.
+- **Arrangement by scenes**: sections (`intro`, `tension`, `lleno`, `ligero`, `pausa`, `final`) follow the scene timeline, with a drum fill before each cut, a cymbal into the full band and a final chord. Voice-leading between chords, swing, sidechain for four-on-the-floor styles, and a gentle cut below 110 Hz for phone speakers.
+- `python3 sonido.py --demo <folder>` renders every style; `--estilos` lists them.
+
+### Sound effects
+- Five packs (`digital`, `organico`, `cinematico`, `minimo`, `juguete`) for every effect type (cut by transition, appear, tick, check, price, outro, impact, riser, key, error, glitch, whoosh). Chimes are tuned to the music's key.
+- Each template's `audio.py` now only says *when* things happen; gag sounds (zipper, sewing machine, scissors, shine) stay in the template.
+
+### Variation
+- `plan.musica` gains `estilo`, `sfx`, `bpm` (inside the style's range) and `semilla`; the planner balances styles and packs across the batch and keeps neighbours apart. `VARIACION.md` reports neighbours sharing a music style.
+- Plans kept from v2 (no style) get music only; their visuals stay as they were.
+- `variacion.json` (any template) restricts options to the brand and takes priority over the `variacion` blocks.
+
+### Voice-over (`voz.js`, optional)
+- Providers: `elevenlabs`, `voicebox` (local, OpenAI-compatible endpoint), `openai` (any `/v1/audio/speech` server), `comando` (any local TTS), `ninguna`.
+- The default script only uses on-screen text (hook, name, price, website); prices and domains are written as they are spoken. Hand-written scripts per product or per person video.
+- One take per sentence, cached by provider, voice, model and text; ElevenLabs runs stop at `tope_caracteres` unless `--confirmar`, and spending is logged. Neighbouring sentences are sent as context. Keys come from the environment or `~/.config/motion-promo-reels/env`, never from the project.
+- Silence trimming, placement without overlaps (up to 15 % faster, then low-priority lines dropped, with warnings), ducking of music (~−10 dB) and effects, `.srt` next to each MP4, and an optional "Voz generada con IA" label in the outro.
+- Tested against servers that implement the documented ElevenLabs and Voicebox requests (headers, paths, bodies, errors), and with a local command. Not tested against the live services from the build environment.
+
+### Any model
+- `comprobar.js`: environment (Node, ffmpeg, Python, Chrome, dependencies, style lists in sync) and every data file, with "where → what → how to fix" messages. `render.js` runs the data check first and stops on errors.
+- `SKILL.md` opens with a step-by-step quick path and stop conditions.
+- `install.sh --agents` / `install.ps1 -Agents` install into `~/.agents/skills` (agents such as pi); installer messages no longer assume Claude Code.
+- The release workflow also checks `sonido.py`, `voz.js` and `comprobar.js` are identical in the three templates, and that the music styles match between Python and JavaScript.
+
+### Compatibility
+- No new dependencies. Without `locucion.json`, no voice. The visuals are unchanged; the audio of existing plans now uses the style engine (the v2 plans' music is regenerated with a style).
+
 ## v2 · 2026-11
 
 **No two videos built the same way.** In v1 every video of a template shared the timeline, layout, transition, colors, music and, within a catalog category, the hook text. v2 gives every video a construction plan, in all three templates.

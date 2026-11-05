@@ -5,3 +5,5 @@ stills/
 *.wav
 REVISAR.md
 VARIACION.md
+__pycache__/
+*.pyc

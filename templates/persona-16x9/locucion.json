@@ -1,0 +1,18 @@
+{
+  "_comentario": "Locución OPCIONAL. proveedor: ninguna | elevenlabs | voicebox | openai | comando. 'lineas': t = segundo en el que empieza cada frase; di solo lo que sale en pantalla (los datos de CFG). Detalles en templates/README.md.",
+  "proveedor": "ninguna",
+  "voz": "",
+  "modelo": "",
+  "velocidad": 1.0,
+  "tope_caracteres": 3000,
+  "etiqueta": "Voz generada con IA",
+  "lineas": [
+    { "t": 0.3, "texto": "Investigar a Alex Ejemplo." },
+    { "t": 2.4, "texto": "Tres resultados. Ninguno es él." },
+    { "t": 5.3, "texto": "Fuente encontrada: alexejemplo.com." },
+    { "t": 7.8, "texto": "Más de 80 proyectos. 8 años de experiencia." },
+    { "t": 11.6, "texto": "Método PASO: plan, arquitectura, sistema y operación." },
+    { "t": 20.8, "texto": "La herramienta ayuda, pero el criterio decide." },
+    { "t": 23.4, "texto": "Alex Ejemplo. alexejemplo.com." }
+  ]
+}

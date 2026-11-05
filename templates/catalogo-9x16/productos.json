@@ -90,22 +90,23 @@
         "v": 2,
         "temporada": "2026-11",
         "orden": "datos,rango,precio",
-        "hero": "tarjeta",
+        "hero": "arco",
         "rango": "regla",
-        "datos": "apiladas",
-        "precio": "grande",
-        "trans": "persiana",
-        "tema": "claro",
-        "entrada": "letras",
+        "datos": "lista",
+        "precio": "sello",
+        "trans": "empuje",
+        "tema": "acento",
+        "entrada": "subir",
         "alin": "centro",
-        "hook": 1,
         "musica": {
-          "prog": 3,
+          "estilo": "funk",
+          "sfx": "cinematico",
+          "prog": 0,
           "tono": -2,
-          "bpm": 102,
-          "timbre": "pizzicato",
-          "patron": "saltos"
+          "bpm": 106,
+          "semilla": 748970
         },
+        "hook": 1,
         "tiempos": [
           {
             "n": "hook",
@@ -195,23 +196,24 @@
       "plan": {
         "v": 2,
         "temporada": "2026-11",
-        "orden": "precio,datos,rango",
-        "hero": "arco",
-        "rango": "pildoras",
-        "datos": "lista",
-        "precio": "etiqueta",
-        "trans": "zoom",
-        "tema": "acento",
-        "entrada": "subir",
+        "orden": "precio,rango,datos",
+        "hero": "tarjeta",
+        "rango": "rejilla",
+        "datos": "numerada",
+        "precio": "grande",
+        "trans": "iris",
+        "tema": "claro",
+        "entrada": "letras",
         "alin": "centro",
-        "hook": 1,
         "musica": {
-          "prog": 0,
-          "tono": 3,
-          "bpm": 108,
-          "timbre": "celesta",
-          "patron": "alberti"
+          "estilo": "pizzicato",
+          "sfx": "minimo",
+          "prog": 2,
+          "tono": -1,
+          "bpm": 118,
+          "semilla": 72754
         },
+        "hook": 1,
         "tiempos": [
           {
             "n": "hook",
@@ -229,13 +231,13 @@
             "b": 7.6
           },
           {
-            "n": "datos",
+            "n": "rango",
             "a": 7.6,
-            "b": 10.2
+            "b": 10.6
           },
           {
-            "n": "rango",
-            "a": 10.2,
+            "n": "datos",
+            "a": 10.6,
             "b": 13.2
           },
           {
@@ -305,23 +307,24 @@
       "plan": {
         "v": 2,
         "temporada": "2026-11",
-        "orden": "datos,precio,rango",
+        "orden": "precio,rango,datos",
         "hero": "difuso",
-        "rango": "regla",
-        "datos": "numerada",
-        "precio": "sello",
-        "trans": "barrido",
+        "rango": "pildoras",
+        "datos": "apiladas",
+        "precio": "etiqueta",
+        "trans": "diagonal",
         "tema": "oscuro",
-        "entrada": "letras",
+        "entrada": "subir",
         "alin": "centro",
-        "hook": 2,
         "musica": {
-          "prog": 2,
-          "tono": 2,
-          "bpm": 108,
-          "timbre": "celesta",
-          "patron": "corcheas"
+          "estilo": "synthwave",
+          "sfx": "digital",
+          "prog": 3,
+          "tono": 3,
+          "bpm": 100,
+          "semilla": 843659
         },
+        "hook": 2,
         "tiempos": [
           {
             "n": "hook",
@@ -334,18 +337,18 @@
             "b": 5.8
           },
           {
-            "n": "datos",
-            "a": 5.8,
-            "b": 8.4
-          },
-          {
             "n": "precio",
-            "a": 8.4,
-            "b": 10.2
+            "a": 5.8,
+            "b": 7.6
           },
           {
             "n": "rango",
-            "a": 10.2,
+            "a": 7.6,
+            "b": 10.6
+          },
+          {
+            "n": "datos",
+            "a": 10.6,
             "b": 13.2
           },
           {
@@ -410,23 +413,24 @@
       "plan": {
         "v": 2,
         "temporada": "2026-11",
-        "orden": "rango,datos,precio",
-        "hero": "arco",
+        "orden": "precio,datos,rango",
+        "hero": "difuso",
         "rango": "rejilla",
-        "datos": "apiladas",
-        "precio": "grande",
-        "trans": "iris",
-        "tema": "oscuro",
+        "datos": "lista",
+        "precio": "sello",
+        "trans": "zoom",
+        "tema": "claro",
         "entrada": "mascara",
         "alin": "centro",
-        "hook": 1,
         "musica": {
-          "prog": 2,
+          "estilo": "house",
+          "sfx": "organico",
+          "prog": 1,
           "tono": 0,
-          "bpm": 96,
-          "timbre": "piano",
-          "patron": "saltos"
+          "bpm": 124,
+          "semilla": 86786
         },
+        "hook": 1,
         "tiempos": [
           {
             "n": "hook",
@@ -439,18 +443,18 @@
             "b": 5.8
           },
           {
-            "n": "rango",
+            "n": "precio",
             "a": 5.8,
-            "b": 8.8
+            "b": 7.6
           },
           {
             "n": "datos",
-            "a": 8.8,
-            "b": 11.4
+            "a": 7.6,
+            "b": 10.2
           },
           {
-            "n": "precio",
-            "a": 11.4,
+            "n": "rango",
+            "a": 10.2,
             "b": 13.2
           },
           {
