@@ -36,6 +36,7 @@ La v2 variaba la imagen; la música seguía siendo un mismo loop con otro tempo 
 - **El arreglo sigue las escenas**: intro despejada bajo el gag, la banda entera con el producto, una base más ligera mientras se leen los datos, un relleno de batería antes de cada corte y un acorde final.
 - **Cinco paquetes de efectos** (`digital`, `organico`, `cinematico`, `minimo`, `juguete`), con las campanas afinadas en la tonalidad de la música.
 - **Locución opcional** con ElevenLabs, [Voicebox](https://github.com/jamiepine/voicebox) (local y gratis) o cualquier comando de voz local. Solo dice lo que sale en pantalla, guarda cada frase en caché (volver a renderizar es gratis), se para en un tope de caracteres, baja la música unos 10 dB y escribe un `.srt`.
+- **Elige el aspecto con palabras** (v3.1): `node variar.js --opciones` enseña el menú; `node variar.js --preferencias musica=tranquila colores=claro` orienta todos los vídeos sin fijarlos. Si el encargo no dice nada del tono, la skill hace una sola pregunta.
 - **Pensada para cualquier modelo:** `node comprobar.js` revisa el entorno y los datos y dice dónde está cada problema y cómo arreglarlo; `SKILL.md` empieza con una ruta rápida paso a paso, y `install.sh --agents` la instala en `~/.agents/skills` para agentes como pi.
 
 <p align="center"><img src="assets/estilos.jpg" alt="Espectrogramas del mismo reel de 15,5 segundos en los diez estilos de música: cada uno tiene textura, batería y densidad distintas" width="820"></p>

@@ -36,6 +36,7 @@ v2 varied the picture; the music was still one loop with a different tempo or ti
 - **The arrangement follows the scenes**: a sparse intro under the gag, the full band with the product, a lighter bed while facts are read, a drum fill before each cut and a final chord.
 - **Five sound-effect packs** (`digital`, `organico`, `cinematico`, `minimo`, `juguete`), with chimes tuned to the music's key.
 - **Optional voice-over** with ElevenLabs, [Voicebox](https://github.com/jamiepine/voicebox) (local and free) or any local TTS command. It only says what is on screen, caches every sentence (re-renders are free), stops at a character budget, ducks the music about 10 dB and writes an `.srt`.
+- **Choose the look in plain words** (v3.1): `node variar.js --opciones` shows the menu; `node variar.js --preferencias musica=tranquila colores=claro` steers every video without fixing it. If a request says nothing about tone, the skill asks one question.
 - **Built to be run by any model:** `node comprobar.js` checks the environment and the data and says where each problem is and how to fix it; `SKILL.md` opens with a step-by-step quick path; `install.sh --agents` installs into `~/.agents/skills` for agents such as pi.
 
 <p align="center"><img src="assets/estilos.jpg" alt="Spectrograms of the same 15.5-second reel in the ten music styles: each one has a different texture, drum pattern and density" width="820"></p>

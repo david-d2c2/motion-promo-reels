@@ -1,6 +1,16 @@
 // Planificador de variación (v2). Archivo COMÚN a las tres plantillas; cada una declara su perfil en package.json
 // ("perfilVariacion": "catalogo" | "producto" | "persona").
 //
+// Elegir el aspecto (v3.1):
+//   node variar.js --opciones                  menú de todo lo que se puede elegir, en palabras (--json para máquinas)
+//   node variar.js --preferencias musica=tranquila efectos=sutiles colores=claro movimiento=suave
+//                                              traduce preferencias a variacion.json y replanifica lo que no las cumpla
+//      musica:     tranquila · elegante · energica · divertida · tecnologica · acustica · epica · variada
+//      efectos:    sutiles · divertidos · tecnologicos · cinematograficos · variados
+//      colores:    claro · oscuro · color · variado
+//      movimiento: suave · dinamico · variado        (también nombres exactos: estilo=lofi,piano  tema=claro)
+//   node variar.js --preferencias limpiar      vuelve a permitirlo todo
+//
 // Catálogo y producto (planes en productos.json; el orden del archivo es el ORDEN DE PUBLICACIÓN):
 //   node variar.js                       planifica los productos que aún no tienen plan (conserva el resto)
 //   node variar.js --temporada 2027-01   temporada nueva: planes nuevos para todo el lote (para republicar)
@@ -71,6 +81,57 @@ ${items.map(fila).join('\n')}
   fs.writeFileSync(path.join(ROOT, 'VARIACION.md'), md);
 }
 
+// ---------------------------------------------------------------- menú de opciones
+function opciones(args) {
+  const cfg = leerCfg();
+  const marca = (() => { try { return JSON.parse(fs.readFileSync(path.join(ROOT, 'productos.json'), 'utf8')).marca || {}; } catch { return {}; } })();
+  const ejes = ['estilo', 'sfx', 'tema', 'paleta', 'trans', 'entrada', 'hero', 'rango', 'colores', 'datos', 'precio', 'titulo', 'cifras', 'metodo', 'stack', 'fondo']
+    .filter(k => VP.OPCIONES[k]);
+  const temaOk = n => !VP.P.colores || VP.tema(marca.colores, n).ok;
+  const menu = ejes.map(k => ({ eje: k, nombre: V.EJES[k] || k, permitidas: cfg[k] || null,
+    opciones: VP.OPCIONES[k].map(o => ({ id: o, que: (V.DESC[k] || {})[o] || '', tempo: k === 'estilo' ? V.ESTILOS[o] : undefined,
+      contraste: k === 'tema' ? temaOk(o) : undefined })) }));
+  if (args.includes('--json')) return console.log(JSON.stringify({ plantilla: PERFIL, menu, preferencias: Object.fromEntries(Object.entries(V.PREFERENCIAS).map(([k, v]) => [k, Object.keys(v)])) }, null, 2));
+  const formato = { catalogo: 'vertical 9:16, 15,5 s (Reels, TikTok, Shorts)', producto: 'vertical 9:16, 15,5 s (Reels, TikTok, Shorts)', persona: 'horizontal 16:9, 27 s (web, YouTube, LinkedIn)' }[PERFIL];
+  console.log(`Plantilla: ${PERFIL} · formato ${formato}\n`);
+  for (const m of menu) {
+    console.log(`${m.nombre}${m.permitidas ? `  (ahora limitado a: ${m.permitidas.join(', ')})` : ''}`);
+    for (const o of m.opciones) {
+      const extra = o.tempo ? ` · ${o.tempo[0]}-${o.tempo[1]} BPM` : o.contraste === false ? ' · no disponible: los colores de la marca no dan contraste suficiente' : '';
+      console.log(`  ${(m.permitidas && !m.permitidas.includes(o.id) ? '·' : '-')} ${o.id.toString().padEnd(11)} ${o.que}${extra}`);
+    }
+    console.log('');
+  }
+  console.log('Sin preferencias, cada vídeo combina todo esto y ninguno se parece a su vecino.');
+  console.log('Para acotarlo en palabras:  node variar.js --preferencias musica=tranquila efectos=sutiles colores=claro movimiento=suave');
+  console.log('  ' + Object.entries(V.PREFERENCIAS).map(([k, v]) => `${k}: ${Object.keys(v).join(' · ')}`).join('\n  '));
+  console.log('O con nombres exactos:      node variar.js --preferencias estilo=lofi,piano tema=claro');
+}
+
+function preferencias(args) {
+  const f = path.join(ROOT, 'variacion.json');
+  const pares = args.slice(args.indexOf('--preferencias') + 1).filter(a => !a.startsWith('--'));
+  if (!pares.length) throw new Error('Faltan preferencias. Ejemplo: node variar.js --preferencias musica=tranquila colores=claro (node variar.js --opciones las lista)');
+  if (pares[0] === 'limpiar') {
+    if (fs.existsSync(f)) fs.unlinkSync(f);
+    console.log('Sin restricciones: se puede usar todo (variacion.json borrado).');
+  } else {
+    const base = fs.existsSync(f) ? JSON.parse(fs.readFileSync(f, 'utf8')) : {};
+    const { cfg, notas, errores } = V.traducirPreferencias(PERFIL, pares, base);
+    if (errores.length) { for (const e of errores) console.error('ERROR  ' + e); process.exit(1); }
+    fs.writeFileSync(f, JSON.stringify(cfg, null, 2) + '\n');
+    console.log('Preferencias: ' + notas.join(' · '));
+    for (const [k, v] of Object.entries(cfg)) if (Array.isArray(v)) console.log(`  ${(V.EJES[k] || k).padEnd(19)} ${v.join(', ')}`);
+    if (cfg.tema && VP.P.colores) {
+      const marca = (() => { try { return JSON.parse(fs.readFileSync(path.join(ROOT, 'productos.json'), 'utf8')).marca || {}; } catch { return {}; } })();
+      const malos = cfg.tema.filter(n => !VP.tema(marca.colores, n).ok);
+      if (malos.length) console.log(`Aviso: con los colores de esta marca, ${malos.join(', ')} no da contraste suficiente y no se usará.`);
+    }
+  }
+  if (PERFIL === 'persona') { console.log('Ahora genera las versiones: node variar.js 3'); return; }
+  main(['--sin-preferencias']); // replanifica: los planes que no cumplan lo nuevo se rehacen, el resto se conserva
+}
+
 function mainPersona(args, cfg) {
   const n = Math.max(1, Math.min(26, parseInt(args.find(a => /^\d+$/.test(a)) || '3', 10)));
   const i = args.indexOf('--temporada');
@@ -85,8 +146,10 @@ function mainPersona(args, cfg) {
   console.log(`OK: ${n} versiones (temporada ${temporada}) -> versiones.json · distancia mínima ${inf.distanciaMinVecinos}/${inf.maximo} -> VARIACION.md`);
 }
 
-function main() {
-  const args = process.argv.slice(2);
+function main(argv) {
+  const args = argv || process.argv.slice(2);
+  if (args.includes('--opciones')) return opciones(args);
+  if (args.includes('--preferencias')) return preferencias(args);
   const cfg = leerCfg();
   if (PERFIL === 'persona') return mainPersona(args, cfg);
   const FILE = path.join(ROOT, 'productos.json');
@@ -109,5 +172,5 @@ function main() {
     `distancia mínima entre vecinos ${inf.distanciaMinVecinos}/${inf.maximo} · media ${inf.distanciaMediaVecinos} -> VARIACION.md`);
 }
 
-if (require.main === module) main();
+if (require.main === module) { try { main(); } catch (e) { console.error('ERROR  ' + e.message); process.exit(1); } }
 module.exports = { main };
