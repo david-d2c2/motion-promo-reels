@@ -1,5 +1,5 @@
 {
-  "_comentario": "Locución OPCIONAL. proveedor: ninguna | elevenlabs | voicebox | openai | comando. 'lineas': t = segundo en el que empieza cada frase; di solo lo que sale en pantalla (los datos de CFG). Detalles en templates/README.md.",
+  "_comentario": "Locución OPCIONAL. proveedor: ninguna | piper (gratis y local: node voz.js --instalar piper es) | elevenlabs | voicebox | openai | comando. 'lineas': t = segundo en el que empieza cada frase; di solo lo que sale en pantalla (los datos de CFG). Detalles en templates/README.md.",
   "proveedor": "ninguna",
   "voz": "",
   "modelo": "",

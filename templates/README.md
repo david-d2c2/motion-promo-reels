@@ -152,10 +152,11 @@ Optional. With no `locucion.json`, or `"proveedor": "ninguna"`, nothing changes.
 
 | `proveedor` | Notes |
 |---|---|
+| `piper` | **Free and local.** `node voz.js --instalar piper es` (or `en`, or a voice name) installs Piper in its own environment under `~/.cache/motion-promo-reels/piper` (~180 MB + ~60 MB per voice, internet needed once) and sets `locucion.json`. Default voices: `es_ES-davefx-medium`, `en_US-lessac-medium`. `node voz.js --voces` shows what is installed. Delete that folder to uninstall. Piper is GPL-3.0 and runs as a separate program; each voice has its own license. |
 | `elevenlabs` | Key in `ELEVENLABS_API_KEY` or in `~/.config/motion-promo-reels/env` as `ELEVENLABS_API_KEY=...` (`chmod 600`). Never in the project. |
 | `voicebox` | Local and free. `"voz"`: profile name or id; `"url"` defaults to `http://127.0.0.1:17493`. The language comes from the profile. |
 | `openai` | Any `POST /v1/audio/speech` server: `"url"`, `"modelo"`, `"voz"`; key in `OPENAI_API_KEY` if needed. |
-| `comando` | Any local program: `"comando": "piper --model es_ES.onnx --output_file {salida}"` (text on stdin, or use `{texto}`). |
+| `comando` | Any program: `"comando": "say -v Monica -o {salida} {texto}", "extension": "aiff"` (macOS), or edge-tts — free but online and unofficial, check its terms before commercial use: `"comando": "edge-tts --voice es-ES-ElviraNeural --text {texto} --write-media {salida}", "extension": "mp3"`. Without `{texto}`, the text arrives on stdin. |
 
 - The narration only uses what is on screen: hook, product name, price and website (9:16), or `"lineas": [{"t": 2.4, "texto": "..."}]` (person). Per product: `"locucion": [{"escena": "precio", "texto": "Desde 9,90 €"}]` or `"locucion": false`.
 - Takes are cached per sentence, so re-rendering costs nothing. ElevenLabs stops at `tope_caracteres` unless you add `--confirmar`.

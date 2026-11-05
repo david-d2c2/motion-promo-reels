@@ -23,7 +23,7 @@ The templates do the hard work; you only edit data files and run commands. Follo
 1. Copy the template folder (table in section 0) into the user's project, then inside it: `npm install`.
 2. `node comprobar.js` → must end with `OK`. It checks Node, ffmpeg, Python (numpy, scipy), Chrome and the data, and every error says where it is, what is wrong and how to fix it.
 3. Edit **only** the data: `productos.json` (+ `config.json` for a catalog) or the `CFG` block at the top of `anim.html` (person). Real data only (section 1). Gag and hook: section 2.
-4. The look (section 3a): if the request says nothing about tone, ask **one** question; then `node variar.js --preferencias ...`. Optional: `locucion.json` for a voice-over (section 3c).
+4. The look (section 3a): if the request says nothing about tone, ask **one** question; then `node variar.js --preferencias ...`. Voice-over is optional (section 3c): ask before installing anything.
 5. `node variar.js` (person: `node variar.js 3`) → plans; read `VARIACION.md`.
 6. Review frames: `node render.js all --hoja` (person: `node render.js hoja`) → **open `out/hoja_01.jpg` and look at it**. Fix text that overflows or overlaps (section 6).
 7. Final videos: `node render.js all` (person: `node render.js video promo_A.mp4 --version A`). `render.js` validates the data again and stops with a clear message if something is wrong.
@@ -160,8 +160,13 @@ Rules:
 
 A video without `locucion.json` (or with `"proveedor": "ninguna"`) renders exactly as before. With it, `render.js` writes a narration, synthesizes it, ducks music (~−10 dB) and effects under it, and saves an `.srt` next to the MP4.
 
+**If the user wants a voice and none is set up, ask before installing anything** — one question:
+*No voice* · *Free and local (Piper, Spanish or English; downloads ~240 MB once, then works offline; sounds clear but less natural)* · *ElevenLabs (paid, the most natural; needs their API key)* · *Voicebox (if they already use it)*.
+Only after an explicit yes to the free option: `node voz.js --instalar piper es` (or `en`). It installs Piper into its own Python environment under `~/.cache/motion-promo-reels/piper` (the system Python is not touched; deleting that folder uninstalls it), downloads the voice and sets `locucion.json`. It needs internet once (pypi.org and huggingface.co); in a sandbox without it, say so and give the user the same command to run on their machine.
+
 | `proveedor` | What it is | Setup |
 |---|---|---|
+| `piper` | Piper: free, local, offline once installed | `node voz.js --instalar piper es\|en\|<voice>` (with the user's consent). `"idioma"` picks `es_ES-davefx-medium` or `en_US-lessac-medium`; any other voice from huggingface.co/rhasspy/piper-voices goes in `"voz"`. Each voice has its own license (MODEL_CARD): check it before commercial use. |
 | `elevenlabs` | ElevenLabs API | `"voz"`: voice_id. Key in `ELEVENLABS_API_KEY` or `~/.config/motion-promo-reels/env` (`chmod 600`). `"modelo"` defaults to `eleven_multilingual_v2`. |
 | `voicebox` | Voicebox, local and free (`http://127.0.0.1:17493`, OpenAI-compatible endpoint) | `"voz"`: profile name or id. The language comes from the profile: create it in the target language. Open the app before rendering. |
 | `openai` | Any server with `POST /v1/audio/speech` | `"url"`, `"modelo"`, `"voz"`; key in `OPENAI_API_KEY` if it needs one. |
