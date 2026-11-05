@@ -92,6 +92,8 @@ motion-promo-reels/
 ├── SKILL.md                    instrucciones para Claude (el método completo)
 ├── install.sh / install.ps1    instaladores de una línea (curl / PowerShell)
 ├── assets/                     imágenes de este README
+├── references/                 detalles que SKILL.md carga solo cuando hacen falta (aspecto, variación, voz, motor, catálogo)
+├── core/                       el motor común, una sola vez: comun/ (las tres plantillas), 9x16/, nuevo.js, VERSION
 └── templates/
     ├── README.md               qué tocar primero en cada plantilla
     ├── persona-16x9/           marca personal (config CFG al inicio de anim.html + versiones.json)
@@ -148,6 +150,8 @@ git clone https://github.com/david-d2c2/motion-promo-reels ~/.claude/skills/moti
 
 > Para esto no uses el botón verde *Code → Download ZIP* de GitHub: nombra la carpeta `motion-promo-reels-main`, y claude.ai exige que la carpeta se llame igual que la skill (`motion-promo-reels`). El zip de la *release* ya tiene la estructura correcta.
 
+**Actualizar.** Reinstala la skill (`--force` / `-Force`, `git pull` o un zip nuevo en claude.ai). Los proyectos que ya tienes llevan su propia copia del motor; para ponerlos al día sin tocar sus datos: `node <carpeta de la skill>/core/nuevo.js --actualizar <proyecto>`.
+
 Después basta con pedirlo: *«hazme un reel promocional de este producto»*, *«investiga a [nombre] y crea un vídeo promocional con motion graphics»*, *«genera un reel por cada producto de mi tienda»*.
 
 ## Requisitos para renderizar
@@ -160,7 +164,8 @@ El render usa herramientas reales, así que donde mejor funciona es en Claude Co
 - Python 3 con `numpy` y `scipy` (y `Pillow` para las hojas de contactos del lote)
 
 ```bash
-cd templates/producto-9x16
+node core/nuevo.js producto ~/reels/mi-tienda              # plantilla + motor en una carpeta nueva
+cd ~/reels/mi-tienda
 npm install
 node comprobar.js                                        # comprueba entorno y datos, con mensajes para arreglarlo
 node render.js all --stills 1.6,3.4,7.4,10.4,12.4,14.4   # revisar

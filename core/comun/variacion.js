@@ -1,5 +1,5 @@
-// Variación de vídeos (v2). Núcleo COMÚN a las tres plantillas: el mismo archivo vive en
-// catalogo-9x16/, producto-9x16/ y persona-16x9/ (si lo cambias en una, cópialo a las otras).
+// Variación de vídeos (v2). Núcleo COMÚN a las tres plantillas. La fuente única es core/comun/ en la skill;
+// cada proyecto lleva su copia (node core/nuevo.js). Para actualizarla: node core/nuevo.js --actualizar <proyecto>.
 // Cada plantilla elige su perfil:  VAR.perfil('catalogo' | 'producto' | 'persona').
 //
 // Lo usan:

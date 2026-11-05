@@ -92,6 +92,8 @@ motion-promo-reels/
 ├── SKILL.md                    instructions for Claude (the full method)
 ├── install.sh / install.ps1    one-line installers (curl / PowerShell)
 ├── assets/                     images for this README
+├── references/                 details SKILL.md loads only when needed (look, variation, voice, engine, catalog data)
+├── core/                       the shared engine, kept once: comun/ (all templates), 9x16/, nuevo.js, VERSION
 └── templates/
     ├── README.md               what to change first in each template
     ├── persona-16x9/           personal brand (CFG block at the top of anim.html + versiones.json)
@@ -146,6 +148,8 @@ git clone https://github.com/david-d2c2/motion-promo-reels ~/.claude/skills/moti
 
 > Don't use GitHub's green *Code → Download ZIP* button for this: it names the folder `motion-promo-reels-main`, and claude.ai requires the folder to match the skill name (`motion-promo-reels`). The release zip is built with the right layout.
 
+**Updating.** Reinstall the skill (`--force` / `-Force`, `git pull`, or a new zip on claude.ai). Projects you already made keep their own copy of the engine; bring one up to date without touching its data with `node <skill folder>/core/nuevo.js --actualizar <project>`.
+
 Then just ask: *"make a promo reel for this product"*, *"research [name] and create a promotional video with motion graphics"*, *"generate one reel for every product in my store"*.
 
 ## Rendering requirements
@@ -158,7 +162,8 @@ Rendering runs real tools, so it works best where they're installed: Claude Code
 - Python 3 with `numpy` and `scipy` (plus `Pillow` for the batch contact sheets)
 
 ```bash
-cd templates/producto-9x16
+node core/nuevo.js producto ~/reels/my-shop                # template + engine in a new folder
+cd ~/reels/my-shop
 npm install
 node comprobar.js                                        # environment + data check, with fix-it messages
 node render.js all --stills 1.6,3.4,7.4,10.4,12.4,14.4   # review frames

@@ -1,4 +1,4 @@
-// Render de reels 9:16 (plantillas catalogo-9x16 y producto-9x16: el mismo archivo en las dos).
+// Render de reels 9:16 (común a catalogo-9x16 y producto-9x16; fuente única: core/9x16/ en la skill).
 // Uso:
 //   node render.js all                 -> renderiza todos los productos de productos.json
 //   node render.js mi-producto        -> solo uno
