@@ -1,5 +1,15 @@
 # Changelog
 
+## v3.1 · 2026-11
+
+**Choosing the look.** Until now the options were only documented in tables, and nothing told the agent to offer them.
+
+- `node variar.js --opciones`: a menu of everything that can be chosen in the template (music styles with tempo, effect packs, colors, transitions, layouts per scene), one line each, with the current restrictions and the themes the brand's colors can't support. `--json` for tools.
+- `node variar.js --preferencias musica=tranquila efectos=sutiles colores=claro movimiento=suave`: plain-word preferences translated into `variacion.json` (exact names also work; `limpiar` removes them). Earlier preferences are kept.
+- `SKILL.md` section 3a: the format comes from the template; if a request says nothing about tone, ask one question, translate it, never invent option names; a table from common phrases to preferences.
+- Fixed: plans kept from earlier runs now must comply with the current restrictions. Before, changing `variacion.json` left existing plans untouched. Now visuals that don't comply are re-planned, music that doesn't comply gets new music only, and the rest stays as it was.
+- `comprobar.js` accepts a person's own palettes from `CFG.paletas` in `variacion.json`.
+
 ## v3 · 2026-11
 
 **They don't sound alike either, and they can talk.** v2 varied the picture, but the music was still one loop with a different tempo or timbre, and the sound effects were the same in every video.

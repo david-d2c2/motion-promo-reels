@@ -94,6 +94,26 @@ Keys: `orden`, `hero` (`tarjeta`, `difuso`, `arco`), `rango` (`pildoras`, `regla
 
 In any template, a `variacion.json` file takes priority over the `variacion` block in `config.json` or `productos.json`.
 
+## Choosing the look (v3.1)
+
+The format comes from the template (products and catalogs: vertical 9:16; personal brand: horizontal 16:9). Everything else is chosen per video; you can steer it in plain words:
+
+```bash
+node variar.js --opciones                      # menu of everything that can be chosen, with descriptions (--json for tools)
+node variar.js --preferencias musica=tranquila efectos=sutiles colores=claro movimiento=suave
+node variar.js --preferencias estilo=lofi,piano tema=claro       # exact names
+node variar.js --preferencias limpiar                            # back to everything
+```
+
+| Preference | Values |
+|---|---|
+| `musica` | `tranquila`, `elegante`, `energica`, `divertida`, `tecnologica`, `acustica`, `epica`, `variada` |
+| `efectos` | `sutiles`, `divertidos`, `tecnologicos`, `cinematograficos`, `variados` |
+| `colores` | `claro`, `oscuro`, `color` (brand accent), `variado` |
+| `movimiento` | `suave`, `dinamico`, `variado` |
+
+It writes `variacion.json`, keeps earlier preferences, and re-plans only the videos that no longer comply (the rest stay as they were). A theme the brand's colors can't support with enough contrast is announced and skipped. In `persona-16x9`, `colores` picks palettes, and your own palette from `CFG.paletas` can be named directly (`paleta=marca,neon`); then run `node variar.js 3`.
+
 ## Music and sound effects (v3)
 
 `sonido.py` (shared) builds the soundtrack; each `audio.py` only says *when* things happen. `node variar.js` writes into every plan a music **style**, a tempo inside its range, key, progression, a **seed** and a **sound-effects pack**, and keeps neighbouring videos in different styles.

@@ -94,6 +94,26 @@ Claves: `orden`, `hero` (`tarjeta`, `difuso`, `arco`), `rango` (`pildoras`, `reg
 
 En cualquier plantilla, un archivo `variacion.json` tiene prioridad sobre el bloque `variacion` de `config.json` o `productos.json`.
 
+## Elegir el aspecto (v3.1)
+
+El formato lo pone la plantilla (producto y catálogo: vertical 9:16; marca personal: horizontal 16:9). Todo lo demás se elige vídeo a vídeo, y se puede orientar con palabras normales:
+
+```bash
+node variar.js --opciones                      # menú de todo lo que se puede elegir, con descripción (--json para herramientas)
+node variar.js --preferencias musica=tranquila efectos=sutiles colores=claro movimiento=suave
+node variar.js --preferencias estilo=lofi,piano tema=claro       # nombres exactos
+node variar.js --preferencias limpiar                            # volver a permitirlo todo
+```
+
+| Preferencia | Valores |
+|---|---|
+| `musica` | `tranquila`, `elegante`, `energica`, `divertida`, `tecnologica`, `acustica`, `epica`, `variada` |
+| `efectos` | `sutiles`, `divertidos`, `tecnologicos`, `cinematograficos`, `variados` |
+| `colores` | `claro`, `oscuro`, `color` (el acento de la marca), `variado` |
+| `movimiento` | `suave`, `dinamico`, `variado` |
+
+Escribe `variacion.json`, conserva las preferencias anteriores y replanifica solo los vídeos que ya no las cumplen (el resto se queda como estaba). Si los colores de la marca no dan contraste suficiente para un tema, lo avisa y no lo usa. En `persona-16x9`, `colores` elige paletas, y una paleta propia de `CFG.paletas` se puede nombrar directamente (`paleta=marca,neon`); después, `node variar.js 3`.
+
 ## Música y efectos (v3)
 
 `sonido.py` (común) hace la banda sonora; cada `audio.py` solo dice *cuándo* pasa cada cosa. `node variar.js` escribe en cada plan un **estilo** de música, un tempo dentro de su rango, tonalidad, progresión, una **semilla** y un **paquete de efectos**, y evita que dos vídeos vecinos compartan estilo.

@@ -23,7 +23,7 @@ The templates do the hard work; you only edit data files and run commands. Follo
 1. Copy the template folder (table in section 0) into the user's project, then inside it: `npm install`.
 2. `node comprobar.js` → must end with `OK`. It checks Node, ffmpeg, Python (numpy, scipy), Chrome and the data, and every error says where it is, what is wrong and how to fix it.
 3. Edit **only** the data: `productos.json` (+ `config.json` for a catalog) or the `CFG` block at the top of `anim.html` (person). Real data only (section 1). Gag and hook: section 2.
-4. Optional: `variacion.json` to restrict options to the brand (e.g. `{"estilo": ["piano", "lofi", "acustico"], "tema": ["claro"]}`), and `locucion.json` for a voice-over (section 3c).
+4. The look (section 3a): if the request says nothing about tone, ask **one** question; then `node variar.js --preferencias ...`. Optional: `locucion.json` for a voice-over (section 3c).
 5. `node variar.js` (person: `node variar.js 3`) → plans; read `VARIACION.md`.
 6. Review frames: `node render.js all --hoja` (person: `node render.js hoja`) → **open `out/hoja_01.jpg` and look at it**. Fix text that overflows or overlaps (section 6).
 7. Final videos: `node render.js all` (person: `node render.js video promo_A.mp4 --version A`). `render.js` validates the data again and stops with a clear message if something is wrong.
@@ -101,6 +101,34 @@ In both 9:16 templates the three middle scenes change order and layout per reel;
 
 **16:9 person or brand (27 s):** terminal → namesakes crossed out with a glitch → drop (source found + headline) → stats with counters → method in phases → tool stack marquee (freezes on a self-referential item: "↑ that's me") → "THIS VIDEO: 0 templates · N lines of code" (real count) → the person's quote → outro with monogram, name and CTA.
 
+## 3a. Choosing the look (v3.1)
+
+The **format** comes from the template: products and catalogs are vertical 9:16 (Reels, TikTok, Shorts); a personal brand is horizontal 16:9. If the user asks for a format a template doesn't have (a vertical personal video, a horizontal product reel), say so in one line: it needs adapting the engine by hand.
+
+Everything else (music, sound effects, colors, transitions, layouts) is chosen per video by the planner. The user only steers it:
+
+- **The request already says it** ("calm music", "dark background", "no silly sounds") → translate it directly, don't ask.
+- **It says nothing about tone** → ask **one** question before planning (multiple choice if your tools allow it), for example: music *calm / energetic / elegant / doesn't matter* · colors *light / dark / mixed* · sound effects *subtle / playful / doesn't matter*. "Doesn't matter" means no restriction: the planner varies everything.
+- **The user asks what can be chosen** → run `node variar.js --opciones` and show its menu (it lists every option with a one-line description, and marks themes the brand's colors can't support).
+- **A specific video** ("the case one with synthwave and the polaroid") → edit that product's `plan` (`musica.estilo`, `hero`…) and set `"manual": true`.
+
+Translate with one command — it writes `variacion.json`, keeps what it already had, and re-plans only the videos that no longer comply:
+
+```bash
+node variar.js --preferencias musica=tranquila efectos=sutiles colores=claro movimiento=suave
+node variar.js --preferencias estilo=lofi,piano tema=claro      # exact names also work
+node variar.js --preferencias limpiar                           # back to everything
+```
+
+| The user says | Preference |
+|---|---|
+| calm, relaxed, soft · elegant, premium · energetic, upbeat · fun, playful · techy · acoustic, handmade · epic | `musica=tranquila` · `elegante` · `energica` · `divertida` · `tecnologica` · `acustica` · `epica` |
+| subtle / no silly sounds · playful · techy · cinematic | `efectos=sutiles` · `divertidos` · `tecnologicos` · `cinematograficos` |
+| light / white · dark · in the brand color | `colores=claro` · `oscuro` · `color` |
+| smooth cuts · dynamic cuts | `movimiento=suave` · `dinamico` |
+
+Brand rules beat preferences: if the brand guide says "never dark backgrounds", `colores=claro` stays even if a later request says otherwise — tell the user. Sensitive categories keep their quiet lane whatever the preferences.
+
 ## 3b. Variation (v2): no two videos built the same way
 
 A batch fails when every video is the same film with different numbers. Since v2, every template gives each video a **plan** — chosen by a seeded planner and compared with the videos published just before it — and the engine, the audio and the contact sheets all read that same plan.
@@ -124,7 +152,7 @@ Rules:
 - **Locking:** edit a product's `plan` by hand and set `"manual": true`.
 - **No plan = v1.** A product without a plan, or a person video rendered without `--version`, keeps v1's construction (pixel-identical except for the v1 bugs fixed in v2).
 - **Look at the batch:** `node render.js all --hoja` (9:16) or `node render.js hoja` (person) builds contact sheets — one row per video, one frame per scene — and `VARIACION.md` reports the distances. Two consecutive rows that look alike mean the batch looks alike.
-- **Music and sound effects vary too (v3).** `plan.musica` holds a **style** (`piano`, `pizzicato`, `electro`, `lofi`, `funk`, `synthwave`, `acustico`, `cinematico`, `ambiente`, `house` — each with its own instruments, drums, groove and harmony), a tempo inside that style's range, key, progression, a **seed** that composes the melody and picks drum pattern, fills, harmonic rhythm and arpeggio, and a **sound-effects pack** (`digital`, `organico`, `cinematico`, `minimo`, `juguete`; chimes are tuned to the music's key). The planner keeps neighbouring videos in different styles. Pick the styles that fit the brand in `variacion.json` (`"estilo": [...]`, `"sfx": [...]`) — an elegant lingerie shop and a gaming store should not share a list. `python3 sonido.py --demo out/demo` renders 15 s of every style to listen to.
+- **Music and sound effects vary too (v3).** `plan.musica` holds a **style** (`piano`, `pizzicato`, `electro`, `lofi`, `funk`, `synthwave`, `acustico`, `cinematico`, `ambiente`, `house` — each with its own instruments, drums, groove and harmony), a tempo inside that style's range, key, progression, a **seed** that composes the melody and picks drum pattern, fills, harmonic rhythm and arpeggio, and a **sound-effects pack** (`digital`, `organico`, `cinematico`, `minimo`, `juguete`; chimes are tuned to the music's key). The planner keeps neighbouring videos in different styles. Narrow them to the brand with `node variar.js --preferencias` (section 3a) — an elegant lingerie shop and a gaming store should not share a list. `python3 sonido.py --demo out/demo` renders 15 s of every style to listen to.
 - **The arrangement follows the scenes:** sparse intro under the gag, full band with the product, lighter while facts are read, a drum fill before every cut, a final chord on the outro. Sensitive categories get `ambiente`, `piano` or `acustico` with no drums or bass.
 - **Plans from v2** (no music style) keep their visuals: `node variar.js` adds only the music.
 

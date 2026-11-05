@@ -115,7 +115,11 @@ function comprobarVariacion(R) {
       const ops = VP.OPCIONES[k] || (k === 'paleta' ? null : undefined);
       if (ops === undefined) { R.aviso(w, `la clave "${k}" no se usa en esta plantilla`, `claves: ${Object.keys(VP.OPCIONES).join(', ')}`); continue; }
       if (!Array.isArray(val) || !val.length) { R.error(w, `"${k}" tiene que ser una lista con al menos una opción`); continue; }
-      if (ops) for (const x of val) if (!ops.includes(x) && !(k === 'estilo' && VAR.ESTILOS[x])) R.error(w, `"${k}": "${x}" no existe`, `opciones: ${ops.join(', ')}`);
+      if (ops) for (const x of val) {
+        if (ops.includes(x) || (k === 'estilo' && VAR.ESTILOS[x])) continue;
+        if (k === 'paleta' && existe('anim.html') && new RegExp('paletas\\s*:[\\s\\S]*?\\b' + x + '\\s*:').test(fs.readFileSync(path.join(ROOT, 'anim.html'), 'utf8'))) continue; // paleta propia en CFG.paletas
+        R.error(w, `"${k}": "${x}" no existe`, k === 'paleta' ? `opciones: ${ops.join(', ')}, o una propia en CFG.paletas de anim.html` : `opciones: ${ops.join(', ')}`);
+      }
     }
   }
 }

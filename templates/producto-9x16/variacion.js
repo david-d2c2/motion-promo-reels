@@ -20,6 +20,49 @@
   const SFX = ['digital', 'organico', 'cinematico', 'minimo', 'juguete'];
   const TODOS = Object.keys(ESTILOS);
   const ENTRADA = ['subir', 'mascara', 'letras'];
+
+  // v3.1: qué es cada opción, en palabras (node variar.js --opciones las enseña; un modelo puede ofrecerlas tal cual)
+  const DESC = {
+    estilo: { piano: 'elegante: piano, cuerdas y escobillas', pizzicato: 'artesanal: pizzicato, marimba y shaker', electro: 'tecnológico: bombo, palmas, bajo de sierra',
+      lofi: 'relajado: piano eléctrico, swing y vinilo', funk: 'con ritmo: bajo slap y clavinet', synthwave: 'años 80: bajo en octavas y caja con eco cortado',
+      acustico: 'cercano: guitarra rasgueada, palmas y pisotones', cinematico: 'épico: cuerdas, tambores y campanas', ambiente: 'sereno: pads y campanas, sin percusión',
+      house: 'bailable: bombo a negras, órgano y charles abierto' },
+    sfx: { digital: 'blips, barridos de ruido y campanas electrónicas', organico: 'madera, papel y marimba', cinematico: 'golpes graves, subidas y campanas grandes',
+      minimo: 'clics suaves y cortos, casi invisibles', juguete: 'muelles, burbujas y xilófono' },
+    tema: { claro: 'fondo claro de la marca', oscuro: 'fondo oscuro con texto claro', acento: 'fondo del color de acento de la marca' },
+    trans: { barrido: 'destello de color', empuje: 'la escena nueva empuja a la anterior', iris: 'círculo que se abre', diagonal: 'cortina en diagonal',
+      persiana: 'persiana horizontal', zoom: 'acercamiento con fundido', fundido: 'fundido suave (solo categorías sensibles)' },
+    entrada: { subir: 'el texto sube y aparece', mascara: 'el texto sale de una ranura', letras: 'letra a letra' },
+    alin: { centro: 'texto centrado', izquierda: 'texto alineado a la izquierda' },
+    hero: { tarjeta: 'foto en una tarjeta con rebote', difuso: 'foto entera sobre su propio fondo desenfocado', arco: 'foto dentro de un arco que se dibuja',
+      abajo: 'el producto cae desde arriba y el nombre va debajo', polaroid: 'foto instantánea que cae girando' },
+    rango: { pildoras: 'tallas en píldoras y muestras redondas', regla: 'regla que se marca y franjas de color', rejilla: 'casillas que se encienden y muestras cuadradas' },
+    colores: { contador: 'número grande y rejilla de muestras', fila: 'dos cintas de muestras en movimiento', abanico: 'muestrario en abanico' },
+    datos: { lista: 'lista con check', numerada: '01 · 02 · 03 grandes', apiladas: 'tarjetas que se apilan', etiquetas: 'etiquetas de tela cosidas' },
+    precio: { grande: 'precio grande', sello: 'sello circular que entra girando', etiqueta: 'etiqueta colgada de un hilo' },
+    paleta: { neon: 'negro con cian y coral', tinta: 'papel claro con azul y rojo', lima: 'negro con lima y violeta' },
+    titulo: { golpe: 'golpe con escala', mascara: 'sube desde una ranura y se subraya', maquina: 'máquina de escribir' },
+    cifras: { columnas: 'cuatro columnas', foco: 'una a una, a pantalla completa', rejilla: 'rejilla 2 × 2' },
+    metodo: { letras: 'iniciales gigantes', linea: 'línea de tiempo con nodos', escalera: 'peldaños que suben' },
+    stack: { marquesina: 'filas que corren', cuadricula: 'cuadrícula que se enciende' },
+    fondo: { reticula: 'líneas que se desplazan', puntos: 'retícula de puntos', limpio: 'liso' },
+  };
+  const EJES = { estilo: 'Música', sfx: 'Efectos de sonido', tema: 'Colores', paleta: 'Paleta', trans: 'Transiciones', entrada: 'Entrada del texto',
+    alin: 'Alineación del gancho', hero: 'Escena del producto', rango: 'Escena de tallas y colores', colores: 'Escena de colores', datos: 'Escena de datos',
+    precio: 'Escena del precio', titulo: 'Titular', cifras: 'Cifras', metodo: 'Método', stack: 'Herramientas', fondo: 'Fondo', orden: 'Orden de escenas' };
+
+  // v3.1: preferencias en palabras -> restricciones (variacion.json). Así cualquier modelo traduce "música tranquila,
+  // fondo claro, nada de efectos de juguete" sin inventar nombres: node variar.js --preferencias musica=tranquila ...
+  const PREFERENCIAS = {
+    musica: { tranquila: ['ambiente', 'piano', 'acustico', 'lofi'], elegante: ['piano', 'cinematico', 'ambiente', 'lofi'],
+      energica: ['house', 'electro', 'funk', 'synthwave', 'pizzicato'], divertida: ['pizzicato', 'funk', 'acustico', 'house'],
+      tecnologica: ['electro', 'synthwave', 'house'], acustica: ['acustico', 'pizzicato', 'piano', 'lofi'], epica: ['cinematico', 'synthwave'], variada: null },
+    efectos: { sutiles: ['minimo', 'organico'], divertidos: ['juguete', 'organico', 'digital'], tecnologicos: ['digital', 'minimo'],
+      cinematograficos: ['cinematico', 'digital'], variados: null },
+    colores: { claro: { tema: ['claro'], paleta: ['tinta'] }, oscuro: { tema: ['oscuro'], paleta: ['neon', 'lima'] },
+      color: { tema: ['acento'], paleta: ['lima'] }, variado: null },
+    movimiento: { suave: ['barrido', 'iris', 'zoom'], dinamico: ['empuje', 'diagonal', 'persiana', 'iris'], variado: null },
+  };
   const perms = xs => xs.length <= 1 ? [xs] : xs.flatMap((x, i) => perms(xs.filter((_, j) => j !== i)).map(r => [x, ...r]));
   const ordenes = medios => perms(medios).map(p => p.join(','));
 
@@ -157,16 +200,19 @@
         const calma = it.gag === 'calma' && P.calma;
         const nHooks = (it.hooks && it.hooks.length) || 1, cat = it.categoria || it.id;
         let plan = it.plan;
-        const conservar = plan && plan.v === 2 && !plan.base && plan.temporada === temporada && !opts.rehacer;
+        const op = k => { // carril tranquilo: opciones de "calma" que la marca no haya excluido (el fundido siempre vale)
+          if (!(calma && P.calma[k])) return ops[k];
+          const f = P.calma[k].filter(v => !cfg[k] || cfg[k].includes(v) || v === 'fundido');
+          return f.length ? f : P.calma[k];
+        };
+        // v3.1: un plan conservado tiene que cumplir las restricciones VIGENTES (si cambias variacion.json, se rehace)
+        const fueraVisual = plan && P.visuales.some(k => k !== 'alin' && cfg[k] && plan[k] !== undefined && !op(k).includes(plan[k]));
+        const fueraMusica = plan && plan.musica && ['estilo', 'sfx'].some(k => cfg[k] && plan.musica[k] && !op(k).includes(plan.musica[k]));
+        const conservar = plan && plan.v === 2 && !plan.base && plan.temporada === temporada && !opts.rehacer && !fueraVisual;
         // v3: un plan conservado de la v2 no tiene estilo de música -> se planifica SOLO la música y lo visual se queda
-        const soloMusica = conservar && !(plan.musica && plan.musica.estilo);
+        const soloMusica = conservar && (!(plan.musica && plan.musica.estilo) || fueraMusica);
         if (!conservar || soloMusica) {
           const r = rng(hash(temporada + '|' + it.id));
-          const op = k => { // carril tranquilo: opciones de "calma" que la marca no haya excluido (el fundido siempre vale)
-            if (!(calma && P.calma[k])) return ops[k];
-            const f = P.calma[k].filter(v => !cfg[k] || cfg[k].includes(v) || v === 'fundido');
-            return f.length ? f : P.calma[k];
-          };
           const temasOk = ops.tema ? op('tema').filter(t => ops.tema.includes(t)) : null;
           let best = null, bestS = -Infinity;
           for (let i = 0; i < intentos; i++) {
@@ -231,6 +277,37 @@
       informe: items => informe(items.map(it => Object.assign({}, it.plan || planBase(), { _cat: it.categoria || it.id }))) };
   }
 
-  const api = { PERFILES, perfil, hash, rng, mix, contraste, lum, ESTILOS, SFX, CALMA_EST };
+  // preferencias en palabras -> { cfg, notas, errores } para un perfil
+  function traducirPreferencias(nombre, pares, base = {}) {
+    const P = PERFILES[nombre], cfg = Object.assign({}, base), notas = [], errores = [];
+    const norm = s => String(s).toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim();
+    for (const par of pares) {
+      const [k0, v0] = par.split('=');
+      const k = norm(k0), v = norm(v0 || '');
+      if (PREFERENCIAS[k]) {
+        if (!(v in PREFERENCIAS[k])) { errores.push(`${k}=${v}: no la conozco. Opciones: ${Object.keys(PREFERENCIAS[k]).join(', ')}`); continue; }
+        const val = PREFERENCIAS[k][v];
+        const destino = k === 'musica' ? 'estilo' : k === 'efectos' ? 'sfx' : k === 'movimiento' ? 'trans' : null;
+        if (k === 'colores') {
+          for (const eje of ['tema', 'paleta']) if (P.opciones[eje]) { if (val) cfg[eje] = val[eje]; else delete cfg[eje]; }
+        } else if (!P.opciones[destino]) { notas.push(`${k}: esta plantilla no tiene ese eje; se ignora`); continue; }
+        else if (val) cfg[destino] = val.filter(x => P.opciones[destino].includes(x));
+        else delete cfg[destino];
+        notas.push(`${k} ${v}` + (val ? '' : ' (sin restricción)'));
+      } else if (P.opciones[k]) { // nombres exactos: estilo=lofi,piano
+        const num = P.opciones[k].every(x => typeof x === 'number');
+        const lista = v.split(',').map(x => x.trim()).filter(Boolean).map(x => (num ? Number(x) : x));
+        // paleta: la persona puede tener las suyas en CFG.paletas (anim.html), que aquí no se ven
+        const malos = k === 'paleta' ? [] : lista.filter(x => !P.opciones[k].includes(x));
+        if (k === 'paleta') lista.filter(x => !P.opciones[k].includes(x)).forEach(x => notas.push(`paleta "${x}": tiene que existir en CFG.paletas de anim.html`));
+        if (malos.length) { errores.push(`${k}: ${malos.join(', ')} no existe. Opciones: ${P.opciones[k].join(', ')}`); continue; }
+        cfg[k] = lista;
+        notas.push(`${k} = ${lista.join(', ')}`);
+      } else errores.push(`"${k}" no es una preferencia. Usa: ${Object.keys(PREFERENCIAS).join(', ')} o un eje exacto (${Object.keys(P.opciones).join(', ')})`);
+    }
+    return { cfg, notas, errores };
+  }
+
+  const api = { PERFILES, perfil, hash, rng, mix, contraste, lum, ESTILOS, SFX, CALMA_EST, DESC, EJES, PREFERENCIAS, traducirPreferencias };
   if (typeof module !== 'undefined' && module.exports) module.exports = api; else root.VAR = api;
 })(typeof window !== 'undefined' ? window : globalThis);
