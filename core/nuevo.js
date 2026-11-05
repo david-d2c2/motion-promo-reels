@@ -66,6 +66,10 @@ function actualizar(dest, forzar) {
   dest = path.resolve(dest);
   let pkg; try { pkg = JSON.parse(fs.readFileSync(path.join(dest, 'package.json'), 'utf8')); } catch { fallo(`${dest} no parece un proyecto de esta skill (no hay package.json).`); }
   const marca = leerMarca(dest);
+  if (!marca && !pkg.perfilVariacion) fallo(`${dest} es un proyecto de v1 (su package.json no declara "perfilVariacion"): su motor.html y su audio.py
+son anteriores al motor común y no se pueden actualizar pieza a pieza. Crea un proyecto nuevo en otra carpeta
+(node core/nuevo.js catalogo|producto|persona <carpeta-nueva>) y pasa tus datos: productos.json, config.json, img/.
+No se ha tocado nada.`);
   const nombre = (marca && marca.plantilla) || plantilla(pkg.perfilVariacion);
   const cambiados = [], iguales = [], respetados = [];
   for (const { f, src } of motor(nombre)) {

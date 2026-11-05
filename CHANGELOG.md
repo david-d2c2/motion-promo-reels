@@ -1,5 +1,9 @@
 # Changelog
 
+## v3.3.1 · 2026-11
+
+- `nuevo.js --actualizar` now refuses a v1 project (hand-made, without `perfilVariacion`) with a clear message instead of a generic error, and touches nothing: v1 engines predate the shared core and must be recreated with `nuevo.js`, carrying the data over.
+
 ## v3.3 · 2026-11
 
 **One engine, kept once.** Nothing changes in the videos; this is about keeping the skill small as it grows.
